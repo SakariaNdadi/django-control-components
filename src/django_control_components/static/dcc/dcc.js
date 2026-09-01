@@ -501,7 +501,7 @@
 
   // Toasts. Two contracts, both re-emitted by htmx from HX-Trigger:
   //   dcc:toast  -> a bare string (the pre-1.0 shorthand)
-  //   dcc:notify -> {level, title, body, url} for a levelled / linked toast
+  //   dcc:notify -> {level, title, body, url}, or an array of them for a batch
   // The shell renders #dcc-toasts; this only falls back to creating it.
   function toastHost() {
     let host = document.getElementById("dcc-toasts");
@@ -514,6 +514,10 @@
     return host;
   }
   function toast(detail) {
+    if (Array.isArray(detail)) {
+      detail.forEach(toast);
+      return;
+    }
     const data =
       typeof detail === "string"
         ? { title: detail }

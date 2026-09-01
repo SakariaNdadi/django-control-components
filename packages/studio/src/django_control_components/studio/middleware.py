@@ -37,7 +37,7 @@ class ToastMiddleware:
             trigger: dict[str, Any] = json.loads(response.headers.get("HX-Trigger", "") or "{}")
         except ValueError:
             trigger = {}
-        # dcc.js listens for both; one payload per response is enough in practice
-        trigger["dcc:notify"] = toasts[0]
+        # dcc.js accepts a single dict or an array; send every pending message
+        trigger["dcc:notify"] = toasts if len(toasts) > 1 else toasts[0]
         response.headers["HX-Trigger"] = json.dumps(trigger)
         return response

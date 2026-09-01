@@ -101,6 +101,23 @@ def test_toast_middleware_adds_hx_trigger_on_htmx_responses():
     assert "Saved" in response.headers["HX-Trigger"]
 
 
+def test_toast_middleware_sends_every_pending_message_as_an_array():
+    import json
+
+    from django.http import HttpResponse
+
+    request = RequestFactory().get("/x/", HTTP_HX_REQUEST="true")
+    SessionMiddleware(lambda r: None).process_request(request)
+    MessageMiddleware(lambda r: None).process_request(request)
+    messages.info(request, "One")
+    messages.error(request, "Two")
+
+    response = ToastMiddleware(lambda r: HttpResponse("ok"))(request)
+    payload = json.loads(response.headers["HX-Trigger"])["dcc:notify"]
+    assert [t["title"] for t in payload] == ["One", "Two"]
+    assert payload[1]["level"] == "error"
+
+
 def test_toast_middleware_ignores_non_htmx_responses():
     from django.http import HttpResponse
 
