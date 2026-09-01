@@ -5,9 +5,14 @@
   <div class="dcc-panel__scrim" @click="navOpen = false" x-show="navOpen" x-transition.opacity></div>
   {{ slots.sidebar }}
   {% endif %}
+  {% if has_topbar or has_footer %}
   <div class="dcc-panel__body">
     {% if has_topbar %}{{ slots.topbar }}{% endif %}
     <main class="dcc-panel__main">{{ slots.content }}</main>
     {% if has_footer %}{{ slots.footer }}{% endif %}
   </div>
+  {% else %}
+  {# no topbar/footer: <main> is a direct child, exactly like panels/base.html #}
+  <main class="dcc-panel__main">{{ slots.content }}</main>
+  {% endif %}
 </div>
