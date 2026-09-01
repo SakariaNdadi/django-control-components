@@ -44,6 +44,57 @@ def _check_dependencies(app_configs: Any, **kwargs: Any) -> list[CheckMessage]:
 
 
 @register()
+def _check_unauthorized_actions(app_configs: Any, **kwargs: Any) -> list[CheckMessage]:
+    """Warn about ``Action`` s with no ``.authorize()`` rule while
+    ``DCC["ACTIONS_DEFAULT_DENY"]`` is False — those run for anyone who can see
+    the row. Silent once default-deny is on, or once every action is authorized.
+
+    The action registry is populated at render time, so this rebuilds each
+    registered panel resource's table against a throwaway request and inspects
+    the actions it declares. Anything that cannot be built is skipped.
+    """
+    from .conf import dcc_settings
+
+    if dcc_settings.ACTIONS_DEFAULT_DENY:
+        return []
+
+    from .core.component import UNSET
+    from .panels.panel import all_panels
+
+    try:
+        from django.contrib.auth.models import AnonymousUser
+        from django.test import RequestFactory
+
+        request = RequestFactory().get("/")
+        request.user = AnonymousUser()
+    except Exception:
+        return []
+
+    unguarded: list[str] = []
+    for panel in all_panels():
+        for resource in getattr(panel, "_resources", []):
+            try:
+                table = resource.build_table(request=request)
+                actions = list(table._row_actions) + list(table._bulk_actions)
+            except Exception:  # noqa: S112 - a resource we can't build is simply not inspected
+                continue
+            for action in actions:
+                if action._config.get("authorize", UNSET) is UNSET:
+                    unguarded.append(f"{resource.__name__}.{action.name}")
+
+    if not unguarded:
+        return []
+    return [
+        Warning(
+            "Actions without an .authorize() rule run for any user who can see "
+            f"the row: {', '.join(sorted(set(unguarded)))}.",
+            hint="Add .authorize(...) to each, or set DCC['ACTIONS_DEFAULT_DENY'] = True.",
+            id="django_control_components.W013",
+        )
+    ]
+
+
+@register()
 def _check_settings(app_configs: Any, **kwargs: Any) -> list[CheckMessage]:
     """Validate the ``DCC`` dict at startup instead of on first (mistyped) access."""
     from django.apps import apps
