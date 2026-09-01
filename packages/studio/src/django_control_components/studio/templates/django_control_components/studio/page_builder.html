@@ -9,7 +9,7 @@
 
   {# self-referencing template — cloned by the x-recurse directive #}
   <template id="dcc-block-tpl">
-    <li class="dcc-tree__node">
+    <li class="dcc-tree__node" :data-node-id="node.id">
       <div class="dcc-tree__row" :class="{ 'is-selected': node.id === selectedId }">
         <button type="button" class="dcc-tree__toggle" x-show="slotNames(node.type).length"
                 @click="toggleCollapse(node.id)" x-text="isCollapsed(node.id) ? '▸' : '▾'"></button>
@@ -24,7 +24,8 @@
         <template x-for="s in slotNames(node.type)" :key="s">
           <div class="dcc-tree__slot">
             <span class="dcc-tree__slotname" x-text="s"></span>
-            <ul class="dcc-tree" x-recurse="(node.slots && node.slots[s]) || []" data-dcc-tpl="dcc-block-tpl"></ul>
+            <ul class="dcc-tree" :data-dcc-slot="s" :data-parent-id="node.id"
+                x-recurse="(node.slots && node.slots[s]) || []" data-dcc-tpl="dcc-block-tpl"></ul>
           </div>
         </template>
       </div>
@@ -63,20 +64,25 @@
 
     <div class="dcc-studio__panel" style="flex:2">
       <h2>Tree</h2>
-      <ul class="dcc-tree dcc-tree--root">
-        <li class="dcc-tree__node">
-          <div class="dcc-tree__row" :class="{ 'is-selected': root.id === selectedId }">
-            <button type="button" class="dcc-tree__label" @click="select(root.id)" x-text="root.type"></button>
-            <span class="dcc-field__help">root</span>
-          </div>
-          <template x-for="s in slotNames(root.type)" :key="s">
-            <div class="dcc-tree__slot">
-              <span class="dcc-tree__slotname" x-text="s"></span>
-              <ul class="dcc-tree" x-recurse="(root.slots && root.slots[s]) || []" data-dcc-tpl="dcc-block-tpl"></ul>
+      <p class="dcc-field__help">Drag a block by its name to move it into another slot.</p>
+      <div x-data="dccTreeDnd"
+           @dcc-tree-move="moveNode($event.detail.id, $event.detail.toParentId, $event.detail.toSlot, $event.detail.toIndex)">
+        <ul class="dcc-tree dcc-tree--root">
+          <li class="dcc-tree__node">
+            <div class="dcc-tree__row" :class="{ 'is-selected': root.id === selectedId }">
+              <button type="button" class="dcc-tree__label" @click="select(root.id)" x-text="root.type"></button>
+              <span class="dcc-field__help">root</span>
             </div>
-          </template>
-        </li>
-      </ul>
+            <template x-for="s in slotNames(root.type)" :key="s">
+              <div class="dcc-tree__slot">
+                <span class="dcc-tree__slotname" x-text="s"></span>
+                <ul class="dcc-tree" :data-dcc-slot="s" :data-parent-id="root.id"
+                    x-recurse="(root.slots && root.slots[s]) || []" data-dcc-tpl="dcc-block-tpl"></ul>
+              </div>
+            </template>
+          </li>
+        </ul>
+      </div>
     </div>
 
     <div class="dcc-studio__panel">

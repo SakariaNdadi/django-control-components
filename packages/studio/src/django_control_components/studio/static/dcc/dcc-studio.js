@@ -5,6 +5,7 @@
  * Alpine components:
  *   dccStudioDoc(bootId)   flat document (dashboard / resource) + undo/redo + save
  *   dccTree(bootId)        the nested block-tree editor (pages), on x-recurse
+ *   dccTreeDnd             pointer drag-to-reparent for a dccTree
  *   dccSortable            pointer-events reorder of a flat <ul> of [data-node]
  * Alpine directive:
  *   x-recurse="<array>"    a self-referencing <template> — Alpine has none natively
@@ -357,6 +358,27 @@
         arr[j] = tmp;
         this.snapshot();
       },
+      // drag-to-reparent: move `id` into `toParentId`'s `toSlot` at `toIndex`.
+      // Rejected if it would create a cycle or the target slot does not exist.
+      moveNode(id, toParentId, toSlot, toIndex) {
+        if (!id || id === toParentId) return;
+        const src = this._locate(id);
+        if (!src || !src.parent) return;
+        const destHit =
+          this.root.id === toParentId ? { node: this.root } : this._locate(toParentId);
+        if (!destHit) return;
+        if (this._locate(toParentId, src.node)) return; // target sits inside the dragged node
+        if (this.slotNames(destHit.node.type).indexOf(toSlot) < 0) return;
+
+        src.parent.slots[src.slot] = src.parent.slots[src.slot].filter((n) => n.id !== id);
+        const dest = destHit.node;
+        if (!dest.slots) dest.slots = {};
+        if (!Array.isArray(dest.slots[toSlot])) dest.slots[toSlot] = [];
+        const arr = dest.slots[toSlot];
+        arr.splice(Math.max(0, Math.min(toIndex, arr.length)), 0, src.node);
+        this.snapshot();
+        this.select(id);
+      },
       setProp(key, value) {
         const node = this.selectedNode();
         if (!node) return;
@@ -478,6 +500,80 @@
             const target = document.getElementById("dcc-studio-preview");
             if (target) target.innerHTML = html;
           });
+      },
+    }));
+
+    // ---- tree drag-to-reparent -----------------------------------------
+    // On the tree root: <div x-data="dccTreeDnd" @dcc-tree-move="moveNode(...)">
+    // Rows carry [data-dcc-handle] + [data-node-id]; slot containers carry
+    // [data-dcc-slot] + [data-parent-id]. The tree mutation is committed once,
+    // on drop, by the dccTree store.
+    window.Alpine.data("dccTreeDnd", () => ({
+      init() {
+        this.$el.addEventListener("pointerdown", (e) => this._start(e));
+      },
+      _slotEls() {
+        return Array.from(this.$el.querySelectorAll("[data-dcc-slot]"));
+      },
+      _clear() {
+        this._slotEls().forEach((s) => s.classList.remove("is-drop-target"));
+      },
+      _start(e) {
+        const handle = e.target.closest("[data-dcc-handle]");
+        if (!handle) return;
+        const row = handle.closest("[data-node-id]");
+        const id = row && row.getAttribute("data-node-id");
+        if (!id) return; // the root row is not draggable
+        e.preventDefault();
+        row.classList.add("is-dragging");
+        try {
+          handle.setPointerCapture(e.pointerId);
+        } catch (err) {
+          /* older browsers */
+        }
+        const move = (ev) => {
+          this._clear();
+          const t = this._target(ev);
+          if (t) t.el.classList.add("is-drop-target");
+        };
+        const end = (ev) => {
+          this.$el.removeEventListener("pointermove", move);
+          this.$el.removeEventListener("pointerup", end);
+          row.classList.remove("is-dragging");
+          const t = this._target(ev);
+          this._clear();
+          if (t) {
+            this.$dispatch("dcc-tree-move", {
+              id: id,
+              toParentId: t.parentId,
+              toSlot: t.slot,
+              toIndex: t.index,
+            });
+          }
+        };
+        this.$el.addEventListener("pointermove", move);
+        this.$el.addEventListener("pointerup", end);
+      },
+      _target(e) {
+        const el = (document.elementsFromPoint(e.clientX, e.clientY) || []).find(
+          (n) => n.getAttribute && n.hasAttribute("data-dcc-slot"),
+        );
+        if (!el) return null;
+        const kids = Array.from(el.children).filter((c) => c.hasAttribute("data-node-id"));
+        let index = kids.length;
+        for (let i = 0; i < kids.length; i++) {
+          const box = kids[i].getBoundingClientRect();
+          if (e.clientY < box.top + box.height / 2) {
+            index = i;
+            break;
+          }
+        }
+        return {
+          el: el,
+          parentId: el.getAttribute("data-parent-id"),
+          slot: el.getAttribute("data-dcc-slot"),
+          index: index,
+        };
       },
     }));
 

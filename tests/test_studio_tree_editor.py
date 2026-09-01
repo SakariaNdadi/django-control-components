@@ -57,6 +57,10 @@ def test_js_ships_the_recurse_directive_and_tree_store():
     assert 'directive(\n      "recurse"' in text or 'directive("recurse"' in text
     assert 'data("dccTree"' in text
     assert "MAX_DEPTH = 12" in text  # mirrors deserialize._MAX_TREE_DEPTH
+    # drag-to-reparent
+    assert 'data("dccTreeDnd"' in text
+    assert "moveNode(id, toParentId, toSlot, toIndex)" in text
+    assert "_locate(toParentId, src.node)" in text  # cycle guard
 
 
 def test_nested_tree_from_the_editor_round_trips(client, urlconf, studio_user):
@@ -101,3 +105,5 @@ def test_editor_page_renders_the_recurse_template(client, urlconf, studio_user):
     assert b'id="dcc-block-tpl"' in body
     assert b"x-recurse" in body
     assert b"dccTree(" in body
+    assert b"dccTreeDnd" in body
+    assert b"data-dcc-slot" in body and b"@dcc-tree-move" in body

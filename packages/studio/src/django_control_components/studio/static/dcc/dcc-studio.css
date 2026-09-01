@@ -114,3 +114,6 @@
 .dcc-tree__label { border: 0; background: none; color: inherit; cursor: pointer; font: inherit; font-weight: 600; }
 .dcc-tree__slot { margin: 0.1rem 0 0.1rem 0.5rem; }
 .dcc-tree__slotname { font-size: 0.6875rem; text-transform: uppercase; letter-spacing: 0.04em; color: var(--dcc-muted, var(--dcc-fg)); }
+.dcc-tree__node.is-dragging { opacity: 0.4; }
+.dcc-tree [data-dcc-slot].is-drop-target { outline: 2px dashed var(--dcc-primary); outline-offset: 2px; border-radius: var(--dcc-radius); }
+.dcc-tree__label[data-dcc-handle] { cursor: grab; }
