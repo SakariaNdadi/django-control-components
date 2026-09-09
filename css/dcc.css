@@ -1,11 +1,15 @@
 /*
- * Tailwind 4 source for consumers who want to theme or purge the component
- * styles with their own build. The package already ships a compiled,
- * dependency-free stylesheet at
- * src/django_control_components/static/dcc/dcc.css - use this only if you want
- * to override tokens or tree-shake.
+ * OPTIONAL Tailwind 4 theming entrypoint - not part of the package build.
+ *
+ * The package ships a complete, hand-authored, dependency-free stylesheet at
+ * src/django_control_components/static/dcc/dcc.css and that file is
+ * authoritative. This one exists only for a consumer who wants to re-theme or
+ * tree-shake the component styles with their own Tailwind build:
  *
  *   npx @tailwindcss/cli -i css/dcc.css -o path/to/output.css
+ *
+ * Do not regenerate the shipped stylesheet from this file - it is a small
+ * mirror, not the source.
  */
 
 @import "tailwindcss";

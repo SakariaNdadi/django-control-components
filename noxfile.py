@@ -81,30 +81,6 @@ def security(session: nox.Session) -> None:
 
 
 @nox.session
-def build_css(session: nox.Session) -> None:
-    """Compile css/dcc.css -> src/django_control_components/static/dcc/dcc.css."""
-    session.run(
-        "npx",
-        "--yes",
-        "@tailwindcss/cli@next",
-        "-i",
-        "css/dcc.css",
-        "-o",
-        "src/django_control_components/static/dcc/dcc.css",
-        "--minify",
-        external=True,
-    )
-
-
-@nox.session
-def css_check(session: nox.Session) -> None:
-    build_css(session)
-    session.run(
-        "git", "diff", "--exit-code", "--", "src/django_control_components/static/", external=True
-    )
-
-
-@nox.session
 def packaging(session: nox.Session) -> None:
     _install(session)
     session.install("twine")
