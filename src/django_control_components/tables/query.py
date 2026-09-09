@@ -52,7 +52,7 @@ def related_hints(model: type[Any], columns: list[Column]) -> tuple[list[str], l
             if field.many_to_many or field.one_to_many:
                 many = True
             related = getattr(field, "related_model", None)
-            if related is None:
+            if related is None:  # pragma: no cover - a relation without a target model
                 ok = False
                 break
             current = related

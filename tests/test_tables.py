@@ -179,9 +179,13 @@ def test_m2m_dotted_column_uses_prefetch_not_select_related(articles):
 
 
 def test_state_fn_column_with_dotted_name_is_not_treated_as_orm_path(articles):
-    col = TextColumn.make("not.a.field").state(lambda record: "x")
-    qs = apply_all(articles, TableState(table_id="article", filters={}), [col], [])
-    assert qs.query.select_related is False  # "not" is not a relation, path skipped
+    state = TableState(table_id="article", filters={})
+    # a segment that is not a field at all
+    unknown = TextColumn.make("not.a.field").state(lambda record: "x")
+    assert apply_all(articles, state, [unknown], []).query.select_related is False
+    # a segment that is a real field but not a relation
+    non_relation = TextColumn.make("title.upper").state(lambda record: "x")
+    assert apply_all(articles, state, [non_relation], []).query.select_related is False
 
 
 def test_htmx_partial_endpoint(articles, settings, client):
