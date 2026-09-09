@@ -181,6 +181,19 @@ nav, access-filtered; see [navigation.md](navigation.md)), `nav_tree` /
 or `infolist_html`. Keep `{% include ".../panels/_nav.html" %}` (which is just
 `{% dcc_render sidebar %}`) in your shadowed base, or render the sidebar yourself.
 
+### Content spacing
+
+`Panel(...).content_spacing(padding=..., margin=...)` sets inline spacing on every
+page's `<main class="dcc-panel__main">`. Each argument is a CSS length (all four
+edges) or an edge dict:
+
+```python
+Panel("admin").content_spacing(padding={"top": "1rem", "left": "3rem"}, margin="0 auto")
+```
+
+For a single page, `PageShell().padding("2rem", left="4rem").margin(top="1rem")`
+does the same on the page wrapper. Values are filtered to a safe CSS character set.
+
 A dashboard page is a grid of widgets - see [widgets.md](widgets.md) for
 `StatWidget`, `ChartWidget` (Chart.js), `BarListWidget`, `TableWidget`, custom
 widgets, and stored `PanelDashboard` rows.

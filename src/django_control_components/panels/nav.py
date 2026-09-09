@@ -245,7 +245,9 @@ def sidebar_from_tree(
     from ..blocks.nav import NavUser, ThemeToggle
 
     sidebar = Sidebar().brand(panel.brand_label or panel.name.title())
-    if panel.brand_icon:
+    if panel.brand_image:
+        sidebar.brand_image(panel.brand_image)
+    elif panel.brand_icon:
         sidebar.brand_icon(panel.brand_icon)
     sidebar.brand_url(f"{panel.namespace}:index")
     sidebar.fill("default", nav_blocks(tree))

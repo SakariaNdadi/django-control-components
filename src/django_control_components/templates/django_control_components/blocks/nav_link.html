@@ -3,7 +3,7 @@
      {% if active %}aria-current="page"{% endif %}
      {% if external %}target="_blank" rel="noopener"{% endif %}>
     {% if dot %}<span class="dcc-nav__dot" style="background:{{ dot }}" aria-hidden="true"></span>{% endif %}
-    {% if icon_html %}<span class="dcc-nav__icon" aria-hidden="true">{{ icon_html }}</span>{% endif %}
+    {% if image %}<img class="dcc-nav__img" src="{{ image }}" alt="{{ image_alt }}">{% elif icon_html %}<span class="dcc-nav__icon" aria-hidden="true">{{ icon_html }}</span>{% endif %}
     <span class="dcc-nav__text">{{ label }}</span>
     {% if badge %}<span class="dcc-nav__badge">{{ badge }}</span>{% endif %}
   </a>

@@ -13,7 +13,11 @@ from django_control_components.blocks import (
     ThemeToggle,
 )
 
+from django.templatetags.static import static
+
 from ..page import ComponentExample, ComponentPageSpec
+
+_LOGO = static("demo/logo.svg")
 
 
 def _sidebar(*children, footer=None):
@@ -47,10 +51,30 @@ NAV_LINK = ComponentPageSpec(
                 NavAction().label("Add new project").icon("plus").to("/p/new/"),
             ),
         ),
+        ComponentExample(
+            title="Image instead of icon",
+            code=(
+                'Sidebar().brand("DCC").brand_image("/static/demo/logo.svg")\n'
+                'NavLink().label("Acme Corp").image("/static/demo/logo.svg").to("/o/acme/")'
+            ),
+            build=lambda request: Sidebar()
+            .brand("DCC")
+            .brand_image(_LOGO)
+            .fill(
+                "default",
+                [
+                    NavLink().label("Dashboard").icon("gauge").to("/").active(True),
+                    NavHeading().label("Organisations"),
+                    NavLink().label("Acme Corp").image(_LOGO).image_alt("Acme").to("/o/acme/"),
+                    NavLink().label("Globex").image(_LOGO).image_alt("Globex").to("/o/globex/"),
+                ],
+            ),
+        ),
     ],
     props_table=[
         (".label(str)", "str", ""),
         (".icon(name)", "str", "leading icon"),
+        (".image(url) / .image_alt(str)", "str", "logo/avatar in place of the icon"),
         (".to(url | url_name)", "str", "path, #anchor, or a URL name"),
         (".badge(str)", "str", "trailing count pill"),
         (".dot(css_color)", "str", "leading colour square"),

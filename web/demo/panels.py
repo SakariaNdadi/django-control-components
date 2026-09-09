@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from django.templatetags.static import static
+
 from django_control_components.panels import Panel
 
 from .catalog.registry import PAGES_BEFORE_BLOCKS, PAGES_BLOCKS
@@ -13,7 +15,7 @@ from .pages.wizards import WizardsPage
 docs_panel = (
     Panel("docs")
     .path("")
-    .brand("DCC", "cubes")
+    .brand("DCC", "cubes", image=static("demo/logo.svg"))
     .resources([TaskResource])
     .pages(
         [

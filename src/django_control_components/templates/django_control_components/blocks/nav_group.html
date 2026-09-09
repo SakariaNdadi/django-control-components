@@ -5,7 +5,7 @@
   <button type="button" class="dcc-nav__grouptoggle"
           @click="toggle()" x-bind:aria-expanded="isOpen() ? 'true' : 'false'"
           aria-controls="{{ group_id }}-list">
-    {% if icon_html %}<span class="dcc-nav__icon" aria-hidden="true">{{ icon_html }}</span>{% endif %}
+    {% if image %}<img class="dcc-nav__img" src="{{ image }}" alt="{{ image_alt }}">{% elif icon_html %}<span class="dcc-nav__icon" aria-hidden="true">{{ icon_html }}</span>{% endif %}
     <span class="dcc-nav__text">{{ label }}</span>
     <span class="dcc-nav__chevron" aria-hidden="true">{% dcc_icon "chevron-down" %}</span>
   </button>

@@ -56,6 +56,7 @@ class PanelPage(TemplateView):
         ctx["nav"] = self.panel.navigation(self.request)
         ctx["nav_tree"] = build_nav(self.panel, self.request)
         ctx["sidebar"] = panel_sidebar(self.panel, self.request)
+        ctx["content_style"] = self.panel.content_style
         ctx["resource_label"] = self.nav_label or self.slug.title() or "Dashboard"
         return ctx
 
@@ -136,6 +137,7 @@ class _ResourcePage(TemplateView):
         ctx["nav"] = self.panel.navigation(self.request)
         ctx["nav_tree"] = build_nav(self.panel, self.request)
         ctx["sidebar"] = panel_sidebar(self.panel, self.request)
+        ctx["content_style"] = self.panel.content_style
         return ctx
 
 

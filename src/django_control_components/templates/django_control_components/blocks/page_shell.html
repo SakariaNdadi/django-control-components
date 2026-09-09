@@ -1,3 +1,4 @@
+<div class="dcc-page"{% if style %} style="{{ style }}"{% endif %}>
 {% if has_header %}
 {{ slots.header }}
 {% elif title or eyebrow or summary %}
@@ -8,3 +9,4 @@
 </header>
 {% endif %}
 {% if has_content %}<div class="dcc-page__body">{{ slots.content }}</div>{% endif %}
+</div>

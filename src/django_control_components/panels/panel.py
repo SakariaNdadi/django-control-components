@@ -52,6 +52,8 @@ class Panel:
         self._login_url: str | None = None
         self.brand_label: str | None = None
         self.brand_icon: str = ""
+        self.brand_image: str = ""
+        self.content_style: str = ""
 
     def path(self, value: str) -> Self:
         self._path = value.strip("/")
@@ -93,9 +95,20 @@ class Panel:
         self._login_url = url
         return self
 
-    def brand(self, label: str, icon: str = "") -> Self:
+    def brand(self, label: str, icon: str = "", *, image: str = "") -> Self:
+        """Sidebar brand. ``image`` (a logo URL) overrides ``icon`` when set."""
         self.brand_label = label
         self.brand_icon = icon
+        self.brand_image = image
+        return self
+
+    def content_spacing(self, padding: Any = None, margin: Any = None) -> Self:
+        """Dev-set spacing on every page's ``<main class="dcc-panel__main">``.
+        ``padding`` / ``margin`` is a CSS length (all edges) or an
+        edge->length dict (``{"top": "1rem", "left": "3rem"}``)."""
+        from ..blocks.page import spacing_style
+
+        self.content_style = spacing_style(padding, margin)
         return self
 
     def get_login_url(self) -> str:

@@ -70,6 +70,15 @@ class Sidebar(Block):
         return self._set("brand_icon", value)
 
     @setter
+    def brand_image(self, value: str) -> Self:
+        """A logo image URL shown in place of ``brand_icon``."""
+        return self._set("brand_image", value)
+
+    @setter
+    def brand_image_alt(self, value: str) -> Self:
+        return self._set("brand_image_alt", value)
+
+    @setter
     def brand_url(self, value: str) -> Self:
         """A URL path or URL name - the brand becomes a link."""
         return self._set("brand_url", value)
@@ -80,6 +89,8 @@ class Sidebar(Block):
         data = super().get_view_data(ctx)
         data["brand"] = self._config.get("brand", "")
         data["brand_icon"] = self._config.get("brand_icon", "")
+        data["brand_image"] = self._config.get("brand_image", "")
+        data["brand_image_alt"] = self._config.get("brand_image_alt", "")
         raw = str(self._config.get("brand_url", "") or "")
         if raw and not raw.startswith(("/", "#", "http://", "https://")):
             try:

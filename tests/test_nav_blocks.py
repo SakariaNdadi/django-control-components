@@ -36,6 +36,60 @@ def test_nav_link_renders_icon_badge_and_dot(soup):
     assert "#f00" in doc.select_one(".dcc-nav__dot")["style"]
 
 
+def test_nav_link_image_replaces_icon(soup):
+    html = str(
+        NavLink()
+        .label("Acme")
+        .icon("inbox")
+        .image("/static/logo.png")
+        .image_alt("Acme")
+        .to("/a/")
+        .render(_ctx())
+    )
+    doc = soup(html)
+    img = doc.select_one("a.dcc-nav__link img.dcc-nav__img")
+    assert img["src"] == "/static/logo.png"
+    assert img["alt"] == "Acme"
+    assert doc.select_one(".dcc-nav__icon") is None  # image wins over icon
+
+
+def test_nav_group_image_replaces_icon(soup):
+    html = str(NavGroup().label("Team").image("/l.svg").render(_ctx()))
+    assert 'class="dcc-nav__img" src="/l.svg"' in html
+
+
+def test_sidebar_brand_image(soup):
+    doc = soup(
+        str(
+            Sidebar()
+            .brand("DCC")
+            .brand_icon("cube")
+            .brand_image("/brand.png")
+            .fill("default", [NavLink().label("H").to("/")])
+            .render(_ctx())
+        )
+    )
+    assert doc.select_one(".dcc-panel__brand img.dcc-panel__brandimg")["src"] == "/brand.png"
+
+
+def test_page_shell_padding_and_margin(soup):
+    from django_control_components.blocks import PageShell
+
+    shell = PageShell().title("X").padding("2rem", left="4rem").margin(top="1rem")
+    style = soup(str(shell.render(_ctx()))).select_one(".dcc-page")["style"]
+    assert "padding-top:2rem" in style
+    assert "padding-left:4rem" in style
+    assert "margin-top:1rem" in style
+
+
+def test_page_shell_padding_rejects_unsafe_value(soup):
+    from django_control_components.blocks import PageShell
+
+    shell = PageShell().title("X").padding('2rem;color:red}body{')
+    node = soup(str(shell.render(_ctx()))).select_one(".dcc-page")
+    assert node.get("style") in (None, "")
+
+
 def test_nav_link_active_from_request_path(soup):
     on = soup(str(NavLink().label("Tasks").to("/tasks/").render(_ctx("/tasks/new/"))))
     off = soup(str(NavLink().label("Tasks").to("/tasks/").render(_ctx("/other/"))))
@@ -105,6 +159,15 @@ def test_sidebar_two_slots(soup):
     assert doc.select_one("nav.dcc-panel__nav .dcc-panel__brand strong").text == "DCC"
     assert doc.select_one(".dcc-nav a")["href"] == "/"
     assert doc.select_one(".dcc-panel__navfoot .dcc-nav__theme") is not None
+
+
+def test_panel_content_spacing_style():
+    from django_control_components.panels import Panel
+
+    panel = Panel("sp").content_spacing(padding={"top": "1rem", "left": "3rem"}, margin="0 auto")
+    assert "padding-top:1rem" in panel.content_style
+    assert "padding-left:3rem" in panel.content_style
+    assert "margin-top:0 auto" in panel.content_style
 
 
 def test_theme_toggle_uses_shell_scope():

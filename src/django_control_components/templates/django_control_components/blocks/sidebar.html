@@ -6,7 +6,7 @@
   </button>
   {% if brand %}
     {% if brand_url %}<a class="dcc-panel__brand" href="{{ brand_url }}">{% else %}<div class="dcc-panel__brand">{% endif %}
-      {% if brand_icon %}{% dcc_icon brand_icon %}{% endif %}<strong>{{ brand }}</strong>
+      {% if brand_image %}<img class="dcc-panel__brandimg" src="{{ brand_image }}" alt="{{ brand_image_alt }}">{% elif brand_icon %}{% dcc_icon brand_icon %}{% endif %}<strong>{{ brand }}</strong>
     {% if brand_url %}</a>{% else %}</div>{% endif %}
   {% endif %}
   <ul class="dcc-nav">{{ slots.default }}</ul>

@@ -62,6 +62,15 @@ class NavLink(Block):
         return self._set("icon", value)
 
     @setter
+    def image(self, value: str) -> Self:
+        """A logo / avatar URL shown in place of the icon."""
+        return self._set("image", value)
+
+    @setter
+    def image_alt(self, value: str) -> Self:
+        return self._set("image_alt", value)
+
+    @setter
     def to(self, value: str) -> Self:
         """A URL path, an anchor, or a URL name."""
         return self._set("to", value)
@@ -97,6 +106,8 @@ class NavLink(Block):
         data["external"] = external
         data["label"] = self.resolve("label", ctx, "")
         data["icon_html"] = render_icon(self._config.get("icon"))
+        data["image"] = self._config.get("image", "")
+        data["image_alt"] = self._config.get("image_alt", "")
         badge = self.resolve("badge", ctx, "")
         data["badge"] = "" if badge in (None, "") else str(badge)
         data["dot"] = self._config.get("dot", "")
@@ -130,6 +141,15 @@ class NavGroup(Block):
         return self._set("icon", value)
 
     @setter
+    def image(self, value: str) -> Self:
+        """A logo URL shown in place of the icon."""
+        return self._set("image", value)
+
+    @setter
+    def image_alt(self, value: str) -> Self:
+        return self._set("image_alt", value)
+
+    @setter
     def id(self, value: str) -> Self:
         return self._set("id", value)
 
@@ -143,6 +163,8 @@ class NavGroup(Block):
         label = str(self.resolve("label", ctx, "") or "")
         data["label"] = label
         data["icon_html"] = render_icon(self._config.get("icon"))
+        data["image"] = self._config.get("image", "")
+        data["image_alt"] = self._config.get("image_alt", "")
         data["group_id"] = self._config.get("id") or _group_id(label)
         data["default_open"] = bool(self._config.get("open"))
         return data

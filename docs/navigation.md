@@ -26,15 +26,18 @@ from django_control_components.blocks import Sidebar, NavLink, NavGroup, ThemeTo
 
 | block | slots | setters |
 |---|---|---|
-| `NavLink` | – | `.label` · `.icon(name)` · `.to(url \| "#anchor" \| url_name)` · `.badge(str)` · `.dot(css_color)` · `.external()` · `.active(bool)` / `.active_for(prefix)` |
-| `NavGroup` | `default` | `.label` · `.icon` · `.id(str)` · `.open()` (start expanded) |
+| `NavLink` | – | `.label` · `.icon(name)` · `.image(url)` / `.image_alt(str)` · `.to(url \| "#anchor" \| url_name)` · `.badge(str)` · `.dot(css_color)` · `.external()` · `.active(bool)` / `.active_for(prefix)` |
+| `NavGroup` | `default` | `.label` · `.icon` · `.image(url)` / `.image_alt(str)` · `.id(str)` · `.open()` (start expanded) |
 | `NavHeading` | – | `.label` |
 | `NavDivider` | – | – |
 | `NavAction` | – | same as `NavLink`; renders muted (a "+ Add …" row) |
 | `NavUser` | – | `.name` · `.email` · `.avatar(url)` · `.menu([(label, url), …])` |
 | `ThemeToggle` | – | – (cycles auto / light / dark; needs a `dccShell` scope, which `AppShell` and the panel shell provide) |
 
-`.to()` takes a path, an anchor, or a URL name (reversed, a miss → `#`).
+`.image(url)` shows a logo / avatar in place of the icon (`.image_alt` sets its
+`alt`); `Sidebar.brand_image(url)` does the same for the brand mark, overriding
+`.brand_icon(...)`. `.to()` takes a path, an anchor, or a URL name (reversed, a
+miss → `#`).
 `NavLink` derives its active state from `request.path` unless you pass
 `.active(...)` explicitly - the panel does, from its own longest-prefix match.
 
