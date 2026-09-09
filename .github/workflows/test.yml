@@ -41,6 +41,10 @@ jobs:
       - run: uv run ruff check .
       - run: uv run ruff format --check .
       - run: uv run mypy
+      - name: migration drift
+        run: uv run --group dev python -m django makemigrations --check --dry-run
+        env:
+          DJANGO_SETTINGS_MODULE: tests.settings
       - run: uv run nox -s coverage
       - name: diff coverage
         if: github.event_name == 'pull_request'

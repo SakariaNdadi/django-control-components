@@ -48,6 +48,17 @@ def lint(session: nox.Session) -> None:
     _install(session)
     session.run("ruff", "check", ".")
     session.run("ruff", "format", "--check", ".")
+    # a model field added without a migration ships broken and nothing else
+    # catches it
+    session.run(
+        "python",
+        "-m",
+        "django",
+        "makemigrations",
+        "--check",
+        "--dry-run",
+        env={"DJANGO_SETTINGS_MODULE": "tests.settings"},
+    )
 
 
 @nox.session
