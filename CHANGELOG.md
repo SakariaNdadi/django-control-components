@@ -8,6 +8,33 @@ All notable changes to this project are documented here. Format loosely follows
 
 Renamed and re-versioned release of the rebuild described under `1.0.0b1` below.
 
+### Security
+
+- **Component ids are sanitised to `[A-Za-z0-9_-]`.** `Widget.id(...)` and
+  `Table.id(...)` reach an Alpine `x-data` expression, where HTML escaping does
+  not protect - the parser decodes entities before Alpine reads the attribute.
+  A studio user could set an id containing a quote and run script in every
+  viewer's browser. Ids are now stripped at `Widget.get_id()` / `Table.table_id`.
+  **Behaviour change:** an id with punctuation (`"my.widget"`) now renders
+  stripped (`"mywidget"`), so any CSS or JS selector written against the old
+  form needs updating.
+- **`ActionView` refuses anonymous requests.** An `Action` with no
+  `.authorize()` rule is implicitly allowed, and the endpoint is mounted outside
+  any panel guard, so an anonymous POST could previously run it. **Behaviour
+  change:** an action intentionally exposed to signed-out users must now be
+  reached through a view that permits it; the shared endpoint will not.
+- **`extra_attributes` is now code-only.** It takes arbitrary HTML attribute
+  names, so a stored spec could set an event handler, whose value is executed
+  rather than displayed. Unchanged in Python.
+- **`@block(...)` accepts `setters=`**, so a custom block can gate a raw-HTML
+  setter `requires="superuser"`. `CODE_ONLY_SETTERS` only covers the setter
+  *names* the library ships. See `docs/blocks.md`.
+- **Wizard temp uploads default outside `MEDIA_ROOT`** (`DCC_WIZARD_TMP_ROOT`
+  overrides). They land before validation runs, and most deployments serve that
+  directory.
+- `UserPreference.home_target` is checked with `url_has_allowed_host_and_scheme`
+  before being used as a post-login redirect.
+
 ### Changed
 
 - **Project renamed** `django-cotton-components` → `django-control-components`.
