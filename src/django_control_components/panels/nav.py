@@ -67,13 +67,18 @@ def _stored_nodes(panel: Panel, request: HttpRequest) -> list[NavNode]:
         return []
     try:
         from ..studio.models import NavItem
-    except Exception:
+    except ImportError:
         return []
 
+    from django.db.models import Prefetch
+
     user = getattr(request, "user", None)
+    # prefetch the *enabled, ordered* children so the loop below reads
+    # row.children.all() from cache instead of issuing a query per row
+    enabled_children = NavItem.objects.filter(is_enabled=True).order_by("order", "pk")
     rows = list(
         NavItem.objects.filter(panel=panel.name, is_enabled=True, parent__isnull=True)
-        .prefetch_related("children")
+        .prefetch_related(Prefetch("children", queryset=enabled_children))
         .order_by("order", "pk")
     )
     out: list[NavNode] = []
@@ -81,7 +86,7 @@ def _stored_nodes(panel: Panel, request: HttpRequest) -> list[NavNode]:
         node = _navitem_node(row, panel, request, user)
         if node is None:
             continue
-        for child in row.children.filter(is_enabled=True).order_by("order", "pk"):
+        for child in row.children.all():
             child_node = _navitem_node(child, panel, request, user)
             if child_node is not None:
                 node.children.append(child_node)

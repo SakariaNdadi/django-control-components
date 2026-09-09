@@ -98,6 +98,14 @@ class Table:
         self._config["searchable"] = value
         return self
 
+    def with_related(self, value: bool = True) -> Self:
+        """Auto-add ``select_related`` / ``prefetch_related`` for the relation
+        paths the dotted columns walk (on by default - it stops the per-row FK
+        fetch). Pass ``False`` when the base queryset already sets its own, or
+        when a dotted column name is not actually an ORM path."""
+        self._config["with_related"] = value
+        return self
+
     def client_side(self) -> Self:
         self._config["mode"] = "client"
         return self
@@ -178,7 +186,13 @@ class Table:
 
     def get_action_queryset(self, request: HttpRequest) -> QuerySet[Any]:
         state = self._default_state(request)
-        return query.apply_all(self._queryset, state, self._columns, self._filters)
+        return query.apply_all(
+            self._queryset,
+            state,
+            self._columns,
+            self._filters,
+            with_related=self._config.get("with_related", True),
+        )
 
     def set_owner_factory(self, factory: OwnerFactory) -> Self:
         """Give the action endpoint a way to rebuild this table for an arbitrary
@@ -349,7 +363,13 @@ class Table:
         self, request: HttpRequest | None, state: TableState, mode: str
     ) -> dict[str, Any]:
         ctx = RenderContext(request=request)
-        qs = query.apply_all(self._queryset, state, self._columns, self._filters)
+        qs = query.apply_all(
+            self._queryset,
+            state,
+            self._columns,
+            self._filters,
+            with_related=self._config.get("with_related", True),
+        )
         has_bulk = bool(self._bulk_actions)
         per_page = state.per_page or self.per_page_choices[0]
         infinite_scroll = bool(self._config.get("infinite_scroll"))

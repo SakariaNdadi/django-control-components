@@ -178,6 +178,12 @@ Import from `django_control_components.tables`.
 `Column.make(name, **kwargs)` - `name` may be dotted (`"author.name"`), walked
 safely (see [architecture.md](architecture.md#safe-attribute-traversal)).
 
+A dotted column's relation path is added to the queryset's `select_related`
+(forward FK / one-to-one) or `prefetch_related` (many-to-many / reverse)
+automatically, so `"author.name"` on 25 rows is one query, not 26. Turn it off
+with `Table.with_related(False)` when your base queryset already sets its own
+`select_related`, or when a dotted column name is not an ORM path.
+
 | Setter | Note |
 |---|---|
 | `.label(str)` | header text; default is the title-cased name |

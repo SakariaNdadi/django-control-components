@@ -156,6 +156,34 @@ def test_filter_validates_value(articles):
     assert apply_all(articles, state, [], [f]).count() == 3
 
 
+def test_dotted_column_gets_select_related_and_does_not_n_plus_one(
+    articles, django_assert_num_queries
+):
+    cols = [TextColumn.make("title"), TextColumn.make("author.name")]
+    state = TableState(table_id="article", filters={})
+    qs = apply_all(articles, state, cols, [])
+    assert "author" in qs.query.select_related
+    with django_assert_num_queries(1):  # one query, not one-per-row for author
+        [(a.title, a.author.name) for a in qs]
+
+    # opt out
+    plain = apply_all(articles, state, cols, [], with_related=False)
+    assert plain.query.select_related is False
+
+
+def test_m2m_dotted_column_uses_prefetch_not_select_related(articles):
+    cols = [TextColumn.make("tags.name")]
+    qs = apply_all(articles, TableState(table_id="article", filters={}), cols, [])
+    assert qs.query.select_related is False
+    assert any("tags" in p for p in qs._prefetch_related_lookups)
+
+
+def test_state_fn_column_with_dotted_name_is_not_treated_as_orm_path(articles):
+    col = TextColumn.make("not.a.field").state(lambda record: "x")
+    qs = apply_all(articles, TableState(table_id="article", filters={}), [col], [])
+    assert qs.query.select_related is False  # "not" is not a relation, path skipped
+
+
 def test_htmx_partial_endpoint(articles, settings, client):
     settings.DCC = {"TABLE_CLIENT_SIDE_MAX_ROWS": 2}
     # server-mode content fragment via request with the marker

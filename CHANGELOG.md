@@ -8,6 +8,16 @@ All notable changes to this project are documented here. Format loosely follows
 
 Renamed and re-versioned release of the rebuild described under `1.0.0b1` below.
 
+### Performance
+
+- **Tables no longer N+1 on dotted columns.** A column named `"author.name"`
+  adds `author` to the queryset's `select_related` (or `prefetch_related` for a
+  many-to-many / reverse path) automatically - 25 rows with an FK column is one
+  query, not 26. `Table.with_related(False)` opts out.
+- The panel nav prefetched `children` then called `.filter()` on it, discarding
+  the prefetch and issuing a query per top-level item. Now a
+  `Prefetch(queryset=...)` with the filter baked in.
+
 ### Fixed
 
 - **The fluent API is now type-checked.** `@setter` preserved the method's own
