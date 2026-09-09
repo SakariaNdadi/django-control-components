@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import glob
+from pathlib import Path
 
 import nox
 
@@ -60,11 +61,9 @@ def coverage(session: nox.Session) -> None:
     _install(session)
     session.run("pytest", "-q", "--cov", "--cov-report=term-missing", "--cov-report=xml")
     # Per-module 100% branch floor on the modules where a missed branch is a vuln.
-    present = [
-        p
-        for p in SECURITY_CRITICAL
-        if session.run("test", "-f", p, external=True, success_codes=[0, 1]) == 0
-    ]
+    # (session.run returns str | bool | None, never 0 - the old `== 0` guard made
+    # this list always empty and the floor never ran.)
+    present = [p for p in SECURITY_CRITICAL if Path(p).is_file()]
     if present:
         session.run("coverage", "report", "--fail-under=100", "--include", ",".join(present))
 

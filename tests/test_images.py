@@ -83,6 +83,10 @@ def test_decompression_bomb_rejected(settings):
 def test_dimension_and_ratio_rules():
     with pytest.raises(ImageValidationError, match="at least"):
         validate_image(_upload(_png(10, 10)), ImageSpec(min_dimensions=(50, 50)))
+    with pytest.raises(ImageValidationError, match="at most"):
+        validate_image(_upload(_png(100, 100)), ImageSpec(max_dimensions=(50, 50)))
+    # within bounds: no raise
+    validate_image(_upload(_png(40, 40)), ImageSpec(max_dimensions=(50, 50)))
     with pytest.raises(ImageValidationError, match="aspect ratio"):
         validate_image(_upload(_png(100, 100)), ImageSpec(aspect_ratio=parse_ratio("16:9")))
 

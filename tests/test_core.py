@@ -107,6 +107,28 @@ def test_attribute_bag_rejects_unsafe_key():
         AttributeBag({'x="y" onload': "1"})
 
 
+def test_attribute_bag_add_class_ignores_falsy_and_renders_via_html():
+    bag = AttributeBag()
+    bag.add_class("")  # falsy - no-op
+    bag.add_class(None)  # falsy - no-op
+    assert "class" not in bag.as_dict()
+    bag.add_class(["a", "", "b"])  # list form, blank part skipped
+    assert bag.as_dict()["class"] == "a b"
+    # __html__ is the template-safety hook - same output as render()
+    assert bag.__html__() == bag.render()
+
+
+def test_attribute_bag_skips_falsy_sources_and_falsy_boolean_values():
+    # a None source in the constructor is skipped, not iterated
+    bag = AttributeBag(None, {"a": "1"})
+    assert bag.as_dict() == {"a": "1"}
+    # a boolean attr whose stored value is falsy-but-not-False (0, "") renders
+    # nothing rather than `required=""`
+    rendered = AttributeBag({"required": 0, "disabled": True}).render()
+    assert "required" not in rendered
+    assert 'disabled="disabled"' in rendered
+
+
 def test_component_instance_renders_concurrently_without_crosstalk(monkeypatch):
     seen: list[str] = []
 

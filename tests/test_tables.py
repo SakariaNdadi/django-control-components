@@ -136,6 +136,18 @@ def test_search_only_over_searchable_columns(articles):
     assert qs.count() == 1
 
 
+def test_search_with_no_searchable_columns_is_a_no_op(articles):
+    state = TableState.from_query("article", QueryDict("t_article_search=Piece 1"))
+    cols = [TextColumn.make("title"), TextColumn.make("status")]  # none searchable
+    assert apply_all(articles, state, cols, []).count() == articles.count()
+
+
+def test_unknown_filter_name_in_state_is_ignored(articles):
+    f = SelectFilter.make("status").options(Article.Status.choices)
+    state = TableState(table_id="article", filters={"nonexistent": "x", "status": "live"})
+    assert apply_all(articles, state, [], [f]).count() == 3
+
+
 def test_filter_validates_value(articles):
     f = SelectFilter.make("status").options(Article.Status.choices)
     state = TableState(table_id="article", filters={"status": "bogus"})

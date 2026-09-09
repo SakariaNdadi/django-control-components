@@ -39,7 +39,6 @@ class ActionOwner(Protocol):
 class _Registry:
     def __init__(self) -> None:
         self._factories: dict[str, OwnerFactory] = {}
-        self._warned: set[str] = set()
 
     def register(self, key: str, factory: OwnerFactory) -> None:
         """Register a per-request owner factory. ``factory(request)`` returns an
@@ -58,17 +57,17 @@ class _Registry:
         """
         key = owner.key
         if key in self._factories:
+            # a real factory (or an earlier capture of this key) already stands;
+            # a later render must not clobber it, and must not re-warn.
             return
-        if key not in self._warned:
-            self._warned.add(key)
-            warnings.warn(
-                f"Action owner {key!r} was registered by rendering a Table "
-                "instance directly. Its action queryset will not be re-scoped "
-                "per request and it will 404 under multiple workers. Register a "
-                "factory via django_control_components.actions.registry.register"
-                "(key, factory), or expose the table through a Resource.",
-                stacklevel=3,
-            )
+        warnings.warn(
+            f"Action owner {key!r} was registered by rendering a Table "
+            "instance directly. Its action queryset will not be re-scoped "
+            "per request and it will 404 under multiple workers. Register a "
+            "factory via django_control_components.actions.registry.register"
+            "(key, factory), or expose the table through a Resource.",
+            stacklevel=3,
+        )
         self._factories[key] = lambda _request: owner
 
     def resolve(
@@ -85,7 +84,6 @@ class _Registry:
 
     def clear(self) -> None:
         self._factories.clear()
-        self._warned.clear()
 
 
 registry = _Registry()

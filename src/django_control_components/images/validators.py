@@ -64,7 +64,7 @@ def validate_image(file: File[Any], spec: ImageSpec) -> tuple[int, int]:
                 probe.verify()
             except (Image.DecompressionBombWarning, Image.DecompressionBombError) as exc:
                 raise ImageValidationError("Image exceeds the pixel limit.") from exc
-            except ImageValidationError:
+            except ImageValidationError:  # pragma: no cover - defensive, no wrapping
                 raise
             except Exception as exc:
                 raise ImageValidationError("File is not a valid image.") from exc

@@ -45,8 +45,44 @@ def _table(qs, actions=None, bulk=None) -> Table:
     return t
 
 
-def test_unknown_owner_and_action_are_404():
-    assert registry.resolve("nope", "x", RequestFactory().get("/")) is None
+def test_unknown_owner_and_action_are_404(data):
+    rf = RequestFactory().get("/")
+    assert registry.resolve("nope", "x", rf) is None  # unknown owner
+    _table(Article.objects.all(), actions=[Action.make("real").action(lambda r: None)]).render(rf)
+    assert registry.resolve("table-art", "not-an-action", rf) is None  # known owner, unknown action
+
+
+def test_registered_factory_wins_over_a_later_bare_render(data, recwarn):
+    """A real per-request factory registered for a key is not clobbered when a
+    bare Table with the same key renders afterwards (and no second warning)."""
+    _, arts = data
+    seen: list = []
+
+    def factory(request):
+        return (
+            _table(Article.objects.all(), actions=[Action.make("t").action(seen.append)])
+            .set_owner_factory(factory)
+        )
+
+    registry.register("table-art", factory)
+    recwarn.clear()
+    _table(Article.objects.all(), actions=[Action.make("t").action(seen.append)]).render(
+        RequestFactory().get("/")
+    )
+    assert not recwarn.list  # the real factory is kept, no register_rendered warning
+    owner, _action = registry.resolve("table-art", "t", RequestFactory().get("/"))
+    assert owner.get_action_queryset(RequestFactory().get("/")).count() == len(arts)
+
+
+def test_clear_forgets_the_rendered_owner_warning(data):
+    table = _table(Article.objects.all(), actions=[Action.make("t").action(lambda r: None)])
+    with pytest.warns(UserWarning, match="rendering a Table"):
+        table.render(RequestFactory().get("/"))
+    registry.clear()
+    with pytest.warns(UserWarning, match="rendering a Table"):  # warns again after clear
+        _table(Article.objects.all(), actions=[Action.make("t").action(lambda r: None)]).render(
+            RequestFactory().get("/")
+        )
 
 
 def test_table_registers_actions_on_render(data):
