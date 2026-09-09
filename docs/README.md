@@ -119,51 +119,45 @@ In your base template `<head>` (e.g., `base.html`):
 
 ## 🛠️ Complete View Implementations
 
-### 1. Full Schema Form View (`SchemaFormMixin` + `CreateView`/`UpdateView`)
+Every snippet below is running in the bundled `web/` project against its `Task`
+model (`web/demo/models.py`: `title`, `priority`, `done`, `due_date`). Full
+sources in `docs/panels.md`, `docs/tables.md`, `docs/wizards.md`.
+
+### 1. Schema form view (`SchemaFormMixin` + `CreateView`/`UpdateView`)
 
 ```python
+from django import forms
 from django.urls import reverse_lazy
 from django.views.generic import CreateView
 from django_control_components.mixins import SchemaFormMixin
-from django_control_components.schemas import (
-    Grid,
-    Schema,
-    Section,
-    Select,
-    TextInput,
-    Toggle,
-)
-from myapp.forms import ArticleForm
-from myapp.models import Article
+from django_control_components.schemas import Grid, Schema, Section, Select, TextInput, Toggle
+from myapp.models import Task
 
 
-class ArticleCreateView(SchemaFormMixin, CreateView):
-    model = Article
-    template_name = "articles/form.html"
-    success_url = reverse_lazy("article-list")
+class TaskForm(forms.ModelForm):
+    class Meta:
+        model = Task
+        fields = ["title", "priority", "done", "due_date"]
+        widgets = {"due_date": forms.DateInput(attrs={"type": "date"})}
+
+
+class TaskCreateView(SchemaFormMixin, CreateView):
+    model = Task
+    template_name = "tasks/form.html"
+    success_url = reverse_lazy("task-list")
 
     def get_schema(self) -> Schema:
         return (
             Schema.make()
-            .form(ArticleForm)  # Uses your standard Django ModelForm for validation
+            .form(TaskForm)  # your standard Django ModelForm does the validation
             .schema(
                 [
-                    Section.make("Article Details")
-                    .description("Core content and author assignments")
-                    .columns(2)
-                    .schema(
+                    Section.make("Task").columns(2).schema(
                         [
                             TextInput.make("title").required().column_span_full(),
-                            TextInput.make("slug").required(),
-                            Select.make("status").searchable(),
-                        ]
-                    ),
-                    Section.make("Visibility & Schedule").schema(
-                        [
-                            Toggle.make("is_published"),
-                            TextInput.make("published_at").visible_when(
-                                "is_published", equals=True
-                            ),
+                            Select.make("priority"),
+                            Toggle.make("done"),
+                            TextInput.make("due_date").visible_when("done", equals=False),
                         ]
                     ),
                 ]
@@ -171,188 +165,160 @@ class ArticleCreateView(SchemaFormMixin, CreateView):
         )
 ```
 
-**Template (`articles/form.html`):**
+**Template (`tasks/form.html`):**
+
 ```django
 {% extends "base.html" %}
 
 {% block content %}
-<div class="max-w-4xl mx-auto py-8">
-  <h1 class="text-2xl font-bold mb-6">Create Article</h1>
-  <form method="post" enctype="multipart/form-data">
+<div class="dcc-panel__main">
+  <h1>New task</h1>
+  <form method="post">
     {% csrf_token %}
     {{ schema_html }}
-    <div class="mt-6 flex gap-3">
-      <button type="submit" class="dcc-btn dcc-btn--primary">Save Article</button>
-      <a href="{% url 'article-list' %}" class="dcc-btn dcc-btn--secondary">Cancel</a>
+    <div class="dcc-form__actions">
+      <button type="submit" class="dcc-btn dcc-btn--primary">Save</button>
+      <a href="{% url 'task-list' %}" class="dcc-btn dcc-btn--secondary">Cancel</a>
     </div>
   </form>
 </div>
 {% endblock %}
 ```
 
----
-
-### 2. Full Table View with Search, Keyset Pagination & Bulk Actions (`TableMixin`)
+### 2. Table view with search, filters and a row action (`TableMixin`)
 
 ```python
-from django.urls import reverse
 from django.views.generic import TemplateView
-from django_control_components.actions import Action, BulkAction
+from django_control_components.actions import Action
 from django_control_components.tables import (
-    BadgeColumn,
-    BooleanColumn,
-    DateColumn,
-    SelectFilter,
-    Table,
-    TableMixin,
-    TextColumn,
+    BadgeColumn, BooleanColumn, DateColumn, SelectFilter, Table, TableMixin, TextColumn,
 )
-from myapp.models import Article
+from myapp.models import Task
 
 
-class ArticleListView(TableMixin, TemplateView):
-    template_name = "articles/list.html"
+def _mark_done(record):
+    record.done = True
+    record.save(update_fields=["done"])
+
+
+class TaskListView(TableMixin, TemplateView):
+    template_name = "tasks/list.html"
 
     def get_table(self) -> Table:
-        queryset = Article.objects.select_related("author").all()
         return (
-            Table.make(queryset)
-            .id("articles-table")
+            Table.make(Task.objects.all())
+            .id("tasks")
             .columns(
                 [
-                    TextColumn.make("title")
-                    .label("Title")
-                    .sortable()
-                    .searchable()
-                    .limit(64),
-                    TextColumn.make("author.username")
-                    .label("Author")
-                    .sortable(sort_field="author__username"),
-                    BadgeColumn.make("status").colors(
-                        {"draft": "muted", "review": "secondary", "live": "success"}
+                    TextColumn.make("title").sortable().searchable(),
+                    BadgeColumn.make("priority").colors(
+                        {"low": "muted", "medium": "secondary", "high": "danger"}
                     ),
-                    BooleanColumn.make("is_published")
-                    .label("Published")
-                    .labels(("Live", "Draft")),
-                    DateColumn.make("created_at").label("Created").since().sortable(),
+                    BooleanColumn.make("done").labels(("✓", "-")),
+                    DateColumn.make("due_date").since().sortable(),
                 ]
             )
-            .filters(
-                [
-                    SelectFilter.make("status").options(
-                        [("draft", "Draft"), ("review", "Review"), ("live", "Live")]
-                    ),
-                ]
-            )
-            .actions(
-                [
-                    Action.make("edit")
-                    .icon("pen")
-                    .to_url(lambda record: reverse("article-edit", args=[record.pk])),
-                ]
-            )
-            .bulk_actions(
-                [
-                    BulkAction.make("publish")
-                    .icon("check")
-                    .requires_confirmation()
-                    .action(lambda records: records.update(is_published=True)),
-                ]
-            )
+            .filters([SelectFilter.make("priority").options(Task.Priority.choices)])
+            .actions([Action.make("mark_done").icon("check").action(_mark_done)])
             .searchable()
-            .default_sort("-created_at")
-            .record_url(lambda record: reverse("article-edit", args=[record.pk]))
+            .default_sort("-due_date")
         )
 ```
 
-**Template (`articles/list.html`):**
+**Template (`tasks/list.html`):**
+
 ```django
 {% extends "base.html" %}
+{% load dcc_tags %}
 
 {% block content %}
-<div class="max-w-7xl mx-auto py-8">
-  <div class="flex justify-between items-center mb-6">
-    <h1 class="text-2xl font-bold">Articles</h1>
-    <a href="{% url 'article-create' %}" class="dcc-btn dcc-btn--primary">New Article</a>
-  </div>
-  
+<div class="dcc-panel__main">
+  <header class="dcc-panel__header">
+    <h1>Tasks</h1>
+    <a href="{% url 'task-create' %}" class="dcc-btn dcc-btn--primary">
+      {% dcc_icon "plus" %} New task
+    </a>
+  </header>
   {{ table_html }}
 </div>
 {% endblock %}
 ```
 
----
-
-### 3. Full Multi-Step Wizard View with htmx Swapping (`WizardView`)
+### 3. Multi-step wizard with htmx step swapping (`WizardView`)
 
 ```python
+from django import forms
 from django.shortcuts import redirect
-from django_control_components.infolists import Infolist, TextEntry
-from django_control_components.schemas import Schema, TextInput, Toggle
+from django_control_components.infolists import BadgeEntry, Infolist, TextEntry
+from django_control_components.schemas import Schema, Section, Select, TextInput, Toggle
 from django_control_components.wizards import WizardStep, WizardView
-from myapp.forms import ArticleDetailsForm, ArticlePublishForm
-from myapp.models import Article
 
 
-class ArticleCreationWizard(WizardView):
-    # Optional styling hooks
-    wizard_class = "article-wizard-flow"
+class ProjectDetailsForm(forms.Form):
+    name = forms.CharField(max_length=100, label="Project name")
+    description = forms.CharField(widget=forms.Textarea(attrs={"rows": 3}), required=False)
+
+
+class ProjectSettingsForm(forms.Form):
+    tier = forms.ChoiceField(
+        choices=[("starter", "Starter"), ("pro", "Professional"), ("enterprise", "Enterprise")],
+        initial="pro",
+    )
+    is_public = forms.BooleanField(required=False, initial=True)
+
+
+class ProjectWizard(WizardView):
     show_step_nav = True
-
     steps_config = [
-        # Step 1: Form step for basic details
         WizardStep(
             "details",
-            Schema.make()
-            .form(ArticleDetailsForm)
-            .strict()
-            .schema([TextInput.make("title").required(), TextInput.make("slug")]),
+            Schema.make().form(ProjectDetailsForm).strict().schema(
+                [Section.make("Project").schema(
+                    [TextInput.make("name").required(), TextInput.make("description")]
+                )]
+            ),
             title="Details",
-            heading="Article Information",
-            description="Enter the main title and URL slug.",
+            heading="Project basics",
         ),
-        # Step 2: Form step for publish settings
         WizardStep(
-            "publishing",
-            Schema.make()
-            .form(ArticlePublishForm)
-            .strict()
-            .schema([Toggle.make("is_published"), TextInput.make("published_at")]),
-            title="Publishing",
-            heading="Publication Settings",
+            "settings",
+            Schema.make().form(ProjectSettingsForm).strict().schema(
+                [Section.make("Configuration").columns(2).schema(
+                    [Select.make("tier").searchable(), Toggle.make("is_public")]
+                )]
+            ),
+            title="Plan & privacy",
         ),
-        # Step 3: Review step (Read-only summary using Infolist)
         WizardStep(
             "review",
             Infolist.make().schema(
                 [
-                    TextEntry.make("title").label("Title"),
-                    TextEntry.make("slug").label("URL Slug"),
-                    TextEntry.make("is_published").label("Published Immediately?"),
+                    TextEntry.make("name").label("Project name"),
+                    BadgeEntry.make("tier").colors(
+                        {"starter": "muted", "pro": "primary", "enterprise": "success"}
+                    ),
+                    TextEntry.make("is_public").label("Public access"),
                 ]
             ),
-            title="Review & Confirm",
-            heading="Verify Details",
-            description="Please check the information before submitting.",
+            title="Review",
+            heading="Review & confirm",
             record=lambda view: view.get_all_cleaned_data(),
         ),
     ]
 
     def done(self, form_list, **kwargs):
-        # Automatically gathers valid data from all steps
-        article_data = self.get_all_cleaned_data()
-        article = Article.objects.create(**article_data)
-        return redirect("article-detail", pk=article.pk)
+        data = self.get_all_cleaned_data()
+        # ... persist `data` ...
+        return redirect("project-list")
 ```
 
-**Template (`articles/wizard.html` or use the default shipped template):**
+**Template (`projects/wizard.html`, or use the shipped default):**
+
 ```django
 {% extends "base.html" %}
 
 {% block content %}
-<div class="max-w-3xl mx-auto py-8">
-  {{ step_html }}
-</div>
+<div class="dcc-panel__main">{{ step_html }}</div>
 {% endblock %}
 ```
 

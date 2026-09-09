@@ -11,56 +11,97 @@ Use a panel when you want a branded, permission-gated admin area that you shape
 in Python - not a replacement for `django-admin`, and not a place for one-off
 pages (yet - see *Custom pages* below).
 
+> **Running example.** Every snippet on this page is the `TaskResource` mounted
+> in the `web/` project. Run it (`docs/deployment.md` has the commands) and open
+> `/task/` for the live version; the source is `web/demo/pages/full_example.py`
+> and `web/demo/panels.py`.
+
 ## Define a resource
 
+The demo `Task` model (`web/demo/models.py`) is deliberately small - `title`,
+`done`, `priority` (`low` / `medium` / `high`), `due_date`:
+
 ```python
-# app/panels.py
-from django_control_components.panels import Panel, Resource
-from django_control_components.schemas import Schema, Section, TextInput, Select
-from django_control_components.tables import Table, TextColumn, DateColumn, SelectFilter
+# web/demo/pages/full_example.py
+from django import forms
 
-from .models import Article
+from django_control_components.infolists import (
+    BadgeEntry, BooleanEntry, DateEntry, Infolist, TextEntry,
+)
+from django_control_components.panels import Resource
+from django_control_components.schemas import Schema, Section, Select, TextInput, Toggle
+from django_control_components.tables import (
+    BadgeColumn, BooleanColumn, DateColumn, SelectFilter, Table, TextColumn,
+)
+
+from ..models import Task
 
 
-class ArticleResource(Resource):
-    model = Article
-    navigation_icon = "newspaper"  # any active-icon-set name
-    navigation_group = "Content"  # optional sidebar grouping
+class TaskForm(forms.ModelForm):
+    class Meta:
+        model = Task
+        fields = ["title", "priority", "done", "due_date"]
+        widgets = {"due_date": forms.DateInput(attrs={"type": "date"})}
+
+
+class TaskResource(Resource):
+    model = Task
+    navigation_icon = "list-check"      # any active-icon-set name
+    create_redirect = "list"
+
+    @classmethod
+    def can(cls, request, action, obj=None):
+        return True                     # this demo is open; drop for Django model perms
 
     @classmethod
     def build_table(cls, *, request):
         return (
-            Table.make(cls.get_queryset(request).select_related("author"))
-            .id("panel-articles")
+            Table.make(cls.get_queryset(request))
+            .id("panel-tasks")
             .columns(
                 [
-                    TextColumn.make("title").sortable().searchable().limit(60),
-                    TextColumn.make("author.name")
-                    .label("Author")
-                    .sortable(sort_field="author__name"),
-                    DateColumn.make("created_at").since().sortable(),
+                    TextColumn.make("title").sortable().searchable(),
+                    BadgeColumn.make("priority").colors(
+                        {"low": "muted", "medium": "secondary", "high": "danger"}
+                    ),
+                    BooleanColumn.make("done").labels(("✓", "-")),
+                    DateColumn.make("due_date").since(),
                 ]
             )
-            .filters([SelectFilter.make("status").options(Article.Status.choices)])
-            .default_sort("-created_at")
+            .filters([SelectFilter.make("priority").options(Task.Priority.choices)])
+            .default_sort("-due_date")
         )
 
     @classmethod
     def build_schema(cls, *, request):
         return (
             Schema.make()
-            .model(Article, fields=["title", "slug", "status", "body"])
+            .form(TaskForm)
             .schema(
                 [
-                    Section.make("Content").schema(
+                    Section.make("Task").schema(
                         [
                             TextInput.make("title").required(),
-                            TextInput.make("slug").required(),
-                            Select.make("status"),
+                            Select.make("priority"),
+                            Toggle.make("done"),
                         ]
                     ),
+                    TextInput.make("due_date"),
                 ]
             )
+        )
+
+    @classmethod
+    def build_infolist(cls, *, request):
+        return Infolist.make().schema(
+            [
+                TextEntry.make("title"),
+                BadgeEntry.make("priority").colors(
+                    {"low": "muted", "medium": "secondary", "high": "danger"}
+                ),
+                BooleanEntry.make("done"),
+                DateEntry.make("due_date"),
+            ]
         )
 ```
 
@@ -84,23 +125,30 @@ Override points:
 ## Mount the panel
 
 ```python
-# config/urls.py
-from django.urls import path
-from app.panels import ArticleResource
+# web/demo/panels.py
 from django_control_components.panels import Panel
 
-admin_panel = (
-    Panel("admin")
-    .path("panel")  # -> /panel/...
-    .resources([ArticleResource])
-    .auth(lambda request: request.user.is_staff)  # panel-wide guard(s)
+from .pages.full_example import TaskResource
+
+docs_panel = (
+    Panel("docs")
+    .path("")                       # mounted at the site root
+    .brand("DCC", "cubes")
+    .resources([TaskResource])
+    .pages([...])                   # non-resource PanelPage classes
 )
 
+# web/config/urls.py
 urlpatterns = [
-    admin_panel.mount(),  # /panel/article/, /panel/article/new/, ...
-    # ...
+    path("dcc/", include("django_control_components.urls")),
+    docs_panel.mount(),             # /task/, /task/new/, /task/<pk>/, ...
 ]
 ```
+
+Add a guard with `.auth(lambda request: request.user.is_staff)` for a
+staff-gated panel; the demo panel is open. `.auth(*guards)` runs before every
+page - each guard is `HttpRequest -> bool`, a falsy result raises
+`PermissionDenied`. Per-resource `can()` runs after the panel guard.
 
 `.auth(*guards)` runs before every page; each guard is `HttpRequest -> bool` and
 a falsy result raises `PermissionDenied`. Add more with repeated `.auth()` calls.

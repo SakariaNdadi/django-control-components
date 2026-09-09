@@ -16,12 +16,12 @@ Two unrelated families share the word "mixin":
 Drives a `FormView` / `CreateView` / `UpdateView` from a `Schema`.
 
 ```python
-class ArticleUpdateView(SchemaFormMixin, UpdateView):
-    model = Article
-    template_name = "articles/form.html"
+class TaskUpdateView(SchemaFormMixin, UpdateView):
+    model = Task
+    template_name = "tasks/form.html"
 
     def get_schema(self):
-        return article_schema()
+        return task_schema()   # see schemas.md
 ```
 
 | aspect | detail |
@@ -39,11 +39,11 @@ class ArticleUpdateView(SchemaFormMixin, UpdateView):
 Renders a `Table` and answers its htmx fragment requests.
 
 ```python
-class ArticleListView(TableMixin, TemplateView):
-    template_name = "articles/list.html"
+class TaskListView(TableMixin, TemplateView):
+    template_name = "tasks/list.html"
 
     def get_table(self):
-        return article_table(self.request)
+        return task_table(self.request)   # see tables.md
 ```
 
 | aspect | detail |
@@ -63,76 +63,63 @@ You can render tables, charts, stats, and forms together in a standard Django vi
 from django.views.generic import TemplateView
 from django_control_components.core.context import RenderContext
 from django_control_components.panels import ChartWidget, StatWidget
-from django_control_components.schemas import Schema, TextInput, Toggle
 from django_control_components.tables import BadgeColumn, Table, TextColumn
-from myapp.forms import FilterForm
-from myapp.models import Article, Comment
+from myapp.models import Task   # web/demo/models.py in the bundled project
 
 
-class AnalyticsHubView(TemplateView):
-    template_name = "analytics/hub.html"
+class TaskHubView(TemplateView):
+    template_name = "tasks/hub.html"
 
     def get_context_data(self, **kwargs):
         ctx = super().get_context_data(**kwargs)
         render_ctx = RenderContext(request=self.request)
 
-        # 1. Interactive Table
+        # 1. Interactive table
         table = (
-            Table.make(Article.objects.select_related("author"))
-            .id("hub-articles")
+            Table.make(Task.objects.all())
+            .id("hub-tasks")
             .columns([
                 TextColumn.make("title").sortable().searchable(),
-                BadgeColumn.make("status").colors({"live": "success", "draft": "muted"}),
+                BadgeColumn.make("priority").colors(
+                    {"low": "muted", "medium": "secondary", "high": "danger"}
+                ),
             ])
             .client_side()
         )
-        ctx["articles_table"] = table.render(self.request)
+        ctx["tasks_table"] = table.render(self.request)
 
-        # 2. Chart.js Widget (loads Chart.js automatically)
+        # 2. Chart.js widget (loads Chart.js automatically)
         chart = (
-            ChartWidget.make("Articles by Category")
+            ChartWidget.make("By priority")
             .kind("bar")
-            .data([("Engineering", 14), ("Design", 8), ("Marketing", 5)])
+            .data([("Low", 2), ("Medium", 5), ("High", 1)])
             .columns(2)
         )
-        ctx["category_chart"] = chart.render(render_ctx)
+        ctx["priority_chart"] = chart.render(render_ctx)
 
-        # 3. Live-Polling Stat Widget
-        stat = StatWidget.make("Open Comments", Comment.objects.filter(approved=False).count()).icon("comments").poll(30)
-        ctx["comments_stat"] = stat.render(render_ctx)
-
-        # 4. Form Schema
-        filter_schema = (
-            Schema.make()
-            .form(FilterForm)
-            .schema([TextInput.make("search_query"), Toggle.make("only_active")])
+        # 3. Live-polling stat widget
+        stat = (
+            StatWidget.make("Open tasks", lambda request: Task.objects.filter(done=False).count())
+            .icon("list-check")
+            .poll(30)
         )
-        ctx["filter_form"] = filter_schema.render(render_ctx)
+        ctx["open_stat"] = stat.render(render_ctx)
 
         return ctx
 ```
 
-**Template (`analytics/hub.html`):**
+**Template (`tasks/hub.html`):**
 
 ```django
 {% extends "base.html" %}
 
 {% block content %}
-<div class="max-w-7xl mx-auto py-8 space-y-8">
-  <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-    <div class="md:col-span-1">{{ comments_stat }}</div>
-    <div class="md:col-span-2">{{ category_chart }}</div>
+<div class="dcc-panel__main">
+  <div class="dcc-grid" style="--dcc-grid-cols: 3;">
+    <div>{{ open_stat }}</div>
+    <div style="grid-column: span 2;">{{ priority_chart }}</div>
   </div>
-
-  <div class="bg-white p-6 rounded-lg border">
-    <h2 class="text-xl font-bold mb-4">Quick Filter</h2>
-    <form method="get">{{ filter_form }}</form>
-  </div>
-
-  <div>
-    <h2 class="text-xl font-bold mb-4">Articles</h2>
-    {{ articles_table }}
-  </div>
+  {{ tasks_table }}
 </div>
 {% endblock %}
 ```

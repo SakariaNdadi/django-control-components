@@ -129,7 +129,7 @@ Renders standard buttons or links with icons and labels:
 
 ```django
 <c-dcc.button variant="primary" label="Save Changes" type="submit" />
-<c-dcc.button href="/articles/new/" icon="plus" label="New Article" />
+<c-dcc.button href="/task/new/" icon="plus" label="New task" />
 <c-dcc.button variant="danger" icon="trash">Delete Record</c-dcc.button>
 ```
 

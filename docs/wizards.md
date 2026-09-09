@@ -20,40 +20,78 @@ django-control-components[wizard].")`.
 
 ## Quick start
 
+This is the live wizard from the `web/` project - `/wizards/`, source
+`web/demo/pages/wizard_demo.py`:
+
 ```python
-from django_control_components.wizards import WizardView, WizardStep
-from django_control_components.schemas import Schema, TextInput
+from django import forms
+from django.shortcuts import redirect
+
+from django_control_components.infolists import BadgeEntry, Infolist, TextEntry
+from django_control_components.schemas import Schema, Section, Select, TextInput, Toggle
+from django_control_components.wizards import WizardStep, WizardView
 
 
-class ArticleWizard(WizardView):
-    template_name = "articles/wizard.html"  # optional - a default ships
+class ProjectDetailsForm(forms.Form):
+    name = forms.CharField(max_length=100, label="Project Name")
+    description = forms.CharField(widget=forms.Textarea(attrs={"rows": 3}), required=False)
+
+
+class ProjectSettingsForm(forms.Form):
+    tier = forms.ChoiceField(
+        choices=[("starter", "Starter"), ("pro", "Professional"), ("enterprise", "Enterprise")],
+        initial="pro",
+    )
+    is_public = forms.BooleanField(required=False, initial=True, label="Publicly discoverable")
+
+
+class ProjectWizard(WizardView):
+    show_step_nav = True
     steps_config = [
         WizardStep(
-            "content",
-            Schema.make()
-            .form(ArticleForm)
-            .strict()
-            .schema(
+            "details",
+            Schema.make().form(ProjectDetailsForm).strict().schema(
                 [
-                    TextInput.make("title"),
-                    TextInput.make("slug"),
+                    Section.make("Project information").schema(
+                        [TextInput.make("name").required(), TextInput.make("description")]
+                    ),
                 ]
             ),
-            title="Content",
+            title="Details",
+            heading="Project basics",
         ),
         WizardStep(
-            "publish",
-            Schema.make().form(ArticleForm).strict().schema([TextInput.make("status")]),
-            title="Publish",
+            "settings",
+            Schema.make().form(ProjectSettingsForm).strict().schema(
+                [
+                    Section.make("Configuration").columns(2).schema(
+                        [Select.make("tier").searchable(), Toggle.make("is_public")]
+                    ),
+                ]
+            ),
+            title="Plan & privacy",
+        ),
+        WizardStep(
+            "review",
+            Infolist.make().schema(
+                [
+                    TextEntry.make("name").label("Project name"),
+                    BadgeEntry.make("tier").colors(
+                        {"starter": "muted", "pro": "primary", "enterprise": "success"}
+                    ),
+                    TextEntry.make("is_public").label("Public access"),
+                ]
+            ),
+            title="Review",
+            heading="Review & confirm",
+            record=lambda view: view.get_all_cleaned_data(),
         ),
     ]
 
     def done(self, form_list, **kwargs):
-        data = {}
-        for form in form_list:
-            data.update(form.cleaned_data)
-        Article.objects.create(**data)
-        return redirect("article-list")
+        data = self.get_all_cleaned_data()
+        # ... persist `data` ...
+        return redirect("project-list")
 ```
 
 ## `WizardStep`
@@ -92,12 +130,12 @@ steps_config = [
         title="Start",
         heading="Before you begin",
     ),
-    WizardStep("content", article_content_schema(), title="Content"),
+    WizardStep("details", project_details_schema(), title="Details"),
     WizardStep(
         "review",
-        Infolist.make().schema([TextEntry.make("title"), TextEntry.make("status")]),
+        Infolist.make().schema([TextEntry.make("name"), TextEntry.make("tier")]),
         title="Review",
-        heading="Confirm and publish",
+        heading="Confirm",
         record=lambda view: view.get_all_cleaned_data(),
     ),
 ]
@@ -141,8 +179,8 @@ step's stored data is re-run through `form.is_valid()` first
 Chrome is themed per subclass, no template override:
 
 ```python
-class ArticleWizard(WizardView):
-    wizard_class = "article-wizard"
+class ProjectWizard(WizardView):
+    wizard_class = "project-wizard"
     wizard_attrs = {
         "style": "--dcc-wizard-bg:#0b1120;--dcc-wizard-pad:2rem;"
         "--dcc-wizard-accent:#6366f1;--dcc-wizard-accent-fg:#fff",

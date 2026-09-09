@@ -179,7 +179,7 @@ takes an import path from the client:
 | Registry | Keys | Consumed by |
 |---|---|---|
 | `schemas.FIELD_TYPES`, `tables.COLUMN_TYPES` / `FILTER_TYPES`, `infolists.ENTRY_TYPES`, `panels.WIDGET_TYPES`, `blocks.BLOCK_TYPES` (`core/type_registry.py`) | `"TextColumn"`, `"Toggle"`, `"AppShell"`, … | studio spec deserialisation + palette |
-| `actions.registry` (`actions/registry.py`) | an owner key (`"table-articles"`) + an action name | `ActionView` |
+| `actions.registry` (`actions/registry.py`) | an owner key (`"table-tasks"`) + an action name | `ActionView` |
 | `schemas.endpoints._SCHEMAS` (`register_schema`) | a schema key | `SchemaValidateView` (live field validation) |
 
 `registry.get("Nope")` raises `KeyError` listing what *is* registered; the

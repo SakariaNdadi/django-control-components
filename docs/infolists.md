@@ -26,14 +26,15 @@ from django_control_components.infolists import (
 infolist = Infolist.make().schema(
     [
         TextEntry.make("title"),
-        TextEntry.make("author.name").label("Author"),
-        BadgeEntry.make("status").colors({"live": "success", "archived": "muted"}),
-        BooleanEntry.make("featured"),
-        DateEntry.make("created_at").since(),
+        BadgeEntry.make("priority").colors(
+            {"low": "muted", "medium": "secondary", "high": "danger"}
+        ),
+        BooleanEntry.make("done"),
+        DateEntry.make("due_date").since(),
     ]
 )
 
-html = infolist.render(request=request, record=article)
+html = infolist.render(request=request, record=task)
 ```
 
 ## `Infolist`
@@ -79,8 +80,8 @@ Values are **escaped** - there is no `.allow_html()` on an entry.
 ## In a panel
 
 ```python
-class ArticleResource(Resource):
-    model = Article
+class TaskResource(Resource):
+    model = Task
 
     @classmethod
     def build_infolist(cls, *, request):

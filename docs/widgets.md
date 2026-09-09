@@ -22,17 +22,23 @@ class Overview(DashboardPage):
 
     def widgets(self, request):
         return [
-            StatWidget.make("Articles", Article.objects.count()).icon("newspaper"),
+            StatWidget.make("Tasks", lambda request: Task.objects.count()).icon("list-check"),
             StatWidget.make(
-                "Open comments", lambda r: Comment.objects.filter(approved=False).count()
+                "Open", lambda request: Task.objects.filter(done=False).count()
             )
-            .icon("comments")
+            .icon("circle-dot")
             .poll(30),
-            ChartWidget.make("Articles over time").kind("area").data(_by_month).columns(2),
-            BarListWidget.make("By status").data([("Live", 8), ("Draft", 3)]),
-            TableWidget.make("Recent", _recent_table),
+            ChartWidget.make("By priority")
+            .kind("bar")
+            .data([("Low", 2), ("Medium", 5), ("High", 1)])
+            .columns(2),
+            BarListWidget.make("By priority").data([("Low", 2), ("Medium", 5), ("High", 1)]),
+            TableWidget.make("Recent tasks", _recent_task_table),
         ]
 ```
+
+This is `web/demo/catalog/examples/widgets.py` (`Task` = `web/demo/models.py`),
+live at `/stat-widget/`, `/chart-widget/`, `/bar-list-widget/`, `/table-widget/`.
 
 ## Shared API
 
@@ -141,8 +147,8 @@ resolved server-side - the only chart data path expressible in a stored
 `PanelDashboard` JSON row:
 
 ```json
-{"model": "blog.Article", "group_by": "status", "aggregate": "count"}
-{"model": "blog.Article", "aggregate": "sum", "aggregate_field": "views"}
+{"model": "demo.Task", "group_by": "priority", "aggregate": "count"}
+{"model": "demo.Task", "aggregate": "count"}
 ```
 
 - `model` **must** be listed in `DCC["STUDIO_MODELS"]` - a spec cannot aggregate an
@@ -161,15 +167,15 @@ PanelDashboard.objects.create(
     widgets=[
         {
             "type": "StatWidget",
-            "name": "Articles",
-            "config": {"query": {"model": "blog.Article", "aggregate": "count"}},
+            "name": "Tasks",
+            "config": {"query": {"model": "demo.Task", "aggregate": "count"}},
         },
         {
             "type": "ChartWidget",
             "name": "By status",
             "config": {
                 "kind": "doughnut",
-                "query": {"model": "blog.Article", "group_by": "status", "aggregate": "count"},
+                "query": {"model": "demo.Task", "group_by": "priority", "aggregate": "count"},
             },
         },
     ],

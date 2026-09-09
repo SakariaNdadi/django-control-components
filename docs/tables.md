@@ -24,14 +24,13 @@ point at a wrong row inside the already-scoped queryset.
 
 ## Quick start
 
+> **Running example.** This is the `Task` table from the `web/` project - live at
+> `/task/` and `/table/`, source in `web/demo/pages/full_example.py` and
+> `web/demo/catalog/examples/tables.py`.
+
 ```python
-from django.http import HttpResponse
-from django.shortcuts import get_object_or_404
-from django.urls import reverse
-from django.utils.html import format_html
 from django.views.generic import TemplateView
-from django_control_components import htmx
-from django_control_components.actions import Action, BulkAction
+from django_control_components.actions import Action
 from django_control_components.tables import (
     BadgeColumn,
     BooleanColumn,
@@ -39,117 +38,67 @@ from django_control_components.tables import (
     SelectFilter,
     Table,
     TableMixin,
-    TernaryFilter,
     TextColumn,
 )
-from myapp.models import Article
+from myapp.models import Task   # web/demo/models.py in the bundled project
 
 
-def save_quick_edit(request, record, data):
-    record.title = data.get("title", record.title)
-    record.save()
-    # Return htmx toast notification / trigger
-    return HttpResponse(
-        status=200,
-        headers={"HX-Trigger": '{"dcc-toast": {"message": "Article updated successfully", "variant": "success"}}'},
-    )
+def _mark_done(record):
+    record.done = True
+    record.save(update_fields=["done"])
 
 
-def article_table(request):
+def task_table(request):
     return (
-        Table.make(Article.objects.select_related("author"))
-        .id("articles")
+        Table.make(Task.objects.all())
+        .id("tasks")
         .columns(
             [
-                TextColumn.make("title").sortable().searchable().limit(64),
-                TextColumn.make("author.name").label("Author").sortable(sort_field="author__name"),
-                BadgeColumn.make("status").colors(
-                    {"draft": "muted", "review": "secondary", "live": "success"}
+                TextColumn.make("title").sortable().searchable(),
+                BadgeColumn.make("priority").colors(
+                    {"low": "muted", "medium": "secondary", "high": "danger"}
                 ),
-                BooleanColumn.make("featured").labels(("★", "-")),
-                DateColumn.make("created_at").label("Created").since().sortable(),
+                BooleanColumn.make("done").labels(("✓", "-")),
+                DateColumn.make("due_date").since().sortable(),
             ]
         )
-        .filters(
-            [
-                SelectFilter.make("status").options(Article.Status.choices),
-                TernaryFilter.make("featured"),
-            ]
-        )
-        .actions(
-            [
-                Action.make("edit")
-                .icon("pen")
-                .to_url(lambda record: reverse("article-edit", args=[record.pk])),
-                Action.make("delete")
-                .icon("trash")
-                .variant("danger")
-                .requires_confirmation(
-                    title="Delete Article?",
-                    message="This action cannot be undone. Are you sure?",
-                )
-                .action(lambda record: record.delete()),
-            ]
-        )
-        .bulk_actions(
-            [
-                BulkAction.make("publish")
-                .icon("rocket")
-                .requires_confirmation(
-                    title="Publish Selected?",
-                    message="Publish all selected articles immediately?",
-                )
-                .action(lambda records: records.update(status="live")),
-                BulkAction.make("archive")
-                .icon("box-archive")
-                .variant("danger")
-                .requires_confirmation()
-                .action(lambda records: records.update(status="archived")),
-            ]
-        )
+        .filters([SelectFilter.make("priority").options(Task.Priority.choices)])
+        .actions([Action.make("mark_done").icon("check").action(_mark_done)])
         .searchable()
-        .default_sort("-created_at")
-        .record_url(lambda record: reverse("article-edit", args=[record.pk]))
-        .record_preview(
-            lambda record: format_html(
-                "<strong>{}</strong><p class='text-sm text-gray-500'>{}</p>",
-                record.title,
-                record.body[:200] if hasattr(record, "body") else "",
-            )
-        )
-        .empty_message("No articles found matching your criteria.")
+        .default_sort("-due_date")
+        .empty_message("No tasks yet.")
     )
 
 
-class ArticleListView(TableMixin, TemplateView):
-    template_name = "articles/list.html"
+class TaskListView(TableMixin, TemplateView):
+    template_name = "tasks/list.html"
 
     def get_table(self):
-        return article_table(self.request)
+        return task_table(self.request)
 ```
 
-### Full Template (`articles/list.html`)
+### Template (`tasks/list.html`)
 
 ```django
 {% extends "base.html" %}
+{% load dcc_tags %}
 
 {% block content %}
-<div class="max-w-7xl mx-auto py-8">
-  <!-- Alerts & notifications container (auto-listens to dcc-toast events) -->
-  <div id="dcc-toast-container" class="fixed bottom-4 right-4 z-50 flex flex-col gap-2"></div>
-
-  <div class="flex justify-between items-center mb-6">
-    <h1 class="text-2xl font-bold">Article Management</h1>
-    <a href="{% url 'article-create' %}" class="dcc-btn dcc-btn--primary">
-      {% dcc_icon "plus" %} New Article
+<div class="dcc-panel__main">
+  <header class="dcc-panel__header">
+    <h1>Tasks</h1>
+    <a href="{% url 'task-create' %}" class="dcc-btn dcc-btn--primary">
+      {% dcc_icon "plus" %} New task
     </a>
-  </div>
-
-  <!-- Renders full interactive table shell and action handlers -->
+  </header>
   {{ table_html }}
 </div>
 {% endblock %}
 ```
+
+`{% csrf_token %}` must be somewhere on the page (or the view marked
+`@ensure_csrf_cookie`) - the bulk-action and `mark_done` POSTs need the CSRF
+cookie. See [settings.md](settings.md#csrf).
 
 ---
 
@@ -320,8 +269,8 @@ title, middle cells the meta line, the last cell a trailing element (3+ columns)
 Combine with `.client_side()` for a small always-in-page list.
 
 ```python
-Table.make(Article.objects.order_by("-created_at")[:6])
-    .columns([TextColumn.make("title"), TextColumn.make("author.name"), BadgeColumn.make("status")])
+Table.make(Task.objects.order_by("-due_date")[:6])
+    .columns([TextColumn.make("title"), DateColumn.make("due_date").since(), BadgeColumn.make("priority")])
     .client_side().presentation("feed")
 ```
 

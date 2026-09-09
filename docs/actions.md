@@ -7,7 +7,7 @@ is the same on **many**. Tables and panel resources expose them.
 
 The security model (`actions/registry.py:1-11`):
 
-- The client only ever sends an **owner key** (`"table-articles"`) and an
+- The client only ever sends an **owner key** (`"table-tasks"`) and an
   **action name** (`"publish"`) - both opaque strings registered at render time.
   Never an import path, a model label, or a callable. An unknown key is a **404**.
 - The owner knows how to produce the queryset its actions may touch
@@ -20,16 +20,22 @@ The security model (`actions/registry.py:1-11`):
 ## Quick start
 
 ```python
-from django_control_components.actions import Action, BulkAction
+from django_control_components.actions import Action
 
-Action.make("publish")
-    .label("Publish")
-    .icon("rocket")
-    .variant("secondary")
+
+def mark_done(record):
+    record.done = True
+    record.save(update_fields=["done"])
+
+
+# a row action on the web/ project's Task table (web/demo/catalog/examples/tables.py)
+Action.make("mark_done")
+    .label("Mark done")
+    .icon("check")
     .requires_confirmation()
-    .modal_heading("Publish this article?")
-    .action(lambda record: record.publish())
-    .success_notification("Published")
+    .modal_heading("Mark this task done?")
+    .action(mark_done)
+    .success_notification("Task updated")
 ```
 
 ## Setters
@@ -124,8 +130,8 @@ With **"Select every matching row"** the callback receives the **unmaterialised
 queryset** - `records.update(...)` runs as one statement:
 
 ```python
-BulkAction.make("archive").requires_confirmation()
-    .action(lambda records: records.update(status="archived"))
+BulkAction.make("mark_all_done").requires_confirmation()
+    .action(lambda records: records.update(done=True))
 ```
 
 ## Row-click actions

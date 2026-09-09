@@ -19,50 +19,48 @@ validation.
 
 ## Quick start
 
+The `Task` model in the bundled `web/` project has `title`, `priority`
+(`low` / `medium` / `high`), `done`, `due_date` - this is `TaskResource.build_schema`
+(`web/demo/pages/full_example.py`), live at `/task/new/`:
+
 ```python
+from django import forms
+
 from django_control_components.schemas import (
+    Grid,
     Schema,
     Section,
-    Grid,
-    TextInput,
-    Textarea,
     Select,
-    MultiSelect,
+    TextInput,
     Toggle,
-    FileUpload,
 )
+from myapp.models import Task   # web/demo/models.py in the bundled project
 
 
-def article_schema():
+class TaskForm(forms.ModelForm):
+    class Meta:
+        model = Task
+        fields = ["title", "priority", "done", "due_date"]
+        widgets = {"due_date": forms.DateInput(attrs={"type": "date"})}
+
+
+def task_schema():
     return (
         Schema.make()
-        .model(Article, fields=["title", "slug", "body", "status", "cover", "published_at"])
+        .form(TaskForm)                     # or .model(Task, fields=[...]) to skip the ModelForm
         .schema(
             [
-                Section.make("Content").schema(
+                Section.make("Task").schema(
                     [
-                        TextInput.make("title").required(),
-                        TextInput.make("slug").help_text("Lowercase, dashes."),
-                        Textarea.make("body").column_span_full(),
-                    ]
-                ),
-                Section.make("Publishing").schema(
-                    [
-                        Grid.make()
-                        .columns(2)
-                        .schema(
+                        TextInput.make("title").required().column_span_full(),
+                        Grid.make().columns(2).schema(
                             [
-                                Select.make("status").searchable(),
-                                TextInput.make("published_at").visible_when(
-                                    "status", equals="live"
-                                ),
+                                Select.make("priority"),
+                                Toggle.make("done"),
                             ]
                         ),
-                        FileUpload.make("cover")
-                        .image()
-                        .max_size("2mb")
-                        .max_dimensions(2000, 2000)
-                        .convert("webp"),
+                        # the due date only matters while the task is open
+                        TextInput.make("due_date").visible_when("done", equals=False),
                     ]
                 ),
             ]
@@ -70,18 +68,20 @@ def article_schema():
     )
 ```
 
+`FileUpload` needs an image/file field on the model - see [images.md](images.md).
+
 Render from a `CreateView` / `UpdateView` with `SchemaFormMixin`:
 
 ```python
 from django_control_components.mixins import SchemaFormMixin
 
 
-class ArticleCreateView(SchemaFormMixin, CreateView):
-    model = Article
-    template_name = "articles/form.html"
+class TaskCreateView(SchemaFormMixin, CreateView):
+    model = Task
+    template_name = "tasks/form.html"
 
     def get_schema(self):
-        return article_schema()
+        return task_schema()
 ```
 
 ```django

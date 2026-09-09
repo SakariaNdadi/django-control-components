@@ -34,20 +34,19 @@ configured.
 `Schema.render(form=...)` returns a `SafeString`. Assert on the markup:
 
 ```python
-from myapp.schemas import article_schema
-from myapp.forms import ArticleForm
+from myapp.schemas import TaskForm, task_schema  # see schemas.md
 
 
-def test_published_at_is_conditional():
-    html = str(article_schema().render(form=ArticleForm()))
+def test_due_date_is_conditional():
+    html = str(task_schema().render(form=TaskForm()))
     # visible_when compiles to an Alpine expression, not a server round-trip
     assert 'x-show' in html
-    assert 'name="published_at"' in html
+    assert 'name="due_date"' in html
 
 
 def test_schema_does_not_validate():
     # a schema rendering a subset of a form must not fail on the omitted fields
-    html = str(article_schema().render(form=ArticleForm(data={"title": "x"})))
+    html = str(task_schema().render(form=TaskForm(data={"title": "x"})))
     assert "error" not in html.lower() or "This field is required" not in html
 ```
 
@@ -61,18 +60,18 @@ querystring state for sort / filter / search / pagination.
 
 ```python
 from django.test import RequestFactory
-from myapp.tables import article_table
+from myapp.tables import task_table
 
 
 def test_default_sort():
-    html = str(article_table().render(RequestFactory().get("/")))
-    assert "Analytical Engine" in html
+    html = str(task_table().render(RequestFactory().get("/")))
+    assert "Ship the release" in html  # a seeded Task
 
 
 def test_search_narrows_rows():
-    req = RequestFactory().get("/", {"_dcc_table": "articles", "articles_search": "engine"})
-    html = str(article_table().render(req))
-    assert "Unrelated Title" not in html
+    req = RequestFactory().get("/", {"_dcc_table": "tasks", "tasks_search": "changelog"})
+    html = str(task_table().render(req))
+    assert "Ship the release" not in html
 ```
 
 `.client_side()` forces the in-memory path so a small fixture set behaves
@@ -86,12 +85,12 @@ matches the table id returns just the table content, not the full page:
 
 ```python
 def test_table_fragment(client):
-    full = client.get("/articles/")
+    full = client.get("/tasks/")
     assert b"<html" in full.content
 
     frag = client.get(
-        "/articles/",
-        {"_dcc_table": "articles"},
+        "/tasks/",
+        {"_dcc_table": "tasks"},
         HTTP_HX_REQUEST="true",
     )
     assert b"<html" not in frag.content
@@ -112,14 +111,14 @@ queryset, then runs the callback.
 from django.urls import reverse
 
 
-def test_bulk_publish(client, django_user_model):
+def test_mark_done(client, django_user_model):
     user = django_user_model.objects.create_superuser("s", "s@x.io", "x")
     client.force_login(user)
-    url = reverse("dcc:action", args=["table-articles", "publish"])
-    resp = client.post(url, {"ids": [a1.pk, a2.pk]})
+    url = reverse("dcc:action", args=["table-tasks", "mark_done"])
+    resp = client.post(url, {"ids": [t1.pk, t2.pk]})
     assert resp.status_code in (200, 204)
-    a1.refresh_from_db()
-    assert a1.status == "live"
+    t1.refresh_from_db()
+    assert t1.done is True
 ```
 
 An unknown owner key or action name is a `404`, never a `500` - worth asserting
@@ -137,7 +136,7 @@ from django.test import override_settings
 
 @override_settings(DCC={"TABLE_CLIENT_SIDE_MAX_ROWS": 1})
 def test_flips_to_server_mode():
-    html = str(article_table().render(RequestFactory().get("/")))
+    html = str(task_table().render(RequestFactory().get("/")))
     assert "hx-get" in html  # server mode wires htmx pagination
 ```
 
