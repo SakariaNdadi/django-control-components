@@ -160,6 +160,8 @@ DCC = {
 | `VENDOR_ASSETS` | bool | `False` | `{% dcc_assets %}` - `True` serves htmx / Alpine / focus from your own static files instead of jsDelivr. Run `manage.py dcc_vendor_assets --dest <static dir>` to fetch the pinned files first. Air-gapped and privacy-sensitive deploys. |
 | `VENDOR_ASSET_DIR` | str | `"dcc/vendor/"` | Static path prefix the vendored copies are served from when `VENDOR_ASSETS`. |
 | `ASSET_SRI` | dict[str, str] | `{}` | `{cdn_url: "sha384-…"}`. Any CDN asset URL present is emitted with `integrity` + `crossorigin="anonymous"`. Ignored for a URL served via `VENDOR_ASSETS`. |
+| `ACTIONS_DEFAULT_DENY` | bool | `False` | An `Action` with no `.authorize(...)` rule is allowed by default. Set `True` to invert that, so an unruled action is refused everywhere - the posture check `W013` warns about. Independent of the endpoint's own baseline: `ActionView` refuses anonymous requests regardless. |
+| `HOME_PANEL` | str \| `None` | `None` | Name of the panel the allauth adapter resolves a post-login landing page inside. `None` (or a name that is not mounted) → the adapter falls through to allauth's own redirect. Resolution order within the panel: the user's `UserPreference`, then a `Page` flagged `is_home` and visible to them, then their default dashboard, then the first nav item with a URL, then the panel index. Requires the `[allauth]` and `[studio]` extras. |
 
 | `STUDIO_ADMIN_ENTRY` | bool | `True` | Show a "Studio" entry in the Django admin index (redirects to `/studio/`). Set `False` if the project has no `django.contrib.admin` or wants its own entry point. |
 

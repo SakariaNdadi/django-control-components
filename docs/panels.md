@@ -178,8 +178,8 @@ The list/create/edit/view templates fill `{% block content %}`; context gives yo
 `panel`, `resource_label`, `sidebar` (a rendered `Sidebar` block - the collapsible
 nav, access-filtered; see [navigation.md](navigation.md)), `nav_tree` /
 `nav` (the same data pre-blocks), and - per page - `table_html`, `schema_html`,
-or `infolist_html`. Keep `{% include ".../panels/_nav.html" %}` (which is just
-`{% dcc_render sidebar %}`) in your shadowed base, or render the sidebar yourself.
+or `infolist_html`. Keep `{% dcc_render sidebar %}` in your shadowed base, or
+render the sidebar yourself.
 
 ### Content spacing
 

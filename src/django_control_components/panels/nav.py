@@ -218,8 +218,8 @@ def _nav_link(node: NavNode) -> Any:
 
 def nav_blocks(nodes: list[NavNode]) -> list[Any]:
     """Turn a :func:`build_nav` tree into ``NavGroup`` / ``NavLink`` blocks.
-    Every heading with children becomes a collapsible ``NavGroup`` (open when it
-    holds the active link)."""
+    Every heading with children becomes a collapsible ``NavGroup``, started
+    open - see the comment below."""
     from ..blocks.nav import NavGroup
 
     out: list[Any] = []

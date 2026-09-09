@@ -31,7 +31,7 @@ from django_control_components.blocks import Sidebar, NavLink, NavGroup, ThemeTo
 | `NavHeading` | – | `.label` |
 | `NavDivider` | – | – |
 | `NavAction` | – | same as `NavLink`; renders muted (a "+ Add …" row) |
-| `NavUser` | – | `.name` · `.email` · `.avatar(url)` · `.menu([(label, url), …])` |
+| `NavUser` | – | `.label` · `.email` · `.avatar(url)` · `.menu([(label, url), …])` |
 | `ThemeToggle` | – | – (cycles auto / light / dark; needs a `dccShell` scope, which `AppShell` and the panel shell provide) |
 
 `.image(url)` shows a logo / avatar in place of the icon (`.image_alt` sets its
@@ -47,8 +47,9 @@ miss → `#`).
 `role="group"` sublist. The `dccNav` Alpine component holds the open state and
 persists it per group id to `localStorage` (`dcc-nav-open`), so a section the
 viewer collapses stays collapsed on the next visit. `.open()` sets the default
-for a first-time viewer; a group that contains the active link opens
-automatically when the panel builds the tree.
+for a first-time viewer. The panel builds every group `.open()`, so a
+first-time viewer sees the whole tree expanded and `localStorage` takes over
+from there.
 
 No `@alpinejs/collapse` plugin is used - the sublist toggles with `x-show` +
 `x-transition`.
@@ -65,9 +66,8 @@ No `@alpinejs/collapse` plugin is used - the sublist toggles with `x-show` +
 
 ### How it is on every page
 
-`panels/base.html` (the shell every panel page extends) does
-`{% include "django_control_components/panels/_nav.html" %}`, and that partial is
-just `{% dcc_render sidebar %}`. Both context-data hooks -
+`panels/base.html` (the shell every panel page extends) renders the sidebar
+inline with `{% dcc_render sidebar %}`. Both context-data hooks -
 `PanelPage.get_context_data` (dashboards, custom pages) and `_ResourcePage`'s
 (list / create / edit / view / delete) - set
 `ctx["sidebar"] = panel_sidebar(self.panel, self.request)`
@@ -75,8 +75,9 @@ just `{% dcc_render sidebar %}`. Both context-data hooks -
 studio nav preview all render the identical sidebar with no per-page code.
 
 If you shadow `panels/base.html` in your own project, keep the
-`{% include ".../_nav.html" %}` (or call `{% dcc_render sidebar %}` yourself) and
-nothing else changes.
+`{% dcc_render sidebar %}` call and nothing else changes. (There is also a
+`panels/_nav.html` partial wrapping the same call in an `{% if sidebar %}`; the
+studio's nav preview uses it, and it works just as well in a shadowed base.)
 
 ### Where the tree comes from - and permissions
 

@@ -331,7 +331,7 @@ Every component accepts either fluent chaining `.make().foo()` or explicit `kwar
 ### 📊 Tables Subsystem (`Table`, `*Column`, `*Filter`, `*Action`)
 *Full reference: [tables.md](tables.md)*
 
-- **Adaptive Mode Switching**: Automatically toggles between in-memory client-side operations (< 1,000 rows) and keyset-paginated streaming server-side mode (millions of rows with no slow `COUNT(*)`).
+- **Adaptive Mode Switching**: Automatically toggles between in-memory client-side operations (at or below `DCC["TABLE_CLIENT_SIDE_MAX_ROWS"]`, default 200) and keyset-paginated streaming server-side mode (millions of rows with no slow `COUNT(*)`).
 - **Column Types & Display**:
   - `TextColumn`: `.limit(n)`, `.badge()`, `.copyable()`, `.align("left"|"center"|"right")`, `.color("emerald"|...)`, `.weight("bold")`
   - `DateColumn`: `.format("Y-m-d")`, `.since()`, `.relative()`
@@ -427,5 +427,6 @@ Every component accepts either fluent chaining `.make().foo()` or explicit `kwar
 | [deployment.md](deployment.md) | Static files, WhiteNoise, CSP, air-gapped assets, `DEBUG=False` checklist |
 | [testing.md](testing.md) | Testing schemas, tables, mixin views, actions; `@override_settings(DCC=...)` |
 | [navigation.md](navigation.md) | Sidebar + nav blocks (`NavLink`, collapsible `NavGroup`, `NavUser`), the `dccNav` collapse contract, a11y |
+| [blocks.md](blocks.md) | The `Block` tree: layout + chrome blocks, `BLOCK_TYPES`, the node codec, custom `@block` registration, spec migrations |
 | [../CHANGELOG.md](../CHANGELOG.md) | Release notes; `0.x` breaking-change policy |
 

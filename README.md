@@ -32,7 +32,8 @@ doc builds on. Then:
 
 [Settings & install](docs/settings.md) · [Views & mixins](docs/views-and-mixins.md) ·
 [Callbacks](docs/callbacks.md) · [Errors](docs/errors.md) ·
-[Deployment](docs/deployment.md) · [Testing](docs/testing.md) · [Navigation](docs/navigation.md)
+[Deployment](docs/deployment.md) · [Testing](docs/testing.md) · [Navigation](docs/navigation.md) ·
+[Blocks](docs/blocks.md)
 
 [Schemas / forms](docs/schemas.md) · [Tables](docs/tables.md) ·
 [Actions](docs/actions.md) · [Infolists](docs/infolists.md) ·
