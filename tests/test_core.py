@@ -55,6 +55,26 @@ def test_clone_isolates_config():
     assert b._get("label") == "B"
 
 
+def test_clone_isolates_block_slots():
+    """clone() must not alias Block._slots - mutating a clone's slot (or the
+    list inside it) must never touch the original."""
+    from django_control_components.blocks import Card, Divider, Stack
+
+    original = Card().fill("body", [Stack()])
+
+    cleared = original.clone()
+    cleared.fill("body", [])
+    assert len(original.slot_children("body")) == 1
+
+    appended = original.clone()
+    appended._slots["body"].append(Divider())
+    assert len(original.slot_children("body")) == 1
+
+    # the cloned child is a distinct instance, not the same object
+    reused = original.clone()
+    assert reused.slot_children("body")[0] is not original.slot_children("body")[0]
+
+
 def test_evaluate_injects_by_param_name():
     ctx = RenderContext(record={"k": 1})
     assert evaluate(lambda record: record["k"], ctx) == 1

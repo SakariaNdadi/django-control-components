@@ -87,7 +87,14 @@ class Component:
         new = copy.copy(self)
         new._config = copy.copy(self._config)
         new._children = [c.clone() for c in self._children]
+        new._clone_state()
         return new
+
+    def _clone_state(self) -> None:
+        """Deep-copy any per-instance mutable state a subclass keeps *outside*
+        ``_config`` / ``_children``, so mutating a clone never touches the
+        original. ``clone()`` calls this on the fresh copy. Base ``Component``
+        keeps nothing extra; ``Block`` overrides for its slot dict."""
 
     # -- identity ------------------------------------------------------
 

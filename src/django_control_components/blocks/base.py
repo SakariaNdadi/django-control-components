@@ -35,6 +35,15 @@ class Block(Component):
         self._slots: dict[str, list[Block]] = {slot: [] for slot in self.slots}
         super().__init__(name, **kwargs)
 
+    def _clone_state(self) -> None:
+        # Block keeps children in _slots, not _children - clone() would otherwise
+        # alias the slot dict and its lists, so mutating a clone's slot would
+        # mutate the original's.
+        self._slots = {
+            slot: [child.clone() for child in children]
+            for slot, children in self._slots.items()
+        }
+
     def fill(self, slot: str, children: list[Block]) -> Self:
         """Set a named slot's children. Raises on an unknown slot or a
         non-``Block`` child - the same posture as ``Tabs.schema()`` for tabs."""

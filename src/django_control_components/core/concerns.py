@@ -6,12 +6,10 @@ Each mixin adds hand-written setters (annotated ``-> Self``) that stash into
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, Self
+from collections.abc import Callable
+from typing import Any, Self
 
 from .component import UNSET, setter
-
-if TYPE_CHECKING:
-    from collections.abc import Callable
 
 
 class HasLabel:

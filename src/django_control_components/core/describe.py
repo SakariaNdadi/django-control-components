@@ -125,32 +125,53 @@ def _unwrap_optional(annotation: Any) -> Any:
     return annotation
 
 
-def _classify(annotation: Any) -> tuple[SetterKind, tuple[tuple[str, str], ...] | None, bool]:
-    """Map a resolved annotation to ``(kind, choices, code_only)``."""
+def _is_callable_arg(arg: Any) -> bool:
+    """A ``Callable[...]`` / bare ``Callable`` arm of a setter's type - the
+    "pass a runtime closure" half. The *other* arm is what a stored spec edits;
+    whether a setter is off-limits to a spec entirely is decided by name
+    (``CODE_ONLY_SETTERS``), not by the presence of this arm."""
+    from collections.abc import Callable as AbcCallable
+
+    return arg is AbcCallable or get_origin(arg) is AbcCallable
+
+
+def _classify(annotation: Any) -> tuple[SetterKind, tuple[tuple[str, str], ...] | None]:
+    """Map a resolved annotation to ``(kind, choices)``."""
     if annotation is inspect.Parameter.empty:
-        return "string", None, False
-    if "Callable" in str(annotation):
-        return "unknown", None, True
+        return "string", None
+
+    origin = get_origin(annotation)
+    if origin in _UNION_TYPES:
+        arms = [
+            a
+            for a in get_args(annotation)
+            if a is not type(None) and not _is_callable_arg(a)
+        ]
+        if not arms:  # the setter only takes a closure - no widget to render
+            return "unknown", None
+        kinds = {_classify(a)[0] for a in arms}
+        choices = next((_classify(a)[1] for a in arms if _classify(a)[1]), None)
+        return (kinds.pop() if len(kinds) == 1 else "string"), choices
+
+    if _is_callable_arg(annotation):
+        return "unknown", None
 
     annotation = _unwrap_optional(annotation)
     origin = get_origin(annotation)
 
     if annotation is bool:
-        return "boolean", None, False
+        return "boolean", None
     if annotation in (int, float):
-        return "number", None, False
+        return "number", None
     if annotation is str:
-        return "string", None, False
+        return "string", None
     if origin is Literal:
-        return "choice", tuple((str(arg), str(arg)) for arg in get_args(annotation)), False
+        return "choice", tuple((str(arg), str(arg)) for arg in get_args(annotation))
     if origin is dict or annotation is dict:
-        return "keyvalue", None, False
+        return "keyvalue", None
     if origin in (list, set, frozenset, tuple) or annotation in (list, set, tuple):
-        return "list", None, False
-    if origin in _UNION_TYPES:
-        kinds = {_classify(arg)[0] for arg in get_args(annotation) if arg is not type(None)}
-        return (kinds.pop() if len(kinds) == 1 else "string"), None, False
-    return "object", None, False
+        return "list", None
+    return "object", None
 
 
 @cache
@@ -183,18 +204,22 @@ def _describe_uncached(cls: type) -> TypeInfo:
 
         param = params[0]
         annotation = param.annotation if resolved else inspect.Parameter.empty
-        kind, choices, ann_code_only = _classify(annotation)
+        kind, choices = _classify(annotation)
         has_default = param.default is not inspect.Parameter.empty
         default = param.default if has_default and _jsonable(param.default) else None
         setters.append(
             SetterInfo(
                 name=name,
-                kind=kind,
+                kind="unknown" if not resolved else kind,
                 default=default,
                 required=not has_default,
                 choices=choices,
                 help=help_text,
-                code_only=in_deny or ann_code_only or not resolved,
+                # spec-safety is decided by name, not by the annotation. A
+                # setter whose type is ``str | Callable`` is still editable in a
+                # spec via its string arm; the ones that must never take a spec
+                # value are in CODE_ONLY_SETTERS.
+                code_only=in_deny,
             )
         )
 

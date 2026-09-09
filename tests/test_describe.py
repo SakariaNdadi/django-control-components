@@ -25,10 +25,23 @@ def test_every_registered_type_describes_without_raising():
             info = registry.info(name)
             assert info.name == name
             assert info.label
-            # no non-deny setter should be left "unknown"
-            for setter in info.setters:
-                if setter.kind == "unknown":
-                    assert setter.code_only, f"{name}.{setter.name} unresolved but editable"
+
+
+def test_field_config_setters_are_spec_editable():
+    """The studio hides ``code_only`` setters. ``label`` / ``placeholder`` /
+    ``required`` are ``str``/``bool`` (or that union with a callable) - editable
+    in a spec. Regression: a TYPE_CHECKING-only ``Callable`` import used to make
+    ``inspect.signature`` fail and every one of these got marked code_only, so
+    the no-code builder hid the Label input on every field."""
+    from django_control_components.schemas.fields.text import TextInput
+
+    editable = {s.name: s for s in describe_type(TextInput).setters}
+    for name in ("label", "placeholder", "help_text", "hint", "icon"):
+        assert editable[name].kind == "string", name
+        assert not editable[name].code_only, name
+    for name in ("required", "disabled", "readonly"):
+        assert editable[name].kind == "boolean", name
+        assert not editable[name].code_only, name
 
 
 def test_layout_types_accept_children_and_leaves_do_not():
