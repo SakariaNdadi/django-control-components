@@ -20,6 +20,13 @@ def _clear_registry():
 
 
 @pytest.fixture
+def signed_in(django_user_model):
+    """ActionView refuses anonymous requests outright, so every endpoint test
+    needs a real user - authorization itself is asserted per action."""
+    return django_user_model.objects.create_user(username="acty", password="pw")
+
+
+@pytest.fixture
 def data():
     ada = Author.objects.create(name="Ada")
     arts = [
@@ -59,31 +66,45 @@ def test_action_trigger_hidden_when_unauthorized(data):
     assert str(action.render_trigger(record=arts[0], request=req)) == ""
 
 
-def test_execute_runs_callback_and_returns_trigger(data):
+def test_execute_runs_callback_and_returns_trigger(data, signed_in):
     _, arts = data
     seen = []
     action = Action.make("touch").action(lambda record: seen.append(record.pk))
     _table(Article.objects.all(), actions=[action]).render(RequestFactory().get("/"))
 
     req = RequestFactory().post("/dcc/a/table-art/touch/", {"record": arts[1].pk})
-    req.user = AnonymousUser()
+    req.user = signed_in
     resp = ActionView.as_view()(req, owner_key="table-art", action_name="touch")
     assert resp.status_code == 204
     assert "HX-Trigger" in resp
     assert seen == [arts[1].pk]
 
 
-def test_execute_denied_when_hidden_action_posted(data):
+def test_anonymous_post_is_refused_even_without_an_authorize_rule(data):
+    """An action with no .authorize() is implicitly allowed, and ActionView sits
+    outside any panel guard - so the endpoint itself has to refuse anonymous."""
+    ran = []
+    action = Action.make("touch").action(lambda record: ran.append(record.pk))
+    _table(Article.objects.all(), actions=[action]).render(RequestFactory().get("/"))
+
+    req = RequestFactory().post("/dcc/a/table-art/touch/", {"record": data[1][0].pk})
+    req.user = AnonymousUser()
+    resp = ActionView.as_view()(req, owner_key="table-art", action_name="touch")
+    assert resp.status_code == 403
+    assert ran == []
+
+
+def test_execute_denied_when_hidden_action_posted(data, signed_in):
     _, arts = data
     action = Action.make("secret").authorize(lambda user: False).action(lambda record: 1 / 0)
     _table(Article.objects.all(), actions=[action]).render(RequestFactory().get("/"))
     req = RequestFactory().post("/x/", {"record": arts[0].pk})
-    req.user = AnonymousUser()
+    req.user = signed_in
     resp = ActionView.as_view()(req, owner_key="table-art", action_name="secret")
     assert resp.status_code == 403
 
 
-def test_bulk_action_rescopes_to_filtered_queryset(data):
+def test_bulk_action_rescopes_to_filtered_queryset(data, signed_in):
     _, arts = data
     # table only exposes 'live' articles; all fixtures start 'draft'
     Article.objects.filter(pk=arts[0].pk).update(status="live")
@@ -100,13 +121,13 @@ def test_bulk_action_rescopes_to_filtered_queryset(data):
 
     # attacker submits ALL pks, but table is scoped to status=live
     req = RequestFactory().post("/x/?t_art_f_status=live", {"records": [a.pk for a in arts]})
-    req.user = AnonymousUser()
+    req.user = signed_in
     resp = ActionView.as_view()(req, owner_key="table-art", action_name="archive")
     assert resp.status_code == 204
     assert seen["n"] == 1  # only the one live article, not all four
 
 
-def test_bulk_select_all_matching_uses_the_filtered_queryset(data):
+def test_bulk_select_all_matching_uses_the_filtered_queryset(data, signed_in):
     _, arts = data
     Article.objects.filter(pk=arts[0].pk).update(status="live")
     Article.objects.filter(pk=arts[1].pk).update(status="live")
@@ -128,13 +149,13 @@ def test_bulk_select_all_matching_uses_the_filtered_queryset(data):
     table.render(RequestFactory().get("/", {"t_art_f_status": "live"}))
 
     req = RequestFactory().post("/x/?t_art_f_status=live&select_all=1", {"select_all": "1"})
-    req.user = AnonymousUser()
+    req.user = signed_in
     resp = ActionView.as_view()(req, owner_key="table-art", action_name="archive")
     assert resp.status_code == 204
     assert seen["n"] == 2  # both live rows, never a pk list
 
 
-def test_action_with_schema_renders_modal_on_get(data):
+def test_action_with_schema_renders_modal_on_get(data, signed_in):
     from django_control_components.schemas import Schema, TextInput
     from tests.testapp.forms import ArticleForm
 
@@ -144,14 +165,14 @@ def test_action_with_schema_renders_modal_on_get(data):
     _table(Article.objects.all(), actions=[action]).render(RequestFactory().get("/"))
 
     req = RequestFactory().get("/dcc/a/table-art/edit_title/", {"record": arts[0].pk})
-    req.user = AnonymousUser()
+    req.user = signed_in
     resp = ActionView.as_view()(req, owner_key="table-art", action_name="edit_title")
     assert resp.status_code == 200
     assert b"dcc-modal__dialog" in resp.content
     assert b'name="title"' in resp.content
 
 
-def test_modal_schema_action_saves_via_standalone_form(data):
+def test_modal_schema_action_saves_via_standalone_form(data, signed_in):
     """A strict .modal(schema) action must bind only its declared fields, not
     the whole ModelForm (whose slug/author would fail validation)."""
     from django_control_components.schemas import Schema, TextInput
@@ -170,7 +191,7 @@ def test_modal_schema_action_saves_via_standalone_form(data):
     req = RequestFactory().post(
         f"/dcc/a/table-art/edit_title/?record={arts[0].pk}", {"title": "renamed"}
     )
-    req.user = AnonymousUser()
+    req.user = signed_in
     resp = ActionView.as_view()(req, owner_key="table-art", action_name="edit_title")
 
     assert saved == {"pk": arts[0].pk, "title": "renamed"}
@@ -180,14 +201,14 @@ def test_modal_schema_action_saves_via_standalone_form(data):
     assert "dcc:refresh" in resp["HX-Trigger"]
 
 
-def test_inline_action_keeps_204(data):
+def test_inline_action_keeps_204(data, signed_in):
     _, arts = data
     hit = {}
     action = Action.make("bump").action(lambda record: hit.setdefault("pk", record.pk))
     _table(Article.objects.all(), actions=[action]).render(RequestFactory().get("/"))
 
     req = RequestFactory().post(f"/dcc/a/table-art/bump/?record={arts[0].pk}")
-    req.user = AnonymousUser()
+    req.user = signed_in
     resp = ActionView.as_view()(req, owner_key="table-art", action_name="bump")
 
     assert hit == {"pk": arts[0].pk}

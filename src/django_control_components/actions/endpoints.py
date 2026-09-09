@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Any
+from typing import Any, cast
 
 from django.http import Http404, HttpRequest, HttpResponse
 from django.views import View
@@ -15,6 +15,16 @@ class ActionView(View):
     GET  -> render the confirmation / schema modal.
     POST -> authorize (again), re-scope targets to the owner's queryset, execute.
     """
+
+    def dispatch(self, request: HttpRequest, *args: Any, **kwargs: Any) -> HttpResponse:
+        """Baseline gate: this endpoint is mounted outside any panel, so it
+        carries no panel guard. An action whose ``.authorize()`` is unset is
+        implicitly allowed (``ACTIONS_DEFAULT_DENY`` defaults to ``False``),
+        which without this would make it runnable by an anonymous POST."""
+        user = getattr(request, "user", None)
+        if user is None or not user.is_authenticated:
+            return HttpResponse(status=403)
+        return cast("HttpResponse", super().dispatch(request, *args, **kwargs))
 
     def _resolve(self, owner_key: str, action_name: str) -> tuple[Any, Any]:
         found = registry.resolve(owner_key, action_name)

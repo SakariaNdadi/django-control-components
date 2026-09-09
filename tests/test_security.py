@@ -170,3 +170,30 @@ def test_apostrophe_does_not_break_json_script(soup):
 
     data = json.loads(blob.string)
     assert any("D'Arcy" in label for _v, label in data)
+
+
+BREAKOUT_ID = "a'),alert(1),('"
+
+
+def test_widget_id_cannot_break_out_of_the_alpine_expression():
+    """A spec-settable widget id reaches ``x-data="dccChart('...')"``. HTML
+    escaping does not help there, so the id itself must be slug-safe."""
+    from django_control_components.panels import ChartWidget
+
+    widget = ChartWidget.make("Sales").kind("bar").data([("a", 1)]).id(BREAKOUT_ID)
+    assert widget.get_id() == "aalert1"
+
+    html = str(widget.render(None))
+    assert "alert(1)" not in html
+    assert "&#x27;" not in html
+
+
+def test_table_id_cannot_break_out_of_the_alpine_expression(article):
+    from django_control_components.tables import Table, TextColumn
+    from tests.testapp.models import Article
+
+    table = Table.make(Article.objects.all()).columns([TextColumn.make("title")]).id(BREAKOUT_ID)
+    assert table.table_id == "aalert1"
+
+    html = str(table.render(None))
+    assert "alert(1)" not in html

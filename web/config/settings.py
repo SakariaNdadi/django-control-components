@@ -2,6 +2,9 @@ from pathlib import Path
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+# DEMO SITE - not a deployment template. The values below are deliberately
+# permissive so `manage.py runserver` works with no setup; every one of them is
+# unsafe in production. See docs/deployment.md for the real checklist.
 SECRET_KEY = "example-only-not-secret"
 DEBUG = True
 ALLOWED_HOSTS = ["*"]
@@ -25,6 +28,7 @@ MIDDLEWARE = [
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
+    "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
 
 ROOT_URLCONF = "config.urls"

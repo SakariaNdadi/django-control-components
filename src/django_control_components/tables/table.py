@@ -10,6 +10,7 @@ from django.utils.safestring import SafeString
 from .. import htmx as htmx_adapter
 from ..conf import dcc_settings
 from ..core.context import RenderContext
+from ..core.identifiers import slug_id
 from . import cursor, query
 from .state import TableState
 
@@ -143,7 +144,8 @@ class Table:
 
     @property
     def table_id(self) -> str:
-        return self._config.get("id") or self._queryset.model._meta.model_name or "table"
+        default = self._queryset.model._meta.model_name or "table"
+        return slug_id(self._config.get("id") or default, "table")
 
     @property
     def key(self) -> str:

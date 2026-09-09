@@ -49,12 +49,17 @@ class _EmptyForm(forms.Form):
 
 
 def _default_file_storage() -> Any:
+    """Half-finished wizard uploads land here before any ``ImageSpec`` validation
+    has run, so the default must sit *outside* ``MEDIA_ROOT`` - most deployments
+    serve that directory, which would make every in-progress upload fetchable."""
+    import tempfile
     from pathlib import Path
 
     from django.conf import settings
     from django.core.files.storage import FileSystemStorage
 
-    root = Path(getattr(settings, "MEDIA_ROOT", "") or ".") / "dcc-wizard-tmp"
+    configured = getattr(settings, "DCC_WIZARD_TMP_ROOT", "")
+    root = Path(configured) if configured else Path(tempfile.gettempdir()) / "dcc-wizard-tmp"
     return FileSystemStorage(location=str(root))
 
 

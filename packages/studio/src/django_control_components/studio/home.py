@@ -10,6 +10,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Any
 
 from django.urls import NoReverseMatch, reverse
+from django.utils.http import url_has_allowed_host_and_scheme
 
 if TYPE_CHECKING:
     from django.http import HttpRequest
@@ -62,7 +63,11 @@ def _from_preference(user: Any, panel: Panel) -> str:
         if pref.home_kind == "spec":
             return reverse(f"{ns}:studio-list", kwargs={"spec_slug": pref.home_target})
         if pref.home_kind == "url":
-            return str(pref.home_target)
+            target = str(pref.home_target)
+            # this value is handed back as a post-login redirect
+            if not url_has_allowed_host_and_scheme(target, allowed_hosts=None):
+                return ""
+            return target
     except NoReverseMatch:
         return ""
     return ""

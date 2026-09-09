@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import pathlib
+import re
 
 import django_control_components
 
@@ -53,16 +54,40 @@ def test_no_hand_rolled_buttons_outside_primitives():
     assert not offenders, offenders
 
 
+#: (template, variable) pairs allowed to interpolate into a line carrying
+#: ``x-data``. Escaping does not defend an Alpine expression context - the HTML
+#: parser decodes entities before Alpine reads the attribute - so each variable
+#: here must be proven safe *pre-escape* at its source, not merely escaped.
+ALPINE_INTERPOLATION_ALLOWLIST = {
+    # slug_id() -> [A-Za-z0-9_-]
+    "templates/django_control_components/panels/widgets/chart.html": {"payload_id"},
+    "templates/django_control_components/tables/_content.html": {"config_id"},
+    "templates/django_control_components/tables/table.html": {"table_id"},
+    # md5 hex digest
+    "templates/django_control_components/blocks/nav_group.html": {"group_id"},
+    # a validated model field name
+    "templates/django_control_components/controls/select.html": {"data_id"},
+    # not inside the x-data value: a CSS length sanitised by _clean_len()
+    "templates/django_control_components/blocks/app_shell.html": {"sidebar_width"},
+    # server-compiled VisibilityRule expression, never a raw config string
+    "templates/django_control_components/layout/tabs.html": {"visible_expr"},
+}
+
+_TEMPLATE_VAR = re.compile(r"\{\{\s*([a-zA-Z_][\w.]*)")
+
+
 def test_no_django_interpolation_inside_alpine_data():
-    """No {{ }} inside x-data='{ ... }' - that is the JS-injection footgun."""
+    """No unvetted {{ }} on an x-data line - that is the JS-injection footgun."""
     offenders = []
     for path in _template_files():
+        rel = str(path.relative_to(ROOT))
+        allowed = ALPINE_INTERPOLATION_ALLOWLIST.get(rel, set())
         for line in path.read_text().splitlines():
-            if "x-data=" in line and "{{" in line and "}}" in line:
-                # allow x-data="dccSelect('{{ id }}-data')" style single-arg factory calls
-                if "dcc" in line and line.count("{{") == 1:
-                    continue
-                offenders.append(f"{path.relative_to(ROOT)}: {line.strip()}")
+            if "x-data=" not in line or "{{" not in line:
+                continue
+            for var in _TEMPLATE_VAR.findall(line):
+                if var not in allowed:
+                    offenders.append(f"{rel}: {var} in {line.strip()}")
     assert not offenders, offenders
 
 

@@ -20,6 +20,7 @@ from django.utils.safestring import SafeString
 
 from .. import htmx as htmx_adapter
 from ..core.component import setter
+from ..core.identifiers import slug_id
 from ..icons import render_icon
 from .assets import CHARTJS_SRC, Asset
 
@@ -107,11 +108,11 @@ class Widget:
     # -- identity ----------------------------------------------------
 
     def get_id(self) -> str:
-        explicit = self._config.get("id")
-        if explicit:
-            return str(explicit)
         if self._auto_id is None:
             self._auto_id = "w" + format(id(self) % 0x1000000, "x")
+        explicit = self._config.get("id")
+        if explicit:
+            return slug_id(explicit, self._auto_id)
         return self._auto_id
 
     def get_span(self) -> int:
