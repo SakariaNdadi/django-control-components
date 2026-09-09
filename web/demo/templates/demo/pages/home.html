@@ -2,175 +2,102 @@
 {% load static dcc_tags %}
 {% block head_extra %}
   <link rel="stylesheet" href="{% static 'demo/docs.css' %}">
-  <style>
-    .dcc-home__hero {
-      padding: 2.5rem 0 2rem;
-      border-bottom: 1px solid var(--dcc-border);
-      margin-bottom: 2.5rem;
-    }
-    .dcc-home__title {
-      font-size: 2.25rem;
-      font-weight: 800;
-      letter-spacing: -0.025em;
-      margin: 0.5rem 0 0.75rem;
-      background: linear-gradient(135deg, var(--dcc-fg) 30%, var(--dcc-docs-accent));
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-    }
-    .dcc-home__subtitle {
-      font-size: 1.1rem;
-      color: var(--dcc-muted);
-      max-width: 48rem;
-      line-height: 1.6;
-      margin-bottom: 1.5rem;
-    }
-    .dcc-home__grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(20rem, 1fr));
-      gap: 1.5rem;
-      margin-bottom: 3rem;
-    }
-    .dcc-home__card {
-      background: var(--dcc-surface);
-      border: 1px solid var(--dcc-border);
-      border-radius: calc(var(--dcc-radius) + 0.25rem);
-      padding: 1.5rem;
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
-      transition: transform 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
-    }
-    .dcc-home__card:hover {
-      transform: translateY(-2px);
-      border-color: var(--dcc-docs-accent);
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-    }
-    .dcc-home__card-icon {
-      font-size: 1.5rem;
-      color: var(--dcc-docs-accent);
-      margin-bottom: 1rem;
-      display: inline-block;
-    }
-    .dcc-home__card-title {
-      font-size: 1.2rem;
-      font-weight: 700;
-      margin: 0 0 0.5rem;
-    }
-    .dcc-home__card-desc {
-      color: var(--dcc-muted);
-      font-size: 0.9rem;
-      line-height: 1.5;
-      margin-bottom: 1.25rem;
-    }
-  </style>
 {% endblock %}
 
 {% block content %}
   <div class="dcc-home__hero">
-    <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.5rem;">
-      <span class="dcc-docs__familybadge" style="background: var(--dcc-docs-accent);">v0.0.1 Alpha</span>
-      <span style="background: var(--dcc-docs-accent-soft); border: 1px solid var(--dcc-docs-accent); border-radius: 9999px; padding: 0.15rem 0.65rem; font-size: 0.75rem; font-weight: 600; color: var(--dcc-docs-accent);">
-        Studio: dev-only prototyping (<code>[studio]</code> extra)
-      </span>
+    <div class="dcc-home__badges">
+      <span class="dcc-docs__familybadge" style="background: var(--dcc-docs-accent);">v0.0.1 alpha</span>
+      <span class="dcc-home__pill">Studio: dev-only prototyping (<code>[studio]</code> extra)</span>
     </div>
-    
+
     <h1 class="dcc-home__title">django-control-components</h1>
     <p class="dcc-home__subtitle">
-      Filament-inspired schema, table, and action builders for Django. Declare rich UI in Python with instant <a href="https://django-cotton.com/" target="_blank" rel="noopener">django-cotton</a> rendering, seamless <a href="https://htmx.org/" target="_blank" rel="noopener">htmx</a> step mutations, and authentic <a href="https://docs.djangoproject.com/en/stable/topics/forms/" target="_blank" rel="noopener">django.forms</a> validation.
+      Filament-inspired schema, table, and action builders for Django. Declare rich UI in Python,
+      rendered through <a href="https://django-cotton.com/" target="_blank" rel="noopener">django-cotton</a>,
+      wired to real <a href="https://docs.djangoproject.com/en/stable/topics/forms/" target="_blank" rel="noopener">django.forms</a>
+      validation, with <a href="https://htmx.org/" target="_blank" rel="noopener">htmx</a> only where it earns its keep.
     </p>
 
-    <div style="display: flex; gap: 0.75rem; flex-wrap: wrap;">
+    <div class="dcc-home__cta">
       <a href="{% url 'dcc-panel-docs:page-installation' %}" class="dcc-btn dcc-btn--primary">
-        {% dcc_icon "download" %} Installation & Setup
+        {% dcc_icon "download" %} Installation
       </a>
       <a href="{% url 'dcc-panel-docs:page-quickstart' %}" class="dcc-btn dcc-btn--secondary">
         {% dcc_icon "bolt" %} Quickstart
       </a>
       <a href="{% url 'dcc-panel-docs:page-full-example' %}" class="dcc-btn dcc-btn--secondary">
-        {% dcc_icon "diagram-project" %} Full End-to-End Example
+        {% dcc_icon "diagram-project" %} Full example
       </a>
     </div>
   </div>
 
-  <h2>Everything DCC Offers</h2>
+  <h2 class="dcc-home__sectiontitle">Everything DCC offers</h2>
   <div class="dcc-home__grid">
-    <!-- Schemas -->
     <div class="dcc-home__card">
-      <div>
-        <div class="dcc-home__card-icon">{% dcc_icon "table-columns" %}</div>
-        <h3 class="dcc-home__card-title">Form Schemas</h3>
-        <p class="dcc-home__card-desc">
-          Structured layouts (Sections, Grids, Tabs, Fieldsets) decorating real Django ModelForms with reactive selects, live validations, and zero-request conditional visibility.
-        </p>
-      </div>
-      <a href="{% url 'dcc-panel-docs:page-schema' %}" class="dcc-btn dcc-btn--secondary dcc-btn--sm">Explore Schemas →</a>
+      <span class="dcc-home__card-icon">{% dcc_icon "table-columns" %}</span>
+      <h3 class="dcc-home__card-title">Form schemas</h3>
+      <p class="dcc-home__card-desc">
+        Sections, grids, tabs and fieldsets decorating real Django <code>ModelForm</code>s — reactive
+        selects, live validation, zero-request conditional visibility.
+      </p>
+      <a href="{% url 'dcc-panel-docs:page-schema' %}" class="dcc-btn dcc-btn--secondary dcc-btn--sm">Schemas &rarr;</a>
     </div>
 
-    <!-- Tables -->
     <div class="dcc-home__card">
-      <div>
-        <div class="dcc-home__card-icon">{% dcc_icon "table" %}</div>
-        <h3 class="dcc-home__card-title">High-Performance Tables</h3>
-        <p class="dcc-home__card-desc">
-          Adaptive client-side (<1,000 rows) and streaming server-side modes with keyset cursor pagination over millions of records. Built-in search, custom filters, row click previews, and bulk mutations.
-        </p>
-      </div>
-      <a href="{% url 'dcc-panel-docs:page-table' %}" class="dcc-btn dcc-btn--secondary dcc-btn--sm">Explore Tables →</a>
+      <span class="dcc-home__card-icon">{% dcc_icon "table" %}</span>
+      <h3 class="dcc-home__card-title">Tables</h3>
+      <p class="dcc-home__card-desc">
+        Adaptive client-side render under ~1,000 rows; keyset-streamed server mode over millions with
+        no <code>COUNT(*)</code>. Search, filters, row and bulk actions.
+      </p>
+      <a href="{% url 'dcc-panel-docs:page-table' %}" class="dcc-btn dcc-btn--secondary dcc-btn--sm">Tables &rarr;</a>
     </div>
 
-    <!-- Wizards -->
     <div class="dcc-home__card">
-      <div>
-        <div class="dcc-home__card-icon">{% dcc_icon "list-ol" %}</div>
-        <h3 class="dcc-home__card-title">Multi-Step Wizards</h3>
-        <p class="dcc-home__card-desc">
-          Stateful multi-step form workflows powered by <code>django-formtools</code> with partial htmx step swapping, back/forward navigation, per-step validation, and review infolists.
-        </p>
-      </div>
-      <a href="{% url 'dcc-panel-docs:page-wizards' %}" class="dcc-btn dcc-btn--secondary dcc-btn--sm">Explore Wizards →</a>
+      <span class="dcc-home__card-icon">{% dcc_icon "list-ol" %}</span>
+      <h3 class="dcc-home__card-title">Wizards</h3>
+      <p class="dcc-home__card-desc">
+        Multi-step flows on <code>django-formtools</code> with htmx step swapping, back/forward
+        navigation, per-step validation and review infolists.
+      </p>
+      <a href="{% url 'dcc-panel-docs:page-wizards' %}" class="dcc-btn dcc-btn--secondary dcc-btn--sm">Wizards &rarr;</a>
     </div>
 
-    <!-- Actions & Modals -->
     <div class="dcc-home__card">
-      <div>
-        <div class="dcc-home__card-icon">{% dcc_icon "bolt" %}</div>
-        <h3 class="dcc-home__card-title">Actions & Confirmations</h3>
-        <p class="dcc-home__card-desc">
-          Key-addressed operations with double authorization, modal dialog overlays, bulk actions with select-all-matching, and toast notification triggers.
-        </p>
-      </div>
-      <a href="{% url 'dcc-panel-docs:page-action' %}" class="dcc-btn dcc-btn--secondary dcc-btn--sm">Explore Actions →</a>
+      <span class="dcc-home__card-icon">{% dcc_icon "bolt" %}</span>
+      <h3 class="dcc-home__card-title">Actions</h3>
+      <p class="dcc-home__card-desc">
+        Key-addressed operations, authorized twice, with confirm and schema modals, select-all-matching
+        bulk actions, and toast triggers.
+      </p>
+      <a href="{% url 'dcc-panel-docs:page-action' %}" class="dcc-btn dcc-btn--secondary dcc-btn--sm">Actions &rarr;</a>
     </div>
 
-    <!-- Panels & Resources -->
     <div class="dcc-home__card">
-      <div>
-        <div class="dcc-home__card-icon">{% dcc_icon "chart-pie" %}</div>
-        <h3 class="dcc-home__card-title">Panels, Resources & Dashboards</h3>
-        <p class="dcc-home__card-desc">
-          Admin-independent CRUD surfaces, metric widgets (Stat, Chart, BarList), and customizable dashboard pages.
-        </p>
-      </div>
-      <a href="{% url 'dcc-panel-docs:page-panels-and-resources' %}" class="dcc-btn dcc-btn--secondary dcc-btn--sm">Explore Panels & Resources →</a>
+      <span class="dcc-home__card-icon">{% dcc_icon "chart-pie" %}</span>
+      <h3 class="dcc-home__card-title">Panels &amp; resources</h3>
+      <p class="dcc-home__card-desc">
+        Admin-independent CRUD surfaces, dashboard widgets (stat, chart, bar-list, table) and custom
+        pages — all pure Python.
+      </p>
+      <a href="{% url 'dcc-panel-docs:page-panels-and-resources' %}" class="dcc-btn dcc-btn--secondary dcc-btn--sm">Panels &rarr;</a>
     </div>
 
-
-
-    <!-- Frontend Cotton Tags -->
     <div class="dcc-home__card">
-      <div>
-        <div class="dcc-home__card-icon">{% dcc_icon "cube" %}</div>
-        <h3 class="dcc-home__card-title">Cotton Frontend Tags</h3>
-        <p class="dcc-home__card-desc">
-          Directly usable <code>&lt;c-dcc.*&gt;</code> templates for custom views: buttons, badges, modals with focus-trap, headings, and standalone form inputs.
-        </p>
-      </div>
-      <a href="{% url 'dcc-panel-docs:page-button' %}" class="dcc-btn dcc-btn--secondary dcc-btn--sm">Explore Components →</a>
+      <span class="dcc-home__card-icon">{% dcc_icon "cube" %}</span>
+      <h3 class="dcc-home__card-title">Cotton tags</h3>
+      <p class="dcc-home__card-desc">
+        <code>&lt;c-dcc.*&gt;</code> components for template authors — buttons, badges, focus-trapped
+        modals, headings, standalone inputs.
+      </p>
+      <a href="{% url 'dcc-panel-docs:page-button' %}" class="dcc-btn dcc-btn--secondary dcc-btn--sm">Components &rarr;</a>
     </div>
   </div>
 
-  <h2>Quick Installation</h2>
-  <pre><code># Install recommended package with uv
-uv add "django-control-components[wizard,images]"</code></pre>
-  <p><small style="color: var(--dcc-muted);">Follow the <a href="{% url 'dcc-panel-docs:page-installation' %}">Installation Guide</a> to configure <code>INSTALLED_APPS</code> and <code>{% templatetag openblock %} dcc_assets {% templatetag closeblock %}</code>.</small></p>
+  <h2 class="dcc-home__sectiontitle">Quick install</h2>
+  <pre><code>uv add "django-control-components[wizard,images]"</code></pre>
+  <p><small style="color: var(--dcc-muted);">Then follow the
+    <a href="{% url 'dcc-panel-docs:page-installation' %}">installation page</a> to wire
+    <code>INSTALLED_APPS</code> and <code>{% templatetag openblock %} dcc_assets {% templatetag closeblock %}</code>.</small></p>
 {% endblock %}
