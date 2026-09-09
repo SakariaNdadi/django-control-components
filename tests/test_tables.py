@@ -266,6 +266,22 @@ def test_feed_presentation_renders_list_not_grid(articles, settings):
     assert "dcc-table__grid" not in html
 
 
+def test_client_table_has_no_pager_by_default(articles, settings):
+    settings.DCC = {"TABLE_CLIENT_SIDE_MAX_ROWS": 100}
+    # 3 rows, default page size (10) - one page, so no footer / pager at all
+    html = str(_table(articles).render(RequestFactory().get("/")))
+    assert "dcc-table__pagination" in html  # the nav exists (JS-hidden)
+    assert 'x-show="totalPages() &gt; 1"' in html or 'x-show="totalPages() > 1"' in html
+    assert 'x-show="matchCount &gt; 0"' not in html
+
+
+def test_client_table_pager_shows_with_explicit_paginate(articles, settings):
+    settings.DCC = {"TABLE_CLIENT_SIDE_MAX_ROWS": 100}
+    html = str(_table(articles).paginate([2, 5]).render(RequestFactory().get("/")))
+    assert "dcc-table__perpage" in html  # the Rows picker
+    assert "dcc-table__pagination" in html
+
+
 def test_infinite_scroll_client_has_sentinel_no_pager(articles, settings):
     settings.DCC = {"TABLE_CLIENT_SIDE_MAX_ROWS": 100}
     html = str(_table(articles).infinite_scroll().render(RequestFactory().get("/")))

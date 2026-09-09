@@ -67,7 +67,12 @@
   </table>
   </div>
 
-  {% if show_per_page or pagination or mode == "client" and not infinite_scroll %}
+  {% comment %}
+  Footer only renders when there is something to show: an explicit "Rows" picker
+  (.paginate([...])), server-side numbered pagination, or - in client mode - more
+  than one page of results. A small all-on-one-page table gets no footer bar.
+  {% endcomment %}
+  {% if show_per_page or pagination %}
   <div class="dcc-table__footer">
     {% if show_per_page %}
     {% if mode == "client" %}
@@ -88,13 +93,7 @@
     {% endif %}
     {% endif %}
 
-    {% if mode == "client" and not infinite_scroll %}
-    <nav class="dcc-table__pagination dcc-table__pagination--{{ pagination_position }}" x-show="matchCount > 0" x-cloak>
-      <c-dcc.button variant="secondary" label="Previous" x-on:click="prevPage()" x-bind:disabled="page === 1" />
-      <span x-text="`Page ${page} of ${totalPages()} · ${matchCount} rows`"></span>
-      <c-dcc.button variant="secondary" label="Next" x-on:click="nextPage()" x-bind:disabled="page >= totalPages()" />
-    </nav>
-    {% elif pagination %}
+    {% if pagination %}
     <nav class="dcc-table__pagination dcc-table__pagination--{{ pagination_position }}">
       {% for link in pagination %}
       {% if link.current %}<span>{{ link.label }}</span>
@@ -102,6 +101,16 @@
       {% endfor %}
     </nav>
     {% endif %}
+  </div>
+  {% endif %}
+
+  {% if mode == "client" and not infinite_scroll %}
+  <div class="dcc-table__footer" x-show="totalPages() > 1" x-cloak>
+    <nav class="dcc-table__pagination dcc-table__pagination--{{ pagination_position }}">
+      <c-dcc.button variant="secondary" label="Previous" x-on:click="prevPage()" x-bind:disabled="page === 1" />
+      <span x-text="`Page ${page} of ${totalPages()} · ${matchCount} rows`"></span>
+      <c-dcc.button variant="secondary" label="Next" x-on:click="nextPage()" x-bind:disabled="page >= totalPages()" />
+    </nav>
   </div>
   {% endif %}
   {% endif %}
