@@ -23,6 +23,20 @@ from ..core.component import setter
 from ..icons import render_icon
 from .assets import CHARTJS_SRC, Asset
 
+#: Default series colours handed to the Chart.js renderer when a dataset does not
+#: carry its own ``backgroundColor`` / ``borderColor``. Override per chart with
+#: ``ChartWidget.colors([...])``.
+DEFAULT_CHART_PALETTE: list[str] = [
+    "#6366f1",
+    "#0891b2",
+    "#16a34a",
+    "#d97706",
+    "#dc2626",
+    "#7c3aed",
+    "#db2777",
+    "#0d9488",
+]
+
 
 def _wants_request(fn: Any) -> bool:
     try:
@@ -246,6 +260,14 @@ class ChartWidget(Widget):
     def query(self, spec: dict[str, Any]) -> Self:
         return self._set("query", spec)
 
+    @setter
+    def colors(self, value: list[str]) -> Self:
+        """Series colours for this chart. Overrides :data:`DEFAULT_CHART_PALETTE`.
+        A dataset that already carries its own ``backgroundColor`` /
+        ``borderColor`` (a hand-built Chart.js ``{labels, datasets}`` dict) is
+        left untouched by the renderer."""
+        return self._set("colors", list(value))
+
     def _dataset_shape(self, request: Any) -> dict[str, Any]:
         raw = self._config.get("data")
         if raw is None and self._config.get("query"):
@@ -277,6 +299,7 @@ class ChartWidget(Widget):
             "type": "line" if kind == "area" else kind,
             "data": data,
             "options": options,
+            "palette": self._config.get("colors") or DEFAULT_CHART_PALETTE,
         }
 
     def context(self, request: Any) -> dict[str, Any]:

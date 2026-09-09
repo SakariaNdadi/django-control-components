@@ -150,7 +150,8 @@ class BooleanColumn(Column):
 
     def format(self, value: Any) -> SafeString:
         yes, no = self._config.get("labels", ("Yes", "No"))
-        return format_html('<span class="dcc-badge">{}</span>', yes if value else no)
+        cls = "dcc-badge dcc-badge--success" if value else "dcc-badge"
+        return format_html('<span class="{}">{}</span>', cls, yes if value else no)
 
 
 class BadgeColumn(Column):
@@ -161,7 +162,9 @@ class BadgeColumn(Column):
     def format(self, value: Any) -> SafeString:
         if value is None:
             return SafeString("")
-        return format_html('<span class="dcc-badge">{}</span>', str(value))
+        variant = (self._config.get("colors") or {}).get(str(value), "")
+        cls = f"dcc-badge dcc-badge--{variant}" if variant else "dcc-badge"
+        return format_html('<span class="{}">{}</span>', cls, str(value))
 
 
 class DateColumn(Column):

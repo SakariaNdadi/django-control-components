@@ -43,10 +43,13 @@ CHART_WIDGET = ComponentPageSpec(
     title="Chart Widget",
     family="widgets",
     icon="chart-column",
-    summary="Chart.js-backed. .kind() picks line/bar/area/pie/doughnut/radar.",
+    summary=(
+        "Chart.js-backed. .kind() picks line/bar/area/pie/doughnut/radar; "
+        "series get a default palette, override with .colors([...])."
+    ),
     examples=[
         ComponentExample(
-            title="Bar",
+            title="Bar (default palette)",
             code=(
                 'ChartWidget.make("By priority").kind("bar")\n'
                 '    .data([("Low", 2), ("Medium", 5), ("High", 1)])'
@@ -55,6 +58,20 @@ CHART_WIDGET = ComponentPageSpec(
                 ChartWidget.make("By priority")
                 .kind("bar")
                 .data([("Low", 2), ("Medium", 5), ("High", 1)])
+            ),
+        ),
+        ComponentExample(
+            title="Doughnut with custom colours",
+            code=(
+                'ChartWidget.make("By priority").kind("doughnut")\n'
+                '    .data([("Low", 2), ("Medium", 5), ("High", 1)])\n'
+                '    .colors(["#0d9488", "#6366f1", "#dc2626"])'
+            ),
+            build=lambda request: (
+                ChartWidget.make("By priority")
+                .kind("doughnut")
+                .data([("Low", 2), ("Medium", 5), ("High", 1)])
+                .colors(["#0d9488", "#6366f1", "#dc2626"])
             ),
         ),
     ],

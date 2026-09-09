@@ -15,11 +15,36 @@
     },
   };
 
+  // Apply payload.palette to any dataset that did not bring its own colours.
+  // A hand-built {labels, datasets:[{backgroundColor: ...}]} is left untouched.
+  function applyPalette(payload) {
+    var palette = payload.palette;
+    if (!palette || !palette.length || !payload.data) return;
+    var perPoint = /^(pie|doughnut|polarArea)$/.test(payload.type);
+    (payload.data.datasets || []).forEach(function (ds, i) {
+      var cycle = function (n) {
+        var out = [];
+        for (var k = 0; k < n; k++) out.push(palette[k % palette.length]);
+        return out;
+      };
+      if (perPoint) {
+        if (ds.backgroundColor == null) ds.backgroundColor = cycle((ds.data || []).length);
+      } else if (payload.type === "bar") {
+        if (ds.backgroundColor == null) ds.backgroundColor = cycle((ds.data || []).length);
+      } else {
+        var c = palette[i % palette.length];
+        if (ds.borderColor == null) ds.borderColor = c;
+        if (ds.backgroundColor == null) ds.backgroundColor = c + "33"; // ~20% alpha
+      }
+    });
+  }
+
   // Chart.js is the built-in renderer. It may `defer` in after Alpine, so
   // register lazily on first use rather than at alpine:init.
   function ensureChartjsRenderer() {
     if (!window.dccWidgets.renderers.chartjs && window.Chart) {
       window.dccWidgets.register("chartjs", function (canvas, payload) {
+        applyPalette(payload);
         return new window.Chart(canvas, {
           type: payload.type,
           data: payload.data,

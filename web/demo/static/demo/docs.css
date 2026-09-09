@@ -2,12 +2,11 @@
  * Docs-site skin — additive tokens/rules layered on top of the shipped
  * dcc.css. Namespaced --dcc-docs-* and scoped to this project's templates;
  * nothing here touches the core stylesheet. It adds:
- *   1. A real badge-variant palette (dcc.css ships the `.dcc-badge--<variant>`
- *      hook but no colours — every badge renders unstyled otherwise).
- *   2. An accent, a type scale, and spacing rhythm for the catalog + prose.
- *   3. Family-coded page headers so the sidebar's flat A–Z list still reads
+ *   1. An accent, a type scale, and spacing rhythm for the catalog + prose.
+ *   2. Family-coded page headers so the sidebar's flat A–Z list still reads
  *      as distinct subsystems once you land on a page.
- *   4. The demo-card (live render + source) and the home hub.
+ *   3. The demo-card (live render + source) and the home hub.
+ * (Badge variant colours now ship in the core dcc.css.)
  */
 
 /* ============================================================ tokens === */
@@ -30,12 +29,8 @@
   --dcc-docs-text-xl: 1.6rem;
   --dcc-docs-text-2xl: 2.2rem;
 
-  /* badge-variant palette (dcc.css defines only the hook) */
-  --dcc-docs-success-bg: #dcfce7;  --dcc-docs-success-fg: #166534;
-  --dcc-docs-danger-bg: #fee2e2;   --dcc-docs-danger-fg: #991b1b;
-  --dcc-docs-muted-bg: #f4f4f5;    --dcc-docs-muted-fg: #52525b;
-  --dcc-docs-secondary-bg: #e0e7ff; --dcc-docs-secondary-fg: #3730a3;
-  --dcc-docs-primary-bg: #4f46e5;  --dcc-docs-primary-fg: #ffffff;
+  --dcc-docs-muted-bg: #f4f4f5;
+  --dcc-docs-muted-fg: #52525b;
 
   /* one accent per family — page header + chips */
   --dcc-docs-family-ui: #4f46e5;
@@ -55,11 +50,8 @@
     --dcc-docs-accent-soft: #1e1b4b;
     --dcc-docs-code-bg: #0a0b0f;
     --dcc-docs-code-fg: #e7e9ee;
-    --dcc-docs-success-bg: #052e16; --dcc-docs-success-fg: #86efac;
-    --dcc-docs-danger-bg: #450a0a;  --dcc-docs-danger-fg: #fca5a5;
-    --dcc-docs-muted-bg: #27272a;   --dcc-docs-muted-fg: #a1a1aa;
-    --dcc-docs-secondary-bg: #312e81; --dcc-docs-secondary-fg: #c7d2fe;
-    --dcc-docs-primary-bg: #6366f1; --dcc-docs-primary-fg: #ffffff;
+    --dcc-docs-muted-bg: #27272a;
+    --dcc-docs-muted-fg: #a1a1aa;
     --dcc-docs-family-ui: #a5b4fc;
     --dcc-docs-family-schemas: #22d3ee;
     --dcc-docs-family-tables: #fbbf24;
@@ -76,11 +68,8 @@
   --dcc-docs-accent-soft: #1e1b4b;
   --dcc-docs-code-bg: #0a0b0f;
   --dcc-docs-code-fg: #e7e9ee;
-  --dcc-docs-success-bg: #052e16; --dcc-docs-success-fg: #86efac;
-  --dcc-docs-danger-bg: #450a0a;  --dcc-docs-danger-fg: #fca5a5;
-  --dcc-docs-muted-bg: #27272a;   --dcc-docs-muted-fg: #a1a1aa;
-  --dcc-docs-secondary-bg: #312e81; --dcc-docs-secondary-fg: #c7d2fe;
-  --dcc-docs-primary-bg: #6366f1; --dcc-docs-primary-fg: #ffffff;
+  --dcc-docs-muted-bg: #27272a;
+  --dcc-docs-muted-fg: #a1a1aa;
   --dcc-docs-family-ui: #a5b4fc;
   --dcc-docs-family-schemas: #22d3ee;
   --dcc-docs-family-tables: #fbbf24;
@@ -90,14 +79,6 @@
   --dcc-docs-family-wizards: #2dd4bf;
   --dcc-docs-family-blocks: #a78bfa;
 }
-
-/* ==================================================== badge variants === */
-
-.dcc-badge--success   { background: var(--dcc-docs-success-bg);   color: var(--dcc-docs-success-fg); }
-.dcc-badge--danger    { background: var(--dcc-docs-danger-bg);    color: var(--dcc-docs-danger-fg); }
-.dcc-badge--muted     { background: var(--dcc-docs-muted-bg);     color: var(--dcc-docs-muted-fg); }
-.dcc-badge--secondary { background: var(--dcc-docs-secondary-bg); color: var(--dcc-docs-secondary-fg); }
-.dcc-badge--primary   { background: var(--dcc-docs-primary-bg);   color: var(--dcc-docs-primary-fg); }
 
 /* ============================================================ layout === */
 

@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import datetime
 from types import SimpleNamespace
 
 from django_control_components.infolists import (
@@ -14,7 +15,12 @@ from django_control_components.infolists import (
 
 from ..page import ComponentExample, ComponentPageSpec
 
-_RECORD = SimpleNamespace(title="Ship the release", priority="high", done=False, due_date=None)
+_RECORD = SimpleNamespace(
+    title="Ship the release",
+    priority="high",
+    done=False,
+    due_date=datetime.date.today() - datetime.timedelta(days=3),
+)
 
 
 def _infolist(request, entries):
@@ -76,9 +82,16 @@ DATE_ENTRY = ComponentPageSpec(
     summary='.since() -> "3 days ago"; else .date_format(fmt) (default).',
     examples=[
         ComponentExample(
-            title="Basic",
+            title="Default",
             code='DateEntry.make("due_date")',
             build=lambda request: _infolist(request, [DateEntry.make("due_date")]),
+        ),
+        ComponentExample(
+            title="Relative",
+            code='DateEntry.make("due_date").since()',
+            build=lambda request: _infolist(
+                request, [DateEntry.make("due_date").since()]
+            ),
         ),
     ],
 )

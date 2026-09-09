@@ -63,7 +63,10 @@ def test_boolean_badge_date_columns():
         BooleanColumn.make("f").labels(("On", "Off")).format(False)
     )
     assert str(BadgeColumn.make("s").format(None)) == ""
-    assert "draft" in str(BadgeColumn.make("s").colors({"draft": "gray"}).format("draft"))
+    live = str(BadgeColumn.make("s").colors({"draft": "muted", "live": "success"}).format("live"))
+    assert "dcc-badge--success" in live and "live" in live
+    assert "dcc-badge--" not in str(BadgeColumn.make("s").colors({"draft": "muted"}).format("live"))
+    assert "dcc-badge--success" in str(BooleanColumn.make("f").format(True))
     d = DateColumn.make("d")
     assert str(d.format(None)) == ""
     assert "ago" in str(DateColumn.make("d").since().format(timezone.now()))

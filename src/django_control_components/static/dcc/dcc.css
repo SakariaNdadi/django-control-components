@@ -16,6 +16,7 @@
   --dcc-danger: #dc2626;
   --dcc-danger-fg: #fef2f2;
   --dcc-success: #16a34a;
+  --dcc-warning: #b45309;
   --dcc-focus: #171717;
   --dcc-radius: 0.375rem;
   --dcc-gap: 1rem;
@@ -33,6 +34,8 @@
     --dcc-primary-fg: #0a0a0a;
     --dcc-danger: #f87171;
     --dcc-danger-fg: #450a0a;
+    --dcc-success: #4ade80;
+    --dcc-warning: #fbbf24;
     --dcc-focus: #ededed;
   }
 }
@@ -47,6 +50,8 @@
   --dcc-primary-fg: #0a0a0a;
   --dcc-danger: #f87171;
   --dcc-danger-fg: #450a0a;
+  --dcc-success: #4ade80;
+  --dcc-warning: #fbbf24;
   --dcc-focus: #ededed;
 }
 
@@ -359,6 +364,36 @@
   background: var(--dcc-surface);
   color: var(--dcc-fg);
   border: 1px solid var(--dcc-border);
+}
+
+/* Variant colours for the `.dcc-badge--<variant>` hook that BadgeColumn,
+   BadgeEntry, ui.Badge and <c-dcc.badge> all emit. Soft tint of a token so
+   they follow the light/dark palette automatically. */
+.dcc-badge--primary {
+  background: color-mix(in srgb, var(--dcc-primary) 12%, var(--dcc-bg));
+  color: var(--dcc-primary);
+  border-color: color-mix(in srgb, var(--dcc-primary) 28%, transparent);
+}
+.dcc-badge--secondary,
+.dcc-badge--muted {
+  background: var(--dcc-surface);
+  color: var(--dcc-muted);
+  border-color: var(--dcc-border);
+}
+.dcc-badge--success {
+  background: color-mix(in srgb, var(--dcc-success) 16%, var(--dcc-bg));
+  color: color-mix(in srgb, var(--dcc-success) 78%, var(--dcc-fg));
+  border-color: color-mix(in srgb, var(--dcc-success) 32%, transparent);
+}
+.dcc-badge--danger {
+  background: color-mix(in srgb, var(--dcc-danger) 15%, var(--dcc-bg));
+  color: color-mix(in srgb, var(--dcc-danger) 82%, var(--dcc-fg));
+  border-color: color-mix(in srgb, var(--dcc-danger) 32%, transparent);
+}
+.dcc-badge--warning {
+  background: color-mix(in srgb, var(--dcc-warning) 18%, var(--dcc-bg));
+  color: color-mix(in srgb, var(--dcc-warning) 80%, var(--dcc-fg));
+  border-color: color-mix(in srgb, var(--dcc-warning) 34%, transparent);
 }
 
 .dcc-modal__overlay {

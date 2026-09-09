@@ -31,4 +31,12 @@
   .dcc-input {
     @apply w-full rounded-[var(--radius-dcc)] border px-2.5 py-2 text-sm;
   }
+
+  /* Badge variant hook — mirror of the compiled stylesheet. */
+  .dcc-badge--primary { background: color-mix(in srgb, var(--dcc-primary) 12%, var(--dcc-bg)); color: var(--dcc-primary); }
+  .dcc-badge--secondary,
+  .dcc-badge--muted { background: var(--dcc-surface); color: var(--dcc-muted); }
+  .dcc-badge--success { background: color-mix(in srgb, var(--dcc-success, #16a34a) 16%, var(--dcc-bg)); color: var(--dcc-success, #16a34a); }
+  .dcc-badge--danger { background: color-mix(in srgb, var(--dcc-danger) 15%, var(--dcc-bg)); color: var(--dcc-danger); }
+  .dcc-badge--warning { background: color-mix(in srgb, var(--dcc-warning, #b45309) 18%, var(--dcc-bg)); color: var(--dcc-warning, #b45309); }
 }

@@ -64,6 +64,24 @@ def test_chart_widget_area_is_a_filled_line():
     assert payload["data"]["datasets"][0]["fill"] is True
 
 
+def _chart_payload(w):
+    return json.loads(
+        str(w.render(None)).split('type="application/json">', 1)[1].split("</script>", 1)[0]
+    )
+
+
+def test_chart_widget_default_palette_in_payload():
+    from django_control_components.panels.widgets import DEFAULT_CHART_PALETTE
+
+    w = ChartWidget.make("x").kind("bar").data([("a", 1), ("b", 2)])
+    assert _chart_payload(w)["palette"] == DEFAULT_CHART_PALETTE
+
+
+def test_chart_widget_colors_override_palette():
+    w = ChartWidget.make("x").kind("doughnut").data([("a", 1)]).colors(["#111", "#999"])
+    assert _chart_payload(w)["palette"] == ["#111", "#999"]
+
+
 def test_chart_widget_rejects_unknown_kind():
     with pytest.raises(ValueError):
         ChartWidget.make("x").kind("sankey")

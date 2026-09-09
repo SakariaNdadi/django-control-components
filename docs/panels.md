@@ -29,9 +29,11 @@ from django_control_components.infolists import (
     BadgeEntry, BooleanEntry, DateEntry, Infolist, TextEntry,
 )
 from django_control_components.panels import Resource
-from django_control_components.schemas import Schema, Section, Select, TextInput, Toggle
+from django_control_components.schemas import (
+    FileUpload, Schema, Section, Select, TextInput, Toggle,
+)
 from django_control_components.tables import (
-    BadgeColumn, BooleanColumn, DateColumn, SelectFilter, Table, TextColumn,
+    BadgeColumn, BooleanColumn, DateColumn, ImageColumn, SelectFilter, Table, TextColumn,
 )
 
 from ..models import Task
@@ -40,7 +42,7 @@ from ..models import Task
 class TaskForm(forms.ModelForm):
     class Meta:
         model = Task
-        fields = ["title", "priority", "done", "due_date"]
+        fields = ["title", "priority", "done", "due_date", "cover"]
         widgets = {"due_date": forms.DateInput(attrs={"type": "date"})}
 
 
@@ -60,6 +62,7 @@ class TaskResource(Resource):
             .id("panel-tasks")
             .columns(
                 [
+                    ImageColumn.make("cover").thumbnail((32, 32)).rounded(),
                     TextColumn.make("title").sortable().searchable(),
                     BadgeColumn.make("priority").colors(
                         {"low": "muted", "medium": "secondary", "high": "danger"}
@@ -84,6 +87,7 @@ class TaskResource(Resource):
                             TextInput.make("title").required(),
                             Select.make("priority"),
                             Toggle.make("done"),
+                            FileUpload.make("cover").image(),
                         ]
                     ),
                     TextInput.make("due_date"),

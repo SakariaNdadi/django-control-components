@@ -15,6 +15,7 @@ class Task(models.Model):
     done = models.BooleanField(default=False)
     priority = models.CharField(max_length=10, choices=Priority.choices, default=Priority.MEDIUM)
     due_date = models.DateField(null=True, blank=True)
+    cover = models.ImageField(upload_to="covers/", null=True, blank=True)
 
     def __str__(self) -> str:
         return self.title

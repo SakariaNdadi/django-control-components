@@ -8,6 +8,7 @@ from django_control_components.tables import (
     BooleanColumn,
     BooleanFilter,
     DateColumn,
+    ImageColumn,
     SelectFilter,
     Table,
     TernaryFilter,
@@ -176,12 +177,21 @@ IMAGE_COLUMN = ComponentPageSpec(
     title="Image Column",
     family="tables",
     icon="image",
-    summary=".thumbnail((48, 48)), .rounded() -> an <img>.",
+    summary=".thumbnail((w, h)), .rounded() -> an <img> from an ImageField.",
     examples=[
         ComponentExample(
-            title="Basic (no image field on Task - shown as a header for reference)",
-            code='ImageColumn.make("avatar").thumbnail((48, 48)).rounded()',
-            build=lambda request: _demo_table(request, [TextColumn.make("title")]),
+            title="Basic",
+            code='ImageColumn.make("cover").thumbnail((40, 40)).rounded()',
+            build=lambda request: _demo_table(
+                request,
+                [
+                    ImageColumn.make("cover").thumbnail((40, 40)).rounded(),
+                    TextColumn.make("title"),
+                    BadgeColumn.make("priority").colors(
+                        {"low": "muted", "medium": "secondary", "high": "danger"}
+                    ),
+                ],
+            ),
         ),
     ],
 )

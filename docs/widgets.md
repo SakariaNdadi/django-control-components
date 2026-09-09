@@ -65,6 +65,11 @@ Every widget:
   filled line.
 - `.data(pairs | {labels, datasets} | callable)` - a `(label, value)` list becomes
   one dataset; a Chart.js `{labels, datasets}` dict passes straight through.
+- `.colors([...])` - series colours. Without it a built-in palette
+  (`DEFAULT_CHART_PALETTE`, indigo-led) is applied by the renderer: cycled across
+  slices for `pie`/`doughnut`/`bar`, one per dataset for `line`/`area`/`radar`. A
+  dataset in a hand-built `{labels, datasets}` dict that already carries
+  `backgroundColor`/`borderColor` is left untouched.
 - `.options(dict)` - merged over `{responsive: true, maintainAspectRatio: false}`.
 - `.query({...})` - the no-code data path (below).
 
