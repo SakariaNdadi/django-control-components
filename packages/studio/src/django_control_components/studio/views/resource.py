@@ -4,7 +4,6 @@ JSON - the form / detail builders come later."""
 
 from __future__ import annotations
 
-import json
 from typing import Any
 
 from django.core.exceptions import ValidationError
@@ -80,7 +79,7 @@ class ResourceBuilder(StudioView):
             request,
             self.template_name,
             self.shell_context(
-                boot_json=json.dumps(boot),
+                boot_json=boot,
                 spec=spec,
                 column_types=pal["columns"],
                 filter_types=pal["filters"],

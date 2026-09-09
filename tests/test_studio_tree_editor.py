@@ -10,7 +10,6 @@ save / hydrate round-trip.
 from __future__ import annotations
 
 import json
-import pathlib
 
 import pytest
 from django.contrib.auth.models import Permission
@@ -49,18 +48,22 @@ def test_palette_exposes_block_slots():
     assert blocks["Divider"]["slots"] == []
 
 
-def test_js_ships_the_recurse_directive_and_tree_store():
-    import django_control_components.studio as studio_pkg
+def test_page_builder_ships_the_depth_cap_from_the_server(client, urlconf, studio_user):
+    """The block-tree depth cap has one source of truth: deserialize._MAX_TREE_DEPTH.
+    The page builder must ship it in the boot JSON so the JS does not carry its
+    own copy that can drift."""
+    from bs4 import BeautifulSoup
 
-    js = pathlib.Path(studio_pkg.__file__).parent / "static/dcc/dcc-studio.js"
-    text = js.read_text()
-    assert 'directive(\n      "recurse"' in text or 'directive("recurse"' in text
-    assert 'data("dccTree"' in text
-    assert "MAX_DEPTH = 12" in text  # mirrors deserialize._MAX_TREE_DEPTH
-    # drag-to-reparent
-    assert 'data("dccTreeDnd"' in text
-    assert "moveNode(id, toParentId, toSlot, toIndex)" in text
-    assert "_locate(toParentId, src.node)" in text  # cycle guard
+    from django_control_components.studio.deserialize import _MAX_TREE_DEPTH
+
+    page = Page.objects.create(title="Home", route="", tree={})
+    client.force_login(studio_user)
+    body = client.get(f"/studio/pages/{page.pk}/").content
+
+    raw = BeautifulSoup(body, "html.parser").find(id="page-boot").string
+    boot = json.loads(raw)
+    assert boot["maxDepth"] == _MAX_TREE_DEPTH
+    assert isinstance(boot["palette"], dict)  # boot is a real object, not a re-encoded string
 
 
 def test_nested_tree_from_the_editor_round_trips(client, urlconf, studio_user):

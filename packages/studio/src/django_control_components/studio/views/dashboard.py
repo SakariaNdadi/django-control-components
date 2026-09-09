@@ -3,7 +3,6 @@ palette-driven inspector, revision-guarded save and a live preview."""
 
 from __future__ import annotations
 
-import json
 from typing import Any
 
 from django.core.exceptions import ValidationError
@@ -67,7 +66,7 @@ class DashboardBuilder(StudioView):
             request,
             self.template_name,
             self.shell_context(
-                boot_json=json.dumps(boot),
+                boot_json=boot,
                 dashboard=dashboard,
                 widget_types=pal["widgets"],
             ),

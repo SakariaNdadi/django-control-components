@@ -8,7 +8,6 @@ phase ships the server views and a raw-tree editor on top of the same
 
 from __future__ import annotations
 
-import json
 from typing import Any
 
 from django.core.exceptions import ValidationError
@@ -17,7 +16,7 @@ from django.shortcuts import redirect, render
 from django.urls import reverse
 from django.utils.html import escape
 
-from ..deserialize import build_block_tree_from_spec, validate_block_tree
+from ..deserialize import _MAX_TREE_DEPTH, build_block_tree_from_spec, validate_block_tree
 from ..models import Page, SpecRevision
 from ..palette import palette
 from ..specmigrations import current_version
@@ -74,11 +73,12 @@ class PageBuilder(StudioView):
             "saveUrl": reverse("dcc_studio:page-save", args=[pk]),
             "previewUrl": reverse("dcc_studio:page-preview", args=[pk]),
             "csrfToken": get_token(request),
+            "maxDepth": _MAX_TREE_DEPTH,  # single source of truth - JS reads this
         }
         return render(
             request,
             self.template_name,
-            self.shell_context(boot_json=json.dumps(boot), page=page, block_types=pal["blocks"]),
+            self.shell_context(boot_json=boot, page=page, block_types=pal["blocks"]),
         )
 
 

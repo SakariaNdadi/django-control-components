@@ -11,7 +11,11 @@
  *   x-recurse="<array>"    a self-referencing <template> - Alpine has none natively
  */
 (function () {
-	var MAX_DEPTH = 12; // mirrors deserialize._MAX_TREE_DEPTH
+	// Depth cap for the recursive x-recurse render. The server is the single
+	// source of truth (deserialize._MAX_TREE_DEPTH) and ships it in the page
+	// builder's boot JSON as `maxDepth`; dccTree.init() sets this. The literal
+	// is only a fallback for a boot payload that predates the field.
+	var MAX_DEPTH = 12;
 
 	function register() {
 		if (!window.Alpine) return;
@@ -286,6 +290,7 @@
 			init() {
 				const boot = readJson(bootId) || {};
 				this._cfg = boot;
+				if (Number.isInteger(boot.maxDepth)) MAX_DEPTH = boot.maxDepth;
 				this.palette = boot.palette || {};
 				this.revision = boot.revision || 0;
 				const root = boot.doc && boot.doc.root;
