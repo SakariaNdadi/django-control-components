@@ -62,25 +62,29 @@ USE_I18N = True
 USE_TZ = True
 
 STATIC_URL = "/static/"
+STATIC_ROOT = BASE_DIR / "staticfiles"
 MEDIA_URL = "/media/"
 MEDIA_ROOT = BASE_DIR / "media"
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
-# django-control-components
+# django-control-components - fully self-hosted, no CDN.
 DCC = {
     "TABLE_CLIENT_SIDE_MAX_ROWS": 200,
+    "VENDOR_ASSETS": True,  # serve htmx / Alpine / focus from web/demo/static/dcc/vendor/
+    "VENDOR_ASSET_DIR": "dcc/vendor/",
+    "ICON_ASSET_URL": STATIC_URL + "fa/css/all.min.css",  # bundled Font Awesome
+    "CHARTJS_URL": STATIC_URL + "dcc/vendor/chart.umd.min.js",
 }
 
-# Content-Security-Policy: Alpine needs 'unsafe-eval'. htmx, Alpine, Chart.js and
-# the icon font all load from the jsdelivr CDN. Everything else stays tight.
-# (Django 6 native CSP; harmless dict on 5.2 where it is simply unused.)
-_CDN = "https://cdn.jsdelivr.net"
+# Content-Security-Policy: Alpine needs 'unsafe-eval'. Everything else is 'self'
+# (no CDN). (Django 6 native CSP; harmless dict on 5.2 where it is unused.)
 SECURE_CSP = {
     "DIRECTIVES": {
         "default-src": ["'self'"],
-        "script-src": ["'self'", "'unsafe-eval'", "'unsafe-inline'", _CDN],
-        "style-src": ["'self'", "'unsafe-inline'", _CDN],
+        "script-src": ["'self'", "'unsafe-eval'"],
+        "style-src": ["'self'", "'unsafe-inline'"],
         "img-src": ["'self'", "data:"],
+        "font-src": ["'self'"],
     }
 }

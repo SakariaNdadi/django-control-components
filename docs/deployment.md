@@ -56,21 +56,27 @@ Chart.js load from `https://cdn.jsdelivr.net`, and the icon font from the same.
 To serve them from your own static files instead:
 
 ```python
+STATIC_URL = "/static/"
 DCC = {
-    "VENDOR_ASSETS": True,             # emit local <script>/<link> for htmx + Alpine + focus
+    "VENDOR_ASSETS": True,             # emit local <script> for htmx + Alpine + focus
     "VENDOR_ASSET_DIR": "dcc/vendor/", # static path prefix for the copies
+    "ICON_ASSET_URL": STATIC_URL + "fa/css/all.min.css",       # your bundled Font Awesome
+    "CHARTJS_URL": STATIC_URL + "dcc/vendor/chart.umd.min.js", # your bundled Chart.js
 }
 ```
 
 ```bash
-python manage.py dcc_vendor_assets --dest path/to/your/static/dcc/vendor/
+python manage.py dcc_vendor_assets --dest yourapp/static/dcc/vendor/   # htmx + Alpine + focus
 python manage.py collectstatic --no-input
 ```
 
-`dcc_vendor_assets` downloads the exact pinned versions the package was built
-against. Chart.js and the icon-set CSS are governed separately by
-`DCC["ICON_SET"]` / `DCC["ICON_ASSET_URL"]` - point those at local files or a
-self-hosting icon set to remove the last CDN references.
+`dcc_vendor_assets` downloads the exact pinned htmx / Alpine / focus versions the
+package was built against. **Chart.js** (only needed if you use `ChartWidget`)
+and the **Font Awesome** CSS + `webfonts/` aren't fetched by that command - drop
+them into your static dir yourself and point `DCC["CHARTJS_URL"]` /
+`DCC["ICON_ASSET_URL"]` at the copies (or set a self-hosting `DCC["ICON_SET"]`).
+The bundled `web/` project does exactly this - see `web/config/settings.py` and
+`web/demo/static/{dcc/vendor,fa}/` for a working CDN-free setup.
 
 If a CDN asset must stay remote, pin its integrity hash:
 

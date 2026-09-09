@@ -30,6 +30,9 @@ DEFAULTS: dict[str, Any] = {
     "ICON_SET": "django_control_components.icons.FontAwesome",
     # Icon stylesheet URL. None => the set self-hosts / emits nothing.
     "ICON_ASSET_URL": "https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.7.2/css/all.min.css",
+    # Chart.js URL for ``ChartWidget``. None => the pinned jsDelivr build. Point
+    # it at a self-hosted copy to stay off the CDN.
+    "CHARTJS_URL": None,
     # Models a stored studio spec may aggregate over (``"app_label.Model"``). A
     # widget's ``.query({...})`` refuses any model not in this list.
     "STUDIO_MODELS": [],

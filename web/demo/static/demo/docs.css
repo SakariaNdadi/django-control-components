@@ -88,8 +88,8 @@
 @media (min-width: 48.0625rem) {
   .dcc-panel__main { padding: 2.25rem clamp(1.5rem, 4vw, 3.5rem) 4rem; }
 }
-.dcc-prose { max-width: 82ch; }
-.dcc-page__summary { max-width: 72ch; }
+.dcc-prose { max-width: 88ch; }
+.dcc-page__summary { max-width: 80ch; }
 
 /* ===================================================== sidebar chrome === */
 

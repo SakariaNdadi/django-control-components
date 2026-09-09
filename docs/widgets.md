@@ -73,7 +73,8 @@ Every widget:
 - `.options(dict)` - merged over `{responsive: true, maintainAspectRatio: false}`.
 - `.query({...})` - the no-code data path (below).
 
-Chart.js loads from the CDN, on demand, only on dashboards that use a chart - the
+Chart.js loads on demand (jsDelivr by default; `DCC["CHARTJS_URL"]` for a
+self-hosted copy), only on dashboards that use a chart - the
 `DashboardPage` collects each widget's `assets` and emits them once in the page
 `<head>`. Nothing is added to `{% dcc_assets %}`.
 

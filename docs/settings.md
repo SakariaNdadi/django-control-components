@@ -154,7 +154,8 @@ DCC = {
 | `THUMBNAIL_BACKEND` | dotted path \| `None` | `None` | `get_thumbnail_backend()`. `None` → probe `easy_thumbnails`, then fall back to `PillowThumbnailBackend`. A bad path raises `ThumbnailBackendError`. |
 | `URL_PREFIX` | str | `"dcc/"` | The intended mount prefix for the internal endpoints. Reversing uses the `dcc` namespace, so this is documentation more than enforcement - but keep your `include(...)` prefix in sync. |
 | `ICON_SET` | dotted path | `…icons.FontAwesome` | `icons.active_set()` - the class rendering `{% dcc_icon %}` / every component icon. Must satisfy the `IconSet` protocol. |
-| `ICON_ASSET_URL` | str \| `None` | FontAwesome 6.7.2 CDN CSS | The `<link>` `{% dcc_assets %}` emits for icons. `None` → the set self-hosts / emits nothing. |
+| `ICON_ASSET_URL` | str \| `None` | FontAwesome 6.7.2 CDN CSS | The `<link>` `{% dcc_assets %}` emits for icons. `None` → the set self-hosts / emits nothing. Point at a bundled copy (with its `webfonts/`) to leave the CDN. |
+| `CHARTJS_URL` | str \| `None` | `None` (pinned jsDelivr build) | `ChartWidget.get_assets()` - the Chart.js `<script>`. Set to a self-hosted copy to stay off the CDN. |
 | `STUDIO_MODELS` | list[str] | `[]` | `"app_label.Model"` entries a stored studio spec or a widget `.query({...})` may aggregate over. A model not in this list is refused. |
 | `VENDOR_ASSETS` | bool | `False` | `{% dcc_assets %}` - `True` serves htmx / Alpine / focus from your own static files instead of jsDelivr. Run `manage.py dcc_vendor_assets --dest <static dir>` to fetch the pinned files first. Air-gapped and privacy-sensitive deploys. |
 | `VENDOR_ASSET_DIR` | str | `"dcc/vendor/"` | Static path prefix the vendored copies are served from when `VENDOR_ASSETS`. |

@@ -233,10 +233,14 @@ class ChartWidget(Widget):
     variant = "chart"
     span = 2
     js_component = "dccChart"
-    assets = (Asset("script", CHARTJS_SRC),)
     auto_refresh = True
 
     _KINDS = frozenset({"line", "bar", "area", "pie", "doughnut", "radar"})
+
+    def get_assets(self) -> tuple[Asset, ...]:
+        from ..conf import dcc_settings
+
+        return (Asset("script", dcc_settings.CHARTJS_URL or CHARTJS_SRC),)
 
     def __init__(self, label: str, **kwargs: Any) -> None:
         super().__init__(**kwargs)
