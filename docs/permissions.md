@@ -144,15 +144,19 @@ Checked in two places, and both matter:
 
 Two baselines sit under that:
 
-- `ActionView` refuses anonymous requests outright. The endpoint is mounted
-  outside any panel, so it carries no panel guard of its own.
-- An action with **no** `.authorize()` rule is implicitly allowed. Set
-  `DCC["ACTIONS_DEFAULT_DENY"] = True` to invert that.
+- An action with **no** `.authorize()` rule is implicitly allowed to any
+  signed-in user. `ActionView` is mounted outside any panel, so it carries no
+  guard of its own - it refuses an anonymous request to an unruled action
+  outright. An action meant to be usable signed-out opts in with an explicit
+  rule (`.authorize(lambda: True)`); an action that carries any rule is left to
+  `is_authorized`.
+- Set `DCC["ACTIONS_DEFAULT_DENY"] = True` to refuse an unruled action for
+  everyone, signed-in included.
 
-Those two interact in one place worth knowing: an unruled action on a page an
-anonymous visitor can reach is still *drawn* for them (the render check passes),
-and only fails on submit with a 403. Put a guard on the panel, or set
-`ACTIONS_DEFAULT_DENY`, rather than relying on the endpoint to be the only stop.
+One interaction worth knowing: an unruled action on a page an anonymous visitor
+can reach is still *drawn* for them (the render check passes) and only fails on
+submit with a 403. Put a guard on the panel, or set `ACTIONS_DEFAULT_DENY`,
+rather than relying on the endpoint being the only stop.
 
 The system check `W013` warns for any action reachable from a resource table with
 no `.authorize()` rule. It builds each table with an anonymous request to find
@@ -184,7 +188,7 @@ there.
 | dispatch, per resource + object | `Resource.can` |
 | dispatch, studio builder | `require_studio` |
 | dispatch, stored page | `resolve_page` - **404, not 403** |
-| endpoint, actions | anonymous refusal, then `Action.is_authorized` |
+| endpoint, actions | anonymous refusal on an unruled action, then `Action.is_authorized` |
 | endpoint, live field validation | the schema's `authorize`, else "any signed-in user" |
 | render, nav | `build_nav` drops items the user cannot reach |
 | render, actions | `render_trigger` / `row_click_attrs` |

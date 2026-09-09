@@ -1,11 +1,12 @@
 from __future__ import annotations
 
-from typing import Any, cast
+from typing import Any
 
 from django.http import Http404, HttpRequest, HttpResponse
 from django.views import View
 
 from .. import htmx
+from ..core.component import UNSET
 from .registry import registry
 
 
@@ -16,21 +17,24 @@ class ActionView(View):
     POST -> authorize (again), re-scope targets to the owner's queryset, execute.
     """
 
-    def dispatch(self, request: HttpRequest, *args: Any, **kwargs: Any) -> HttpResponse:
-        """Baseline gate: this endpoint is mounted outside any panel, so it
-        carries no panel guard. An action whose ``.authorize()`` is unset is
-        implicitly allowed (``ACTIONS_DEFAULT_DENY`` defaults to ``False``),
-        which without this would make it runnable by an anonymous POST."""
-        user = getattr(request, "user", None)
-        if user is None or not user.is_authenticated:
-            return HttpResponse(status=403)
-        return cast("HttpResponse", super().dispatch(request, *args, **kwargs))
-
     def _resolve(self, owner_key: str, action_name: str) -> tuple[Any, Any]:
         found = registry.resolve(owner_key, action_name)
         if found is None:
             raise Http404("Unknown action")
         return found
+
+    @staticmethod
+    def _baseline_denied(request: HttpRequest, action: Any) -> bool:
+        """This endpoint is mounted outside any panel, so it has no guard of its
+        own. An action with no ``.authorize()`` rule is implicitly allowed
+        (``ACTIONS_DEFAULT_DENY`` defaults to ``False``), which would make it
+        runnable by an anonymous POST. Refuse that here - an action that really
+        is public says so with an explicit ``.authorize(...)`` rule, which
+        ``is_authorized`` then evaluates as usual."""
+        if action._config.get("authorize", UNSET) is not UNSET:
+            return False
+        user = getattr(request, "user", None)
+        return user is None or not user.is_authenticated
 
     def _targets(self, request: HttpRequest, owner: Any, action: Any) -> Any:
         scope = owner.get_action_queryset(request)
@@ -57,7 +61,9 @@ class ActionView(View):
     def get(self, request: HttpRequest, owner_key: str, action_name: str) -> HttpResponse:
         owner, action = self._resolve(owner_key, action_name)
         records = self._targets(request, owner, action)
-        if not action.is_authorized(request, records[0] if records else None):
+        if self._baseline_denied(request, action) or not action.is_authorized(
+            request, records[0] if records else None
+        ):
             return HttpResponse(status=403)
 
         form_html: Any = ""
@@ -84,7 +90,9 @@ class ActionView(View):
     def post(self, request: HttpRequest, owner_key: str, action_name: str) -> HttpResponse:
         owner, action = self._resolve(owner_key, action_name)
         records = self._targets(request, owner, action)
-        if not action.is_authorized(request, records[0] if records else None):
+        if self._baseline_denied(request, action) or not action.is_authorized(
+            request, records[0] if records else None
+        ):
             return HttpResponse(status=403)
 
         data: dict[str, Any] = {}

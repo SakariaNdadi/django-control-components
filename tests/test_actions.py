@@ -94,6 +94,24 @@ def test_anonymous_post_is_refused_even_without_an_authorize_rule(data):
     assert ran == []
 
 
+def test_anonymous_post_runs_when_the_action_authorizes_it(data):
+    """A deliberately-public action opts in with an explicit .authorize() rule -
+    the baseline only refuses anonymous on an *unruled* action."""
+    ran = []
+    action = (
+        Action.make("touch")
+        .authorize(lambda: True)
+        .action(lambda record: ran.append(record.pk))
+    )
+    _table(Article.objects.all(), actions=[action]).render(RequestFactory().get("/"))
+
+    req = RequestFactory().post("/dcc/a/table-art/touch/", {"record": data[1][0].pk})
+    req.user = AnonymousUser()
+    resp = ActionView.as_view()(req, owner_key="table-art", action_name="touch")
+    assert resp.status_code == 204
+    assert ran == [data[1][0].pk]
+
+
 def test_execute_denied_when_hidden_action_posted(data, signed_in):
     _, arts = data
     action = Action.make("secret").authorize(lambda user: False).action(lambda record: 1 / 0)

@@ -18,11 +18,13 @@ Renamed and re-versioned release of the rebuild described under `1.0.0b1` below.
   **Behaviour change:** an id with punctuation (`"my.widget"`) now renders
   stripped (`"mywidget"`), so any CSS or JS selector written against the old
   form needs updating.
-- **`ActionView` refuses anonymous requests.** An `Action` with no
-  `.authorize()` rule is implicitly allowed, and the endpoint is mounted outside
-  any panel guard, so an anonymous POST could previously run it. **Behaviour
-  change:** an action intentionally exposed to signed-out users must now be
-  reached through a view that permits it; the shared endpoint will not.
+- **`ActionView` refuses anonymous requests to an action with no `.authorize()`
+  rule.** Such an action is implicitly allowed, and the endpoint is mounted
+  outside any panel guard, so an anonymous POST could previously run it.
+  **Behaviour change:** an action meant to be usable by signed-out visitors now
+  has to opt in with an explicit rule, e.g. `.authorize(lambda: True)`;
+  `is_authorized` evaluates it as before. Render-time button visibility is
+  unchanged.
 - **`extra_attributes` is now code-only.** It takes arbitrary HTML attribute
   names, so a stored spec could set an event handler, whose value is executed
   rather than displayed. Unchanged in Python.
