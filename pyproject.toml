@@ -48,7 +48,7 @@ Changelog = "https://github.com/SakariaNdadi/django-control-components/blob/mast
 Issues = "https://github.com/SakariaNdadi/django-control-components/issues"
 
 [tool.uv.workspace]
-members = ["packages/studio"]
+members = ["packages/studio", "web"]
 
 [tool.uv.sources]
 django-control-components = { workspace = true }

@@ -9,7 +9,7 @@
         <h1 style="margin-top: 0.25rem;">Installation & Setup</h1>
       </div>
       <div style="background: var(--dcc-docs-accent-soft); border: 1px solid var(--dcc-docs-accent); border-radius: 9999px; padding: 0.25rem 0.85rem; font-size: 0.8rem; font-weight: 600; color: var(--dcc-docs-accent);">
-        ✨ Studio Prototyping UI Coming Soon
+        Studio: dev-only prototyping (<code>[studio]</code> extra)
       </div>
     </div>
   </header>
@@ -42,7 +42,7 @@ uv add "django-control-components[wizard,images]"</code></pre>
     <h2>Asset Loading</h2>
     <p>Add <code>{% templatetag openblock %} dcc_assets {% templatetag closeblock %}</code>
       to your base template <code>&lt;head&gt;</code> - it emits the stylesheet, htmx,
-      Alpine, the focus plugin, and Tabler icons automatically:</p>
+      Alpine, the focus plugin, and Font Awesome icons automatically:</p>
     <pre><code>&lt;head&gt;
   {% templatetag openblock %} load dcc_tags {% templatetag closeblock %}
   {% templatetag openblock %} dcc_assets {% templatetag closeblock %}

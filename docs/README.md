@@ -1,8 +1,11 @@
 # Developer Documentation & UI/UX Hub
 
-> **Version `0.0.1`** (Alpha)
+> **Version `0.0.1`** (Alpha — `0.x` permits breaking changes; see [CHANGELOG](../CHANGELOG.md)).
 >
-> ⚠️ **Notice**: The core components (`schemas`, `tables`, `wizards`, `actions`, `infolists`, `panels`, `widgets`, `ui`) are fully active. **Studio (visual designer & prototyping UI) is under heavy development and coming soon.**
+> The core (`schemas`, `tables`, `wizards`, `actions`, `infolists`, `panels`,
+> `widgets`, `ui`) is active and tested. **Studio** — the visual builder — ships
+> in the optional `[studio]` extra as a **dev-only** prototyping tool
+> (`DEBUG=True`; remove it before deploying, per check `dcc_studio.W003`).
 
 Declare UI in Python; it renders through [django-cotton](https://django-cotton.com/), wired directly to real `django.forms` validation without duplicating form state.
 
@@ -110,7 +113,7 @@ In your base template `<head>` (e.g., `base.html`):
 {% dcc_assets %}
 ```
 
-*(Emits stylesheets, lightweight Alpine helpers, htmx, Alpine.js, and Tabler icons automatically. Pass `htmx=False`, `alpine=False`, or `icons=False` if host page loads them).*
+*(Emits `dcc.css`, the icon-set `<link>` (Font Awesome by default), htmx, `dcc.js`, the Alpine focus plugin, and Alpine.js — in that order. Pass `htmx=False`, `alpine=False`, `focus=False`, or `icons=False` for anything the host page already loads).*
 
 ---
 
@@ -454,5 +457,8 @@ Every component accepts either fluent chaining `.make().foo()` or explicit `kwar
 | [views-and-mixins.md](views-and-mixins.md) | Class-based view mixins (`SchemaFormMixin`, `TableMixin`, etc.) |
 | [callbacks.md](callbacks.md) | Closure injection contracts, evaluation lifecycle |
 | [errors.md](errors.md) | System exceptions, error codes, recovery behaviors |
-| [no-code.md](no-code.md) | Studio JSON schema definitions *(Studio UI coming soon)* |
+| [no-code.md](no-code.md) | Studio JSON schema definitions *(dev-only, `[studio]` extra)* |
+| [deployment.md](deployment.md) | Static files, WhiteNoise, CSP, air-gapped assets, `DEBUG=False` checklist |
+| [testing.md](testing.md) | Testing schemas, tables, mixin views, actions; `@override_settings(DCC=...)` |
+| [../CHANGELOG.md](../CHANGELOG.md) | Release notes; `0.x` breaking-change policy |
 

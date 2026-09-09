@@ -4,8 +4,8 @@ Filament-inspired schema, table, and action builders for Django. Declare UI in
 Python; it renders itself through [django-cotton](https://django-cotton.com/),
 wired to real `django.forms` validation.
 
-> **1.0.0b1** — a full rebuild. The old prop-driven cotton templates are gone.
-> See [MIGRATION.md](MIGRATION.md) and [CHANGELOG.md](CHANGELOG.md).
+> **`0.0.1`** (alpha) — a full rebuild. The old prop-driven cotton templates are
+> gone. See [MIGRATION.md](MIGRATION.md) and [CHANGELOG.md](CHANGELOG.md).
 
 ## Status
 
@@ -31,13 +31,17 @@ Start with [Architecture](docs/architecture.md) — the render model every other
 doc builds on. Then:
 
 [Settings & install](docs/settings.md) · [Views & mixins](docs/views-and-mixins.md) ·
-[Callbacks](docs/callbacks.md) · [Errors](docs/errors.md)
+[Callbacks](docs/callbacks.md) · [Errors](docs/errors.md) ·
+[Deployment](docs/deployment.md) · [Testing](docs/testing.md)
 
 [Schemas / forms](docs/schemas.md) · [Tables](docs/tables.md) ·
 [Actions](docs/actions.md) · [Infolists](docs/infolists.md) ·
 [Wizards](docs/wizards.md) · [UI primitives](docs/ui.md) · [Images](docs/images.md) ·
 [Panels & Resources](docs/panels.md) · [Widgets](docs/widgets.md) ·
 [Studio (dev-only)](docs/no-code.md) — index: [docs/](docs/README.md)
+
+A complete running project — every builder wired to a live SQLite database —
+lives in [`web/`](web/).
 
 ## Install
 

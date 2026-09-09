@@ -1,0 +1,14 @@
+[project]
+name = "dcc-web"
+version = "0"
+description = "The django-control-components website and live documentation demo. Not published."
+requires-python = ">=3.12"
+dependencies = [
+    "django-control-components[wizard,images]",
+]
+
+[tool.uv]
+package = false
+
+[tool.uv.sources]
+django-control-components = { workspace = true }

@@ -58,6 +58,35 @@ Alpine and Hyperscript are not equivalent in DCC:
 For the studio builder page (dev-only), also add `{% dcc_studio_assets %}`
 (after `{% dcc_assets %}`).
 
+### Minimal base template
+
+Every view example does `{% extends "base.html" %}`. A greenfield `base.html`
+needs three things: the assets in `<head>`, a `content` block, and the toast
+host. This is the whole file:
+
+```django
+{% load static dcc_tags %}
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}My App{% endblock %}</title>
+  {% dcc_assets %}
+  <link rel="stylesheet" href="{% static 'css/theme.css' %}">  {# your overrides, after dcc_assets #}
+</head>
+<body>
+  {% csrf_token %}                          {# ensures the CSRF cookie - see below #}
+  {% block content %}{% endblock %}
+  <div id="dcc-toasts" class="dcc-toasts" aria-live="polite"></div>
+</body>
+</html>
+```
+
+`dcc.js` will create `#dcc-toasts` on demand, so it is optional - but declaring
+it avoids a layout shift on the first toast. The panel shell
+(`django_control_components/panels/base.html`) is the fuller reference if you
+want the responsive nav drawer.
 
 ### URLs
 
@@ -74,6 +103,26 @@ urlpatterns = [
 This adds `dcc:action` (`a/<owner_key>/<action_name>/`) and `dcc:schema-validate`
 (`v/<schema_key>/`). The literal prefix is your choice; URL reversing uses the
 `dcc` namespace, so only mounting it once matters.
+
+### CSRF
+
+Table sort/filter/search, bulk actions, action confirms and `Field.live()`
+validation are POSTs issued by htmx and `dcc.js`. Row/bulk action triggers carry
+an `hx-headers` bag with `X-CSRFToken` (built from `get_token(request)` in
+`htmx.py`); `dcc.js` reads the `csrftoken` **cookie** for its own `fetch` calls.
+
+Both need the CSRF cookie to exist on the page. Django only sets it when a view
+renders `{% csrf_token %}` or is marked `@ensure_csrf_cookie`. So either:
+
+- put `{% csrf_token %}` in your base layout (simplest - `{% dcc_form %}` and the
+  panel pages already emit one, but a bare `TableMixin` page does not), or
+- decorate the host view with
+  `django.views.decorators.csrf.ensure_csrf_cookie`, or
+- set `CSRF_COOKIE_HTTPONLY = False` is **not** required - `dcc.js` needs to read
+  the cookie, so leave `CSRF_COOKIE_HTTPONLY` at its default `False`.
+
+Symptom when the cookie is missing: `403 Forbidden` on the first bulk action or
+live-validation request, working fine everywhere a `<form>` is rendered.
 
 ## The `DCC` dict
 

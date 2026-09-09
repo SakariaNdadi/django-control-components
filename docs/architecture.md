@@ -225,7 +225,10 @@ shapes:
 
 ## Where to go next
 
-- [settings.md](settings.md) - every `DCC[...]` key, install, system checks.
+- [settings.md](settings.md) - every `DCC[...]` key, install, the minimal base
+  template, CSRF, system checks.
 - [views-and-mixins.md](views-and-mixins.md) - every view and mixin, MRO rules.
 - [callbacks.md](callbacks.md) - every user-supplied callable and its contract.
 - [errors.md](errors.md) - every exception and what triggers it.
+- [deployment.md](deployment.md) - static files, CSP, `DEBUG=False` checklist.
+- [testing.md](testing.md) - testing views and components.
