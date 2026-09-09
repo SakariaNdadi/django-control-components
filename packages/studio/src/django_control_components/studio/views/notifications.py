@@ -1,5 +1,5 @@
 """The notification-bell polling endpoint. Any signed-in user, not just studio
-users — so it does not extend :class:`StudioView`."""
+users - so it does not extend :class:`StudioView`."""
 
 from __future__ import annotations
 

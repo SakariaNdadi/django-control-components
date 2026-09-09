@@ -2,7 +2,7 @@
 
 Built on the two seams that already work: ``htmx.response.trigger`` (any dict)
 and the ``dcc:notify`` / ``dcc:toast`` DOM-event contract in ``dcc.js``. No
-Channels / websockets — the ``NotificationBell`` block polls.
+Channels / websockets - the ``NotificationBell`` block polls.
 """
 
 from __future__ import annotations

@@ -1,5 +1,5 @@
 /*
- * Docs-site skin — additive tokens/rules layered on top of the shipped
+ * Docs-site skin - additive tokens/rules layered on top of the shipped
  * dcc.css. Namespaced --dcc-docs-* and scoped to this project's templates;
  * nothing here touches the core stylesheet. It adds:
  *   1. An accent, a type scale, and spacing rhythm for the catalog + prose.
@@ -12,208 +12,257 @@
 /* ============================================================ tokens === */
 
 :root {
-  --dcc-docs-accent: #4f46e5;
-  --dcc-docs-accent-fg: #ffffff;
-  --dcc-docs-accent-soft: #eef2ff;
-  --dcc-docs-accent-line: color-mix(in srgb, var(--dcc-docs-accent) 22%, transparent);
+	--dcc-docs-accent: #4f46e5;
+	--dcc-docs-accent-fg: #ffffff;
+	--dcc-docs-accent-soft: #eef2ff;
+	--dcc-docs-accent-line: color-mix(
+		in srgb,
+		var(--dcc-docs-accent) 22%,
+		transparent
+	);
 
-  --dcc-docs-code-bg: #0f1117;
-  --dcc-docs-code-fg: #e7e9ee;
-  --dcc-docs-code-font: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace;
+	--dcc-docs-code-bg: #0f1117;
+	--dcc-docs-code-fg: #e7e9ee;
+	--dcc-docs-code-font:
+		ui-monospace, "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace;
 
-  /* type scale (1.20 minor third off 1rem) */
-  --dcc-docs-text-xs: 0.75rem;
-  --dcc-docs-text-sm: 0.875rem;
-  --dcc-docs-text-md: 1rem;
-  --dcc-docs-text-lg: 1.2rem;
-  --dcc-docs-text-xl: 1.6rem;
-  --dcc-docs-text-2xl: 2.2rem;
+	/* type scale (1.20 minor third off 1rem) */
+	--dcc-docs-text-xs: 0.75rem;
+	--dcc-docs-text-sm: 0.875rem;
+	--dcc-docs-text-md: 1rem;
+	--dcc-docs-text-lg: 1.2rem;
+	--dcc-docs-text-xl: 1.6rem;
+	--dcc-docs-text-2xl: 2.2rem;
 
-  --dcc-docs-muted-bg: #f4f4f5;
-  --dcc-docs-muted-fg: #52525b;
+	--dcc-docs-muted-bg: #f4f4f5;
+	--dcc-docs-muted-fg: #52525b;
 
-  /* one accent per family — page header + chips */
-  --dcc-docs-family-ui: #4f46e5;
-  --dcc-docs-family-schemas: #0891b2;
-  --dcc-docs-family-tables: #b45309;
-  --dcc-docs-family-infolists: #15803d;
-  --dcc-docs-family-widgets: #be185d;
-  --dcc-docs-family-actions: #dc2626;
-  --dcc-docs-family-wizards: #0d9488;
-  --dcc-docs-family-blocks: #6d28d9;
+	/* one accent per family - page header + chips */
+	--dcc-docs-family-ui: #4f46e5;
+	--dcc-docs-family-schemas: #0891b2;
+	--dcc-docs-family-tables: #b45309;
+	--dcc-docs-family-infolists: #15803d;
+	--dcc-docs-family-widgets: #be185d;
+	--dcc-docs-family-actions: #dc2626;
+	--dcc-docs-family-wizards: #0d9488;
+	--dcc-docs-family-blocks: #6d28d9;
 }
 
 @media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) {
-    --dcc-docs-accent: #a5b4fc;
-    --dcc-docs-accent-fg: #0f1117;
-    --dcc-docs-accent-soft: #1e1b4b;
-    --dcc-docs-code-bg: #0a0b0f;
-    --dcc-docs-code-fg: #e7e9ee;
-    --dcc-docs-muted-bg: #27272a;
-    --dcc-docs-muted-fg: #a1a1aa;
-    --dcc-docs-family-ui: #a5b4fc;
-    --dcc-docs-family-schemas: #22d3ee;
-    --dcc-docs-family-tables: #fbbf24;
-    --dcc-docs-family-infolists: #4ade80;
-    --dcc-docs-family-widgets: #f472b6;
-    --dcc-docs-family-actions: #f87171;
-    --dcc-docs-family-wizards: #2dd4bf;
-    --dcc-docs-family-blocks: #a78bfa;
-  }
+	:root:not([data-theme="light"]) {
+		--dcc-docs-accent: #a5b4fc;
+		--dcc-docs-accent-fg: #0f1117;
+		--dcc-docs-accent-soft: #1e1b4b;
+		--dcc-docs-code-bg: #0a0b0f;
+		--dcc-docs-code-fg: #e7e9ee;
+		--dcc-docs-muted-bg: #27272a;
+		--dcc-docs-muted-fg: #a1a1aa;
+		--dcc-docs-family-ui: #a5b4fc;
+		--dcc-docs-family-schemas: #22d3ee;
+		--dcc-docs-family-tables: #fbbf24;
+		--dcc-docs-family-infolists: #4ade80;
+		--dcc-docs-family-widgets: #f472b6;
+		--dcc-docs-family-actions: #f87171;
+		--dcc-docs-family-wizards: #2dd4bf;
+		--dcc-docs-family-blocks: #a78bfa;
+	}
 }
 :root[data-theme="dark"] {
-  --dcc-docs-accent: #a5b4fc;
-  --dcc-docs-accent-fg: #0f1117;
-  --dcc-docs-accent-soft: #1e1b4b;
-  --dcc-docs-code-bg: #0a0b0f;
-  --dcc-docs-code-fg: #e7e9ee;
-  --dcc-docs-muted-bg: #27272a;
-  --dcc-docs-muted-fg: #a1a1aa;
-  --dcc-docs-family-ui: #a5b4fc;
-  --dcc-docs-family-schemas: #22d3ee;
-  --dcc-docs-family-tables: #fbbf24;
-  --dcc-docs-family-infolists: #4ade80;
-  --dcc-docs-family-widgets: #f472b6;
-  --dcc-docs-family-actions: #f87171;
-  --dcc-docs-family-wizards: #2dd4bf;
-  --dcc-docs-family-blocks: #a78bfa;
+	--dcc-docs-accent: #a5b4fc;
+	--dcc-docs-accent-fg: #0f1117;
+	--dcc-docs-accent-soft: #1e1b4b;
+	--dcc-docs-code-bg: #0a0b0f;
+	--dcc-docs-code-fg: #e7e9ee;
+	--dcc-docs-muted-bg: #27272a;
+	--dcc-docs-muted-fg: #a1a1aa;
+	--dcc-docs-family-ui: #a5b4fc;
+	--dcc-docs-family-schemas: #22d3ee;
+	--dcc-docs-family-tables: #fbbf24;
+	--dcc-docs-family-infolists: #4ade80;
+	--dcc-docs-family-widgets: #f472b6;
+	--dcc-docs-family-actions: #f87171;
+	--dcc-docs-family-wizards: #2dd4bf;
+	--dcc-docs-family-blocks: #a78bfa;
 }
 
 /* ============================================================ layout === */
 
 /* The docs site uses the full width - the shipped 64rem cap on
    .dcc-panel__main is right for an app page, too tight for a docs page. */
-.dcc-panel__main { max-width: none; width: 100%; }
-@media (min-width: 48.0625rem) {
-  .dcc-panel__main { padding: 2.25rem clamp(1.5rem, 4vw, 3.5rem) 4rem; }
+.dcc-panel__main {
+	max-width: none;
+	width: 100%;
 }
-.dcc-prose { max-width: 88ch; }
-.dcc-page__summary { max-width: 80ch; }
+@media (min-width: 48.0625rem) {
+	.dcc-panel__main {
+		padding: 2.25rem clamp(1.5rem, 4vw, 3.5rem) 4rem;
+	}
+}
+.dcc-prose {
+	max-width: 88ch;
+}
+.dcc-page__summary {
+	max-width: 80ch;
+}
 
 /* ===================================================== sidebar chrome === */
 
-.dcc-panel__brand { color: var(--dcc-docs-accent); font-weight: 700; }
-.dcc-panel__brand strong { color: var(--dcc-fg); margin-left: 0.35rem; }
+.dcc-panel__brand {
+	color: var(--dcc-docs-accent);
+	font-weight: 700;
+}
+.dcc-panel__brand strong {
+	color: var(--dcc-fg);
+	margin-left: 0.35rem;
+}
 
 .dcc-nav__grouplabel {
-  color: var(--dcc-muted);
-  font-weight: 700;
-  font-size: var(--dcc-docs-text-xs);
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
+	color: var(--dcc-muted);
+	font-weight: 700;
+	font-size: var(--dcc-docs-text-xs);
+	letter-spacing: 0.08em;
+	text-transform: uppercase;
 }
 
 .dcc-nav__link {
-  border-radius: var(--dcc-radius);
-  transition: background 0.12s ease, color 0.12s ease;
+	border-radius: var(--dcc-radius);
+	transition:
+		background 0.12s ease,
+		color 0.12s ease;
 }
 .dcc-nav__link:hover:not(.is-active) {
-  background: var(--dcc-docs-accent-soft);
-  color: var(--dcc-docs-accent);
+	background: var(--dcc-docs-accent-soft);
+	color: var(--dcc-docs-accent);
 }
 .dcc-nav__link.is-active {
-  background: var(--dcc-docs-accent-soft);
-  color: var(--dcc-docs-accent);
-  font-weight: 600;
-  box-shadow: inset 2px 0 0 var(--dcc-docs-accent);
+	background: var(--dcc-docs-accent-soft);
+	color: var(--dcc-docs-accent);
+	font-weight: 600;
+	box-shadow: inset 2px 0 0 var(--dcc-docs-accent);
 }
 .dcc-nav__link:focus-visible {
-  outline: 2px solid var(--dcc-docs-accent);
-  outline-offset: 1px;
+	outline: 2px solid var(--dcc-docs-accent);
+	outline-offset: 1px;
 }
 
 /* ================================================= page header (family) */
 
 .dcc-docs__pageheader {
-  border-bottom: 1px solid var(--dcc-border);
-  padding-bottom: 1.25rem;
-  margin-bottom: 2rem;
+	border-bottom: 1px solid var(--dcc-border);
+	padding-bottom: 1.25rem;
+	margin-bottom: 2rem;
 }
 .dcc-docs__familybadge {
-  display: inline-block;
-  text-transform: uppercase;
-  font-size: var(--dcc-docs-text-xs);
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  padding: 0.2rem 0.6rem;
-  border-radius: 999px;
-  margin-bottom: 0.6rem;
-  color: #fff;
-  background: var(--dcc-docs-accent);
+	display: inline-block;
+	text-transform: uppercase;
+	font-size: var(--dcc-docs-text-xs);
+	font-weight: 700;
+	letter-spacing: 0.08em;
+	padding: 0.2rem 0.6rem;
+	border-radius: 999px;
+	margin-bottom: 0.6rem;
+	color: #fff;
+	background: var(--dcc-docs-accent);
 }
-.dcc-docs__pageheader[data-family="ui"]        .dcc-docs__familybadge { background: var(--dcc-docs-family-ui); }
-.dcc-docs__pageheader[data-family="schemas"]   .dcc-docs__familybadge { background: var(--dcc-docs-family-schemas); }
-.dcc-docs__pageheader[data-family="tables"]    .dcc-docs__familybadge { background: var(--dcc-docs-family-tables); }
-.dcc-docs__pageheader[data-family="infolists"] .dcc-docs__familybadge { background: var(--dcc-docs-family-infolists); }
-.dcc-docs__pageheader[data-family="widgets"]   .dcc-docs__familybadge { background: var(--dcc-docs-family-widgets); }
-.dcc-docs__pageheader[data-family="actions"]   .dcc-docs__familybadge { background: var(--dcc-docs-family-actions); }
-.dcc-docs__pageheader[data-family="wizards"]   .dcc-docs__familybadge { background: var(--dcc-docs-family-wizards); }
-.dcc-docs__pageheader[data-family="blocks"]    .dcc-docs__familybadge { background: var(--dcc-docs-family-blocks); }
+.dcc-docs__pageheader[data-family="ui"] .dcc-docs__familybadge {
+	background: var(--dcc-docs-family-ui);
+}
+.dcc-docs__pageheader[data-family="schemas"] .dcc-docs__familybadge {
+	background: var(--dcc-docs-family-schemas);
+}
+.dcc-docs__pageheader[data-family="tables"] .dcc-docs__familybadge {
+	background: var(--dcc-docs-family-tables);
+}
+.dcc-docs__pageheader[data-family="infolists"] .dcc-docs__familybadge {
+	background: var(--dcc-docs-family-infolists);
+}
+.dcc-docs__pageheader[data-family="widgets"] .dcc-docs__familybadge {
+	background: var(--dcc-docs-family-widgets);
+}
+.dcc-docs__pageheader[data-family="actions"] .dcc-docs__familybadge {
+	background: var(--dcc-docs-family-actions);
+}
+.dcc-docs__pageheader[data-family="wizards"] .dcc-docs__familybadge {
+	background: var(--dcc-docs-family-wizards);
+}
+.dcc-docs__pageheader[data-family="blocks"] .dcc-docs__familybadge {
+	background: var(--dcc-docs-family-blocks);
+}
 
 .dcc-docs__pageheader h1 {
-  margin: 0;
-  font-size: var(--dcc-docs-text-2xl);
-  font-weight: 800;
-  letter-spacing: -0.02em;
+	margin: 0;
+	font-size: var(--dcc-docs-text-2xl);
+	font-weight: 800;
+	letter-spacing: -0.02em;
 }
 .dcc-docs__summary {
-  color: var(--dcc-muted);
-  margin: 0.5rem 0 0;
-  max-width: 60ch;
-  font-size: var(--dcc-docs-text-lg);
-  line-height: 1.5;
+	color: var(--dcc-muted);
+	margin: 0.5rem 0 0;
+	max-width: 60ch;
+	font-size: var(--dcc-docs-text-lg);
+	line-height: 1.5;
 }
 
 /* ============================================================= prose === */
 
-.dcc-docs__prose { max-width: 68ch; line-height: 1.7; }
-.dcc-docs__prose > * + * { margin-top: 1.1rem; }
+.dcc-docs__prose {
+	max-width: 68ch;
+	line-height: 1.7;
+}
+.dcc-docs__prose > * + * {
+	margin-top: 1.1rem;
+}
 .dcc-docs__prose h2 {
-  margin-top: 2.75rem;
-  padding-top: 0.85rem;
-  border-top: 1px solid var(--dcc-border);
-  font-size: var(--dcc-docs-text-xl);
-  font-weight: 700;
-  letter-spacing: -0.01em;
+	margin-top: 2.75rem;
+	padding-top: 0.85rem;
+	border-top: 1px solid var(--dcc-border);
+	font-size: var(--dcc-docs-text-xl);
+	font-weight: 700;
+	letter-spacing: -0.01em;
 }
 .dcc-docs__prose h3 {
-  margin-top: 1.75rem;
-  font-size: var(--dcc-docs-text-lg);
-  font-weight: 700;
+	margin-top: 1.75rem;
+	font-size: var(--dcc-docs-text-lg);
+	font-weight: 700;
 }
-.dcc-docs__prose ul { padding-left: 1.25rem; }
-.dcc-docs__prose li + li { margin-top: 0.35rem; }
+.dcc-docs__prose ul {
+	padding-left: 1.25rem;
+}
+.dcc-docs__prose li + li {
+	margin-top: 0.35rem;
+}
 .dcc-docs__prose a {
-  color: var(--dcc-docs-accent);
-  text-decoration: none;
-  border-bottom: 1px solid var(--dcc-docs-accent-line);
+	color: var(--dcc-docs-accent);
+	text-decoration: none;
+	border-bottom: 1px solid var(--dcc-docs-accent-line);
 }
-.dcc-docs__prose a:hover { border-bottom-color: currentColor; }
+.dcc-docs__prose a:hover {
+	border-bottom-color: currentColor;
+}
 
 .dcc-docs__prose code {
-  font-family: var(--dcc-docs-code-font);
-  font-size: 0.9em;
-  background: var(--dcc-docs-muted-bg);
-  color: var(--dcc-fg);
-  padding: 0.1em 0.35em;
-  border-radius: 0.35rem;
+	font-family: var(--dcc-docs-code-font);
+	font-size: 0.9em;
+	background: var(--dcc-docs-muted-bg);
+	color: var(--dcc-fg);
+	padding: 0.1em 0.35em;
+	border-radius: 0.35rem;
 }
 .dcc-docs__prose pre {
-  background: var(--dcc-docs-code-bg);
-  color: var(--dcc-docs-code-fg);
-  border: 1px solid rgb(255 255 255 / 0.06);
-  border-radius: calc(var(--dcc-radius) + 0.15rem);
-  padding: 1rem 1.15rem;
-  overflow-x: auto;
-  font-size: var(--dcc-docs-text-sm);
-  line-height: 1.6;
+	background: var(--dcc-docs-code-bg);
+	color: var(--dcc-docs-code-fg);
+	border: 1px solid rgb(255 255 255 / 0.06);
+	border-radius: calc(var(--dcc-radius) + 0.15rem);
+	padding: 1rem 1.15rem;
+	overflow-x: auto;
+	font-size: var(--dcc-docs-text-sm);
+	line-height: 1.6;
 }
 .dcc-docs__prose pre code {
-  background: none;
-  color: inherit;
-  padding: 0;
-  font-size: inherit;
+	background: none;
+	color: inherit;
+	padding: 0;
+	font-size: inherit;
 }
 
 /* ===================================== two-column body + on-page rail === */
@@ -222,91 +271,109 @@
  * content column), so the rail's `position: sticky` has the whole page's
  * scroll room, and only the content column scrolls under it. */
 .dcc-docs__layout {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) 13rem;
-  gap: 3rem;
-  align-items: start;
+	display: grid;
+	grid-template-columns: minmax(0, 1fr) 13rem;
+	gap: 3rem;
+	align-items: start;
 }
-.dcc-docs__body { min-width: 0; }
+.dcc-docs__body {
+	min-width: 0;
+}
 .dcc-docs__onpage {
-  width: 12rem;
-  font-size: var(--dcc-docs-text-sm);
-  position: sticky;
-  top: 1.5rem;
+	width: 12rem;
+	font-size: var(--dcc-docs-text-sm);
+	position: sticky;
+	top: 1.5rem;
 }
 @media (max-width: 64rem) {
-  .dcc-docs__layout { grid-template-columns: 1fr; gap: 0; }
-  .dcc-docs__onpage { position: static; width: auto; margin-bottom: 1.5rem; }
+	.dcc-docs__layout {
+		grid-template-columns: 1fr;
+		gap: 0;
+	}
+	.dcc-docs__onpage {
+		position: static;
+		width: auto;
+		margin-bottom: 1.5rem;
+	}
 }
 .dcc-docs__onpage-title {
-  font-weight: 700;
-  text-transform: uppercase;
-  font-size: var(--dcc-docs-text-xs);
-  letter-spacing: 0.06em;
-  color: var(--dcc-muted);
-  margin: 0 0 0.5rem;
+	font-weight: 700;
+	text-transform: uppercase;
+	font-size: var(--dcc-docs-text-xs);
+	letter-spacing: 0.06em;
+	color: var(--dcc-muted);
+	margin: 0 0 0.5rem;
 }
 .dcc-docs__onpage ul {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-  border-left: 1px solid var(--dcc-border);
+	list-style: none;
+	padding: 0;
+	margin: 0;
+	border-left: 1px solid var(--dcc-border);
 }
 .dcc-docs__onpage li a {
-  display: block;
-  padding: 0.25rem 0.85rem;
-  color: var(--dcc-muted);
-  text-decoration: none;
-  border-left: 1px solid transparent;
-  margin-left: -1px;
-  transition: color 0.12s ease, border-color 0.12s ease;
+	display: block;
+	padding: 0.25rem 0.85rem;
+	color: var(--dcc-muted);
+	text-decoration: none;
+	border-left: 1px solid transparent;
+	margin-left: -1px;
+	transition:
+		color 0.12s ease,
+		border-color 0.12s ease;
 }
 .dcc-docs__onpage li a:hover {
-  color: var(--dcc-docs-accent);
-  border-left-color: var(--dcc-docs-accent);
+	color: var(--dcc-docs-accent);
+	border-left-color: var(--dcc-docs-accent);
 }
 
 /* ==================================================== setters table === */
 
-.dcc-docs__props { margin-top: 2.75rem; }
-.dcc-docs__props h2 {
-  margin-bottom: 0.75rem;
-  font-size: var(--dcc-docs-text-lg);
-  font-weight: 700;
+.dcc-docs__props {
+	margin-top: 2.75rem;
 }
-.dcc-docs__props table { width: 100%; border-collapse: collapse; }
+.dcc-docs__props h2 {
+	margin-bottom: 0.75rem;
+	font-size: var(--dcc-docs-text-lg);
+	font-weight: 700;
+}
+.dcc-docs__props table {
+	width: 100%;
+	border-collapse: collapse;
+}
 .dcc-docs__props th {
-  text-align: left;
-  font-size: var(--dcc-docs-text-xs);
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  color: var(--dcc-muted);
-  border-bottom: 2px solid var(--dcc-border);
-  padding: 0.5rem 0.65rem;
+	text-align: left;
+	font-size: var(--dcc-docs-text-xs);
+	text-transform: uppercase;
+	letter-spacing: 0.05em;
+	color: var(--dcc-muted);
+	border-bottom: 2px solid var(--dcc-border);
+	padding: 0.5rem 0.65rem;
 }
 .dcc-docs__props td {
-  border-bottom: 1px solid var(--dcc-border);
-  padding: 0.55rem 0.65rem;
-  font-size: var(--dcc-docs-text-sm);
-  vertical-align: top;
+	border-bottom: 1px solid var(--dcc-border);
+	padding: 0.55rem 0.65rem;
+	font-size: var(--dcc-docs-text-sm);
+	vertical-align: top;
 }
-.dcc-docs__props tbody tr:hover { background: color-mix(in srgb, var(--dcc-border) 20%, transparent); }
+.dcc-docs__props tbody tr:hover {
+	background: color-mix(in srgb, var(--dcc-border) 20%, transparent);
+}
 .dcc-docs__props td code {
-  color: var(--dcc-docs-accent);
-  font-family: var(--dcc-docs-code-font);
+	color: var(--dcc-docs-accent);
+	font-family: var(--dcc-docs-code-font);
 }
 
 /* ====================================================== filler chips === */
 
 .dcc-docs__chip {
-  display: inline-flex;
-  align-items: center;
-  padding: 0.4rem 0.9rem;
-  border-radius: var(--dcc-radius);
-  background: var(--dcc-docs-accent-soft);
-  color: var(--dcc-docs-accent);
-  font-size: var(--dcc-docs-text-sm);
-  font-weight: 600;
+	display: inline-flex;
+	align-items: center;
+	padding: 0.4rem 0.9rem;
+	border-radius: var(--dcc-radius);
+	background: var(--dcc-docs-accent-soft);
+	color: var(--dcc-docs-accent);
+	font-size: var(--dcc-docs-text-sm);
+	font-weight: 600;
 }
 
 /* ======================================================== demo card === */
@@ -315,190 +382,215 @@
  * that needs to escape the preview box. Round the first/last child instead
  * and keep the card `overflow: visible`. */
 .dcc-democard {
-  border: 1px solid var(--dcc-border);
-  border-radius: calc(var(--dcc-radius) + 0.35rem);
-  margin: 1.75rem 0;
-  clear: both;
-  background: var(--dcc-surface);
-  box-shadow: 0 1px 2px rgb(0 0 0 / 0.04), 0 8px 24px -16px rgb(0 0 0 / 0.15);
+	border: 1px solid var(--dcc-border);
+	border-radius: calc(var(--dcc-radius) + 0.35rem);
+	margin: 1.75rem 0;
+	clear: both;
+	background: var(--dcc-surface);
+	box-shadow:
+		0 1px 2px rgb(0 0 0 / 0.04),
+		0 8px 24px -16px rgb(0 0 0 / 0.15);
 }
 .dcc-democard > :first-child {
-  border-radius: calc(var(--dcc-radius) + 0.35rem) calc(var(--dcc-radius) + 0.35rem) 0 0;
+	border-radius: calc(var(--dcc-radius) + 0.35rem)
+		calc(var(--dcc-radius) + 0.35rem) 0 0;
 }
 .dcc-democard > :last-child {
-  border-radius: 0 0 calc(var(--dcc-radius) + 0.35rem) calc(var(--dcc-radius) + 0.35rem);
+	border-radius: 0 0 calc(var(--dcc-radius) + 0.35rem)
+		calc(var(--dcc-radius) + 0.35rem);
 }
 .dcc-democard__title {
-  margin: 0;
-  padding: 0.7rem 1.15rem;
-  font-size: var(--dcc-docs-text-sm);
-  font-weight: 600;
-  letter-spacing: 0.01em;
-  color: var(--dcc-fg);
-  background: color-mix(in srgb, var(--dcc-border) 20%, transparent);
-  border-bottom: 1px solid var(--dcc-border);
+	margin: 0;
+	padding: 0.7rem 1.15rem;
+	font-size: var(--dcc-docs-text-sm);
+	font-weight: 600;
+	letter-spacing: 0.01em;
+	color: var(--dcc-fg);
+	background: color-mix(in srgb, var(--dcc-border) 20%, transparent);
+	border-bottom: 1px solid var(--dcc-border);
 }
 .dcc-democard__note {
-  margin: 0;
-  padding: 0.65rem 1.15rem 0;
-  color: var(--dcc-muted);
-  font-size: var(--dcc-docs-text-sm);
+	margin: 0;
+	padding: 0.65rem 1.15rem 0;
+	color: var(--dcc-muted);
+	font-size: var(--dcc-docs-text-sm);
 }
 .dcc-democard__preview {
-  padding: 1.75rem 1.5rem;
-  border-bottom: 1px solid var(--dcc-border);
-  background: var(--dcc-bg);
-  position: relative;
+	padding: 1.75rem 1.5rem;
+	border-bottom: 1px solid var(--dcc-border);
+	background: var(--dcc-bg);
+	position: relative;
 }
 .dcc-democard__code {
-  position: relative;
-  background: var(--dcc-docs-code-bg);
-  overflow: hidden;
+	position: relative;
+	background: var(--dcc-docs-code-bg);
+	overflow: hidden;
 }
 .dcc-democard__code pre {
-  margin: 0;
-  padding: 1.05rem 1.15rem;
-  overflow-x: auto;
-  font-size: var(--dcc-docs-text-sm);
-  line-height: 1.6;
-  color: var(--dcc-docs-code-fg);
-  font-family: var(--dcc-docs-code-font);
+	margin: 0;
+	padding: 1.05rem 1.15rem;
+	overflow-x: auto;
+	font-size: var(--dcc-docs-text-sm);
+	line-height: 1.6;
+	color: var(--dcc-docs-code-fg);
+	font-family: var(--dcc-docs-code-font);
 }
 .dcc-democard__copy {
-  position: absolute;
-  top: 0.6rem;
-  right: 0.6rem;
-  border: 1px solid color-mix(in srgb, var(--dcc-docs-code-fg) 22%, transparent);
-  background: color-mix(in srgb, var(--dcc-docs-code-fg) 8%, transparent);
-  color: var(--dcc-docs-code-fg);
-  border-radius: 0.5rem;
-  padding: 0.25rem 0.65rem;
-  font-size: var(--dcc-docs-text-xs);
-  font-weight: 600;
-  cursor: pointer;
-  transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+	position: absolute;
+	top: 0.6rem;
+	right: 0.6rem;
+	border: 1px solid color-mix(in srgb, var(--dcc-docs-code-fg) 22%, transparent);
+	background: color-mix(in srgb, var(--dcc-docs-code-fg) 8%, transparent);
+	color: var(--dcc-docs-code-fg);
+	border-radius: 0.5rem;
+	padding: 0.25rem 0.65rem;
+	font-size: var(--dcc-docs-text-xs);
+	font-weight: 600;
+	cursor: pointer;
+	transition:
+		background 0.15s ease,
+		color 0.15s ease,
+		border-color 0.15s ease;
 }
 .dcc-democard__copy:hover {
-  background: var(--dcc-docs-accent);
-  color: var(--dcc-docs-accent-fg);
-  border-color: var(--dcc-docs-accent);
+	background: var(--dcc-docs-accent);
+	color: var(--dcc-docs-accent-fg);
+	border-color: var(--dcc-docs-accent);
 }
 .dcc-democard__copy:focus-visible {
-  outline: 2px solid var(--dcc-docs-accent);
-  outline-offset: 2px;
+	outline: 2px solid var(--dcc-docs-accent);
+	outline-offset: 2px;
 }
 
 /* ======================================== table zebra so rows read === */
 
 .dcc-table tbody tr:nth-child(even) {
-  background: color-mix(in srgb, var(--dcc-border) 22%, transparent);
+	background: color-mix(in srgb, var(--dcc-border) 22%, transparent);
 }
 .dcc-table tbody tr:hover {
-  background: var(--dcc-docs-accent-soft);
+	background: var(--dcc-docs-accent-soft);
 }
 
 /* ============================================================= home === */
 
 .dcc-home__hero {
-  padding: 1rem 0 2.25rem;
-  border-bottom: 1px solid var(--dcc-border);
-  margin-bottom: 2.75rem;
+	padding: 1rem 0 2.25rem;
+	border-bottom: 1px solid var(--dcc-border);
+	margin-bottom: 2.75rem;
 }
 .dcc-home__badges {
-  display: flex;
-  align-items: center;
-  gap: 0.6rem;
-  flex-wrap: wrap;
-  margin-bottom: 1rem;
+	display: flex;
+	align-items: center;
+	gap: 0.6rem;
+	flex-wrap: wrap;
+	margin-bottom: 1rem;
 }
 .dcc-home__pill {
-  background: var(--dcc-docs-accent-soft);
-  border: 1px solid var(--dcc-docs-accent-line);
-  border-radius: 999px;
-  padding: 0.2rem 0.7rem;
-  font-size: var(--dcc-docs-text-xs);
-  font-weight: 600;
-  color: var(--dcc-docs-accent);
+	background: var(--dcc-docs-accent-soft);
+	border: 1px solid var(--dcc-docs-accent-line);
+	border-radius: 999px;
+	padding: 0.2rem 0.7rem;
+	font-size: var(--dcc-docs-text-xs);
+	font-weight: 600;
+	color: var(--dcc-docs-accent);
 }
 .dcc-home__title {
-  font-size: clamp(2rem, 5vw, 2.75rem);
-  font-weight: 800;
-  letter-spacing: -0.03em;
-  margin: 0 0 0.75rem;
-  color: var(--dcc-fg);
+	font-size: clamp(2rem, 5vw, 2.75rem);
+	font-weight: 800;
+	letter-spacing: -0.03em;
+	margin: 0 0 0.75rem;
+	color: var(--dcc-fg);
 }
 .dcc-home__subtitle {
-  font-size: var(--dcc-docs-text-lg);
-  color: var(--dcc-muted);
-  max-width: 60ch;
-  line-height: 1.6;
-  margin: 0 0 1.5rem;
+	font-size: var(--dcc-docs-text-lg);
+	color: var(--dcc-muted);
+	max-width: 60ch;
+	line-height: 1.6;
+	margin: 0 0 1.5rem;
 }
-.dcc-home__cta { display: flex; gap: 0.75rem; flex-wrap: wrap; }
+.dcc-home__cta {
+	display: flex;
+	gap: 0.75rem;
+	flex-wrap: wrap;
+}
 
 .dcc-home__sectiontitle {
-  font-size: var(--dcc-docs-text-xl);
-  font-weight: 700;
-  letter-spacing: -0.01em;
-  margin: 0 0 1.25rem;
+	font-size: var(--dcc-docs-text-xl);
+	font-weight: 700;
+	letter-spacing: -0.01em;
+	margin: 0 0 1.25rem;
 }
 .dcc-home__grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(18rem, 1fr));
-  gap: 1.25rem;
-  margin-bottom: 3rem;
+	display: grid;
+	grid-template-columns: repeat(auto-fill, minmax(18rem, 1fr));
+	gap: 1.25rem;
+	margin-bottom: 3rem;
 }
 .dcc-home__card {
-  background: var(--dcc-surface);
-  border: 1px solid var(--dcc-border);
-  border-radius: calc(var(--dcc-radius) + 0.35rem);
-  padding: 1.5rem;
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-  transition: transform 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
+	background: var(--dcc-surface);
+	border: 1px solid var(--dcc-border);
+	border-radius: calc(var(--dcc-radius) + 0.35rem);
+	padding: 1.5rem;
+	display: flex;
+	flex-direction: column;
+	gap: 1rem;
+	transition:
+		transform 0.15s ease,
+		border-color 0.15s ease,
+		box-shadow 0.15s ease;
 }
 .dcc-home__card:hover {
-  transform: translateY(-2px);
-  border-color: var(--dcc-docs-accent);
-  box-shadow: 0 12px 28px -18px rgb(0 0 0 / 0.35);
+	transform: translateY(-2px);
+	border-color: var(--dcc-docs-accent);
+	box-shadow: 0 12px 28px -18px rgb(0 0 0 / 0.35);
 }
 .dcc-home__card-icon {
-  width: 2.5rem;
-  height: 2.5rem;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 1.15rem;
-  color: var(--dcc-docs-accent);
-  background: var(--dcc-docs-accent-soft);
-  border-radius: 0.75rem;
+	width: 2.5rem;
+	height: 2.5rem;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	font-size: 1.15rem;
+	color: var(--dcc-docs-accent);
+	background: var(--dcc-docs-accent-soft);
+	border-radius: 0.75rem;
 }
-.dcc-home__card-title { font-size: var(--dcc-docs-text-lg); font-weight: 700; margin: 0; }
+.dcc-home__card-title {
+	font-size: var(--dcc-docs-text-lg);
+	font-weight: 700;
+	margin: 0;
+}
 .dcc-home__card-desc {
-  color: var(--dcc-muted);
-  font-size: var(--dcc-docs-text-sm);
-  line-height: 1.6;
-  margin: 0;
-  flex: 1;
+	color: var(--dcc-muted);
+	font-size: var(--dcc-docs-text-sm);
+	line-height: 1.6;
+	margin: 0;
+	flex: 1;
 }
-.dcc-home__card a { align-self: flex-start; }
+.dcc-home__card a {
+	align-self: flex-start;
+}
 
 /* ---- nav-block catalog previews: unpin the Sidebar so it sits in the card */
 .dcc-democard__preview .dcc-panel__nav {
-  position: static;
-  width: 17rem;
-  max-width: 100%;
-  min-height: 0;
-  border: 1px solid var(--dcc-border);
-  border-inline-end: 1px solid var(--dcc-border);
-  border-radius: var(--dcc-radius);
-  background: var(--dcc-bg);
+	position: static;
+	width: 17rem;
+	max-width: 100%;
+	min-height: 0;
+	border: 1px solid var(--dcc-border);
+	border-inline-end: 1px solid var(--dcc-border);
+	border-radius: var(--dcc-radius);
+	background: var(--dcc-bg);
 }
 
 /* ======================================================== reduced motion */
 
 @media (prefers-reduced-motion: reduce) {
-  * { transition-duration: 0.01ms !important; animation-duration: 0.01ms !important; }
-  .dcc-home__card:hover { transform: none; }
+	* {
+		transition-duration: 0.01ms !important;
+		animation-duration: 0.01ms !important;
+	}
+	.dcc-home__card:hover {
+		transform: none;
+	}
 }

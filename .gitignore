@@ -11,7 +11,7 @@ dist/
 venv/
 
 # uv
-# uv.lock IS committed — it is the reproducible lock for contributors
+# uv.lock IS committed - it is the reproducible lock for contributors
 
 # Tooling caches
 .pytest_cache/

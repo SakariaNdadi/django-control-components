@@ -1,724 +1,746 @@
 /*
- * django-control-components — small Alpine helpers.
+ * django-control-components - small Alpine helpers.
  * Registered on alpine:init so inline x-data="dccSelect('id')" resolves.
  * No network calls: the select filters options already in the page.
  */
 (function () {
-  // Widget renderer registry. A charting library registers a function that
-  // draws into a mount node given the widget's JSON payload. Defined before
-  // alpine:init so a third-party <script> can call it at any time:
-  //   window.dccWidgets.register("apexcharts", (node, payload) => { ... })
-  window.dccWidgets = window.dccWidgets || {
-    renderers: {},
-    register: function (name, fn) {
-      this.renderers[name] = fn;
-    },
-  };
+	// Widget renderer registry. A charting library registers a function that
+	// draws into a mount node given the widget's JSON payload. Defined before
+	// alpine:init so a third-party <script> can call it at any time:
+	//   window.dccWidgets.register("apexcharts", (node, payload) => { ... })
+	window.dccWidgets = window.dccWidgets || {
+		renderers: {},
+		register: function (name, fn) {
+			this.renderers[name] = fn;
+		},
+	};
 
-  // Apply payload.palette to any dataset that did not bring its own colours.
-  // A hand-built {labels, datasets:[{backgroundColor: ...}]} is left untouched.
-  function applyPalette(payload) {
-    var palette = payload.palette;
-    if (!palette || !palette.length || !payload.data) return;
-    var perPoint = /^(pie|doughnut|polarArea)$/.test(payload.type);
-    (payload.data.datasets || []).forEach(function (ds, i) {
-      var cycle = function (n) {
-        var out = [];
-        for (var k = 0; k < n; k++) out.push(palette[k % palette.length]);
-        return out;
-      };
-      if (perPoint) {
-        if (ds.backgroundColor == null) ds.backgroundColor = cycle((ds.data || []).length);
-      } else if (payload.type === "bar") {
-        if (ds.backgroundColor == null) ds.backgroundColor = cycle((ds.data || []).length);
-      } else {
-        var c = palette[i % palette.length];
-        if (ds.borderColor == null) ds.borderColor = c;
-        if (ds.backgroundColor == null) ds.backgroundColor = c + "33"; // ~20% alpha
-      }
-    });
-  }
+	// Apply payload.palette to any dataset that did not bring its own colours.
+	// A hand-built {labels, datasets:[{backgroundColor: ...}]} is left untouched.
+	function applyPalette(payload) {
+		var palette = payload.palette;
+		if (!palette || !palette.length || !payload.data) return;
+		var perPoint = /^(pie|doughnut|polarArea)$/.test(payload.type);
+		(payload.data.datasets || []).forEach(function (ds, i) {
+			var cycle = function (n) {
+				var out = [];
+				for (var k = 0; k < n; k++) out.push(palette[k % palette.length]);
+				return out;
+			};
+			if (perPoint) {
+				if (ds.backgroundColor == null)
+					ds.backgroundColor = cycle((ds.data || []).length);
+			} else if (payload.type === "bar") {
+				if (ds.backgroundColor == null)
+					ds.backgroundColor = cycle((ds.data || []).length);
+			} else {
+				var c = palette[i % palette.length];
+				if (ds.borderColor == null) ds.borderColor = c;
+				if (ds.backgroundColor == null) ds.backgroundColor = c + "33"; // ~20% alpha
+			}
+		});
+	}
 
-  // Chart.js is the built-in renderer. It may `defer` in after Alpine, so
-  // register lazily on first use rather than at alpine:init.
-  function ensureChartjsRenderer() {
-    if (!window.dccWidgets.renderers.chartjs && window.Chart) {
-      window.dccWidgets.register("chartjs", function (canvas, payload) {
-        applyPalette(payload);
-        return new window.Chart(canvas, {
-          type: payload.type,
-          data: payload.data,
-          options: payload.options,
-        });
-      });
-    }
-  }
+	// Chart.js is the built-in renderer. It may `defer` in after Alpine, so
+	// register lazily on first use rather than at alpine:init.
+	function ensureChartjsRenderer() {
+		if (!window.dccWidgets.renderers.chartjs && window.Chart) {
+			window.dccWidgets.register("chartjs", function (canvas, payload) {
+				applyPalette(payload);
+				return new window.Chart(canvas, {
+					type: payload.type,
+					data: payload.data,
+					options: payload.options,
+				});
+			});
+		}
+	}
 
-  // django-control-components was built and tested against Alpine 3.x. A host
-  // that adds its own Alpine <script> (instead of passing alpine=False to
-  // {% dcc_assets %} and owning the load order) risks two Alpine cores
-  // fighting over the same DOM, or a version this library was never tested
-  // against. Neither is detectable from Python at request time - the check
-  // has to run here, once Alpine itself is on the page.
-  var dccAlpineChecked = false;
-  function warnOnAlpineMismatch() {
-    if (dccAlpineChecked || !window.Alpine) return;
-    dccAlpineChecked = true;
-    var version = window.Alpine.version || "";
-    if (version && version.split(".")[0] !== "3") {
-      console.warn(
-        "[django-control-components] Alpine " +
-          version +
-          " detected; this package is built against Alpine 3.x. " +
-          "dccShell/modals/dropdowns/tables may misbehave. " +
-          'If you load your own Alpine, pass {% dcc_assets alpine=False %} and match versions.'
-      );
-    }
-  }
+	// django-control-components was built and tested against Alpine 3.x. A host
+	// that adds its own Alpine <script> (instead of passing alpine=False to
+	// {% dcc_assets %} and owning the load order) risks two Alpine cores
+	// fighting over the same DOM, or a version this library was never tested
+	// against. Neither is detectable from Python at request time - the check
+	// has to run here, once Alpine itself is on the page.
+	var dccAlpineChecked = false;
+	function warnOnAlpineMismatch() {
+		if (dccAlpineChecked || !window.Alpine) return;
+		dccAlpineChecked = true;
+		var version = window.Alpine.version || "";
+		if (version && version.split(".")[0] !== "3") {
+			console.warn(
+				"[django-control-components] Alpine " +
+					version +
+					" detected; this package is built against Alpine 3.x. " +
+					"dccShell/modals/dropdowns/tables may misbehave. " +
+					"If you load your own Alpine, pass {% dcc_assets alpine=False %} and match versions.",
+			);
+		}
+	}
 
-  function register() {
-    if (!window.Alpine) return;
-    warnOnAlpineMismatch();
+	function register() {
+		if (!window.Alpine) return;
+		warnOnAlpineMismatch();
 
-    // Reactive mirror of a form's field values, so `.visible_when(...)` (compiled
-    // to x-show="$dccField('name') == ...") re-evaluates when a sibling changes.
-    function fieldValue(el) {
-      if (el.type === "checkbox") return el.checked;
-      if (el.multiple) return Array.from(el.selectedOptions).map((o) => o.value);
-      return el.value;
-    }
-    window.Alpine.data("dccForm", () => ({
-      values: {},
-      init() {
-        const seen = new Set();
-        this.$root.querySelectorAll("[name]").forEach((el) => {
-          if (seen.has(el.name)) return;
-          seen.add(el.name);
-          this.values[el.name] = fieldValue(el);
-        });
-        this.$root.addEventListener("input", (e) => {
-          if (e.target.name) this.values[e.target.name] = fieldValue(e.target);
-        });
-        this.$root.addEventListener("change", (e) => {
-          if (e.target.name) this.values[e.target.name] = fieldValue(e.target);
-        });
-      },
-    }));
-    window.Alpine.magic("dccField", (el) => (name) => {
-      const host = el.closest(".dcc-form");
-      if (!host) return undefined;
-      const data = window.Alpine.$data(host);
-      return data && data.values ? data.values[name] : undefined;
-    });
+		// Reactive mirror of a form's field values, so `.visible_when(...)` (compiled
+		// to x-show="$dccField('name') == ...") re-evaluates when a sibling changes.
+		function fieldValue(el) {
+			if (el.type === "checkbox") return el.checked;
+			if (el.multiple)
+				return Array.from(el.selectedOptions).map((o) => o.value);
+			return el.value;
+		}
+		window.Alpine.data("dccForm", () => ({
+			values: {},
+			init() {
+				const seen = new Set();
+				this.$root.querySelectorAll("[name]").forEach((el) => {
+					if (seen.has(el.name)) return;
+					seen.add(el.name);
+					this.values[el.name] = fieldValue(el);
+				});
+				this.$root.addEventListener("input", (e) => {
+					if (e.target.name) this.values[e.target.name] = fieldValue(e.target);
+				});
+				this.$root.addEventListener("change", (e) => {
+					if (e.target.name) this.values[e.target.name] = fieldValue(e.target);
+				});
+			},
+		}));
+		window.Alpine.magic("dccField", (el) => (name) => {
+			const host = el.closest(".dcc-form");
+			if (!host) return undefined;
+			const data = window.Alpine.$data(host);
+			return data && data.values ? data.values[name] : undefined;
+		});
 
-    // Searchable/reactive select. Wraps a real <select x-ref="native"> (which
-    // still submits and works with JS off). `selected` is reactive state — the
-    // trigger label and option highlight read it, so picking an option updates
-    // the UI immediately; every change is mirrored onto the native <select>.
-    window.Alpine.data("dccSelect", (elId) => ({
-      open: false,
-      query: "",
-      options: [],
-      selected: [],
-      multiple: false,
-      searchable: false,
-      init() {
-        const blob = document.getElementById(elId);
-        try {
-          this.options = (blob ? JSON.parse(blob.textContent) : []).map((o) =>
-            Array.isArray(o) ? { value: String(o[0]), label: String(o[1]) } : o
-          );
-        } catch (e) {
-          this.options = [];
-        }
-        const ds = this.$root.dataset || {};
-        this.multiple = ds.multiple === "1" || !!this.native.multiple;
-        this.searchable = ds.searchable === "1";
-        this.selected = Array.from(this.native.selectedOptions).map((o) => o.value);
-        // keep in sync if something else writes to the native select
-        this.native.addEventListener("change", () => {
-          this.selected = Array.from(this.native.selectedOptions).map((o) => o.value);
-        });
-      },
-      get native() {
-        return this.$refs.native;
-      },
-      toggle() {
-        this.open = !this.open;
-        if (this.open && this.searchable) {
-          this.$nextTick(() => this.$refs.search && this.$refs.search.focus());
-        }
-      },
-      close() {
-        this.open = false;
-        this.query = "";
-      },
-      filtered() {
-        const q = this.query.toLowerCase();
-        return q
-          ? this.options.filter((o) => o.label.toLowerCase().includes(q))
-          : this.options;
-      },
-      isSelected(value) {
-        return this.selected.includes(String(value));
-      },
-      choose(value) {
-        const v = String(value);
-        if (this.multiple) {
-          this.selected = this.isSelected(v)
-            ? this.selected.filter((x) => x !== v)
-            : [...this.selected, v];
-        } else {
-          this.selected = [v];
-          this.close();
-        }
-        Array.from(this.native.options).forEach((o) => {
-          o.selected = this.selected.includes(o.value);
-        });
-        this.native.dispatchEvent(new Event("change", { bubbles: true }));
-      },
-      triggerLabel() {
-        if (!this.selected.length) return "";
-        return this.options
-          .filter((o) => this.selected.includes(o.value))
-          .map((o) => o.label)
-          .join(", ");
-      },
-    }));
+		// Searchable/reactive select. Wraps a real <select x-ref="native"> (which
+		// still submits and works with JS off). `selected` is reactive state - the
+		// trigger label and option highlight read it, so picking an option updates
+		// the UI immediately; every change is mirrored onto the native <select>.
+		window.Alpine.data("dccSelect", (elId) => ({
+			open: false,
+			query: "",
+			options: [],
+			selected: [],
+			multiple: false,
+			searchable: false,
+			init() {
+				const blob = document.getElementById(elId);
+				try {
+					this.options = (blob ? JSON.parse(blob.textContent) : []).map((o) =>
+						Array.isArray(o) ? { value: String(o[0]), label: String(o[1]) } : o,
+					);
+				} catch (e) {
+					this.options = [];
+				}
+				const ds = this.$root.dataset || {};
+				this.multiple = ds.multiple === "1" || !!this.native.multiple;
+				this.searchable = ds.searchable === "1";
+				this.selected = Array.from(this.native.selectedOptions).map(
+					(o) => o.value,
+				);
+				// keep in sync if something else writes to the native select
+				this.native.addEventListener("change", () => {
+					this.selected = Array.from(this.native.selectedOptions).map(
+						(o) => o.value,
+					);
+				});
+			},
+			get native() {
+				return this.$refs.native;
+			},
+			toggle() {
+				this.open = !this.open;
+				if (this.open && this.searchable) {
+					this.$nextTick(() => this.$refs.search && this.$refs.search.focus());
+				}
+			},
+			close() {
+				this.open = false;
+				this.query = "";
+			},
+			filtered() {
+				const q = this.query.toLowerCase();
+				return q
+					? this.options.filter((o) => o.label.toLowerCase().includes(q))
+					: this.options;
+			},
+			isSelected(value) {
+				return this.selected.includes(String(value));
+			},
+			choose(value) {
+				const v = String(value);
+				if (this.multiple) {
+					this.selected = this.isSelected(v)
+						? this.selected.filter((x) => x !== v)
+						: [...this.selected, v];
+				} else {
+					this.selected = [v];
+					this.close();
+				}
+				Array.from(this.native.options).forEach((o) => {
+					o.selected = this.selected.includes(o.value);
+				});
+				this.native.dispatchEvent(new Event("change", { bubbles: true }));
+			},
+			triggerLabel() {
+				if (!this.selected.length) return "";
+				return this.options
+					.filter((o) => this.selected.includes(o.value))
+					.map((o) => o.label)
+					.join(", ");
+			},
+		}));
 
-    // Row selection for bulk actions. Shared by the client-side table engine
-    // (dccTable) and by dccBulk (server-side tables). `selected` is an array of
-    // pk strings bound to the row checkboxes via x-model; the bulk trigger reads
-    // the checked boxes straight from the DOM through hx-include.
-    //
-    // A module-level cache keyed by table id keeps the selection alive across
-    // htmx content swaps (a client-mode filter re-creates the whole dccTable).
-    const _selCache = Object.create(null);
-    // A mutating action fires dcc:refresh (htmx re-emits it on <body>); every
-    // table then drops any stale selection. One listener, bound once.
-    let _refreshBound = false;
-    function bindGlobalRefresh() {
-      if (_refreshBound) return;
-      _refreshBound = true;
-      document.body.addEventListener("dcc:refresh", () => {
-        for (const key in _selCache) delete _selCache[key];
-      });
-    }
+		// Row selection for bulk actions. Shared by the client-side table engine
+		// (dccTable) and by dccBulk (server-side tables). `selected` is an array of
+		// pk strings bound to the row checkboxes via x-model; the bulk trigger reads
+		// the checked boxes straight from the DOM through hx-include.
+		//
+		// A module-level cache keyed by table id keeps the selection alive across
+		// htmx content swaps (a client-mode filter re-creates the whole dccTable).
+		const _selCache = Object.create(null);
+		// A mutating action fires dcc:refresh (htmx re-emits it on <body>); every
+		// table then drops any stale selection. One listener, bound once.
+		let _refreshBound = false;
+		function bindGlobalRefresh() {
+			if (_refreshBound) return;
+			_refreshBound = true;
+			document.body.addEventListener("dcc:refresh", () => {
+				for (const key in _selCache) delete _selCache[key];
+			});
+		}
 
-    // NOTE: `selectedCount` / `allSelected` are METHODS, not getters — this
-    // object is spread into the host components (`{ ...selectionState() }`) and
-    // object spread would freeze a getter to its one-time value. Templates call
-    // `selectedCount()` / `allSelected()`.
-    function selectionState() {
-      return {
-        selected: [],
-        selectAll: false, // "every row matching the filter", not just this page
-        _selId: "",
-        // Restore any cached selection and start mirroring changes back into the
-        // cache. Called from each host's init() once $root/refs are live.
-        _bindSelection(id) {
-          this._selId = id;
-          bindGlobalRefresh();
-          const cached = _selCache[id];
-          this.selected = cached ? cached.selected.slice() : [];
-          this.selectAll = cached ? cached.selectAll : false;
-          const save = () => {
-            _selCache[id] = {
-              selected: this.selected.slice(),
-              selectAll: this.selectAll,
-            };
-          };
-          this.$watch("selected", save);
-          this.$watch("selectAll", save);
-        },
-        rowCount() {
-          return this.$root ? this.$root.querySelectorAll("[data-dcc-bulk]").length : 0;
-        },
-        selectedCount() {
-          return this.selected.length;
-        },
-        allSelected() {
-          const n = this.rowCount();
-          return n > 0 && this.selected.length >= n;
-        },
-        toggleAll(checked) {
-          if (checked) {
-            this.selected = Array.from(
-              this.$root.querySelectorAll("[data-dcc-bulk]")
-            ).map((el) => el.value);
-          } else {
-            this.selected = [];
-            this.selectAll = false;
-          }
-        },
-        clearSelection() {
-          this.selected = [];
-          this.selectAll = false;
-        },
-      };
-    }
+		// NOTE: `selectedCount` / `allSelected` are METHODS, not getters - this
+		// object is spread into the host components (`{ ...selectionState() }`) and
+		// object spread would freeze a getter to its one-time value. Templates call
+		// `selectedCount()` / `allSelected()`.
+		function selectionState() {
+			return {
+				selected: [],
+				selectAll: false, // "every row matching the filter", not just this page
+				_selId: "",
+				// Restore any cached selection and start mirroring changes back into the
+				// cache. Called from each host's init() once $root/refs are live.
+				_bindSelection(id) {
+					this._selId = id;
+					bindGlobalRefresh();
+					const cached = _selCache[id];
+					this.selected = cached ? cached.selected.slice() : [];
+					this.selectAll = cached ? cached.selectAll : false;
+					const save = () => {
+						_selCache[id] = {
+							selected: this.selected.slice(),
+							selectAll: this.selectAll,
+						};
+					};
+					this.$watch("selected", save);
+					this.$watch("selectAll", save);
+				},
+				rowCount() {
+					return this.$root
+						? this.$root.querySelectorAll("[data-dcc-bulk]").length
+						: 0;
+				},
+				selectedCount() {
+					return this.selected.length;
+				},
+				allSelected() {
+					const n = this.rowCount();
+					return n > 0 && this.selected.length >= n;
+				},
+				toggleAll(checked) {
+					if (checked) {
+						this.selected = Array.from(
+							this.$root.querySelectorAll("[data-dcc-bulk]"),
+						).map((el) => el.value);
+					} else {
+						this.selected = [];
+						this.selectAll = false;
+					}
+				},
+				clearSelection() {
+					this.selected = [];
+					this.selectAll = false;
+				},
+			};
+		}
 
-    window.Alpine.data("dccBulk", () => ({
-      ...selectionState(),
-      init() {
-        this._bindSelection(this.$root.id);
-      },
-    }));
+		window.Alpine.data("dccBulk", () => ({
+			...selectionState(),
+			init() {
+				this._bindSelection(this.$root.id);
+			},
+		}));
 
-    // Client-side table: rows are server-rendered <tr data-dcc-pk>. This
-    // component filters/sorts/paginates by reordering and x-show-ing those
-    // real nodes, so rich cells and row actions keep working. Zero requests.
-    window.Alpine.data("dccTable", (configId) => ({
-      ...selectionState(),
-      meta: {},            // pk -> {"0": text, "1": text, ...}
-      order: [],           // pk order as delivered by the server
-      search: "",
-      sortIndex: null,
-      sortDir: 1,
-      page: 1,
-      perPage: 25,
-      limit: 25,           // infinite-scroll: rows shown so far
-      infiniteScroll: false,
-      matchCount: 0,
-      _visible: new Set(),
-      init() {
-        try {
-          const el = document.getElementById(configId);
-          const cfg = el ? JSON.parse(el.textContent) : {};
-          this.perPage = cfg.perPage || 25;
-          this.limit = this.perPage;
-          this.infiniteScroll = !!cfg.infiniteScroll;
-          (cfg.rows || []).forEach((r) => {
-            this.order.push(r._pk);
-            this.meta[r._pk] = r;
-          });
-        } catch (e) {
-          /* keep empty */
-        }
-        this._bindSelection(configId.replace(/-config$/, ""));
-        this.$watch("search", () => {
-          this.page = 1;
-          this.limit = this.perPage;
-          this.recompute();
-        });
-        this.$watch("perPage", () => {
-          this.page = 1;
-          this.limit = this.perPage;
-          this.recompute();
-        });
-        if (this.infiniteScroll) this._observeSentinel();
-        this.recompute();
-      },
-      _observeSentinel() {
-        const sentinel = this.$root.querySelector("[data-dcc-sentinel]");
-        if (!sentinel || !window.IntersectionObserver) return;
-        new IntersectionObserver((entries) => {
-          if (entries.some((e) => e.isIntersecting)) this.loadMore();
-        }).observe(sentinel);
-      },
-      loadMore() {
-        if (this.limit < this.matchCount) {
-          this.limit += this.perPage;
-          this.recompute();
-        }
-      },
-      _matches(pk) {
-        const row = this.meta[pk] || {};
-        const q = this.search.trim().toLowerCase();
-        if (q) {
-          const hay = Object.keys(row)
-            .filter((k) => k !== "_pk")
-            .map((k) => String(row[k]).toLowerCase())
-            .join(" ");
-          if (!hay.includes(q)) return false;
-        }
-        return true;
-      },
-      _sorted(pks) {
-        if (this.sortIndex === null) return pks;
-        const idx = String(this.sortIndex);
-        return [...pks].sort((a, b) => {
-          const av = (this.meta[a] || {})[idx] ?? "";
-          const bv = (this.meta[b] || {})[idx] ?? "";
-          const an = parseFloat(av);
-          const bn = parseFloat(bv);
-          const cmp =
-            !isNaN(an) && !isNaN(bn)
-              ? an - bn
-              : String(av).localeCompare(String(bv), undefined, { sensitivity: "base" });
-          return cmp * this.sortDir;
-        });
-      },
-      recompute() {
-        const kept = this._sorted(this.order.filter((pk) => this._matches(pk)));
-        this.matchCount = kept.length;
-        let pagep;
-        if (this.infiniteScroll) {
-          pagep = kept.slice(0, this.limit);
-        } else {
-          if (this.page > this.totalPages()) this.page = this.totalPages();
-          const start = (this.page - 1) * this.perPage;
-          pagep = kept.slice(start, start + this.perPage);
-        }
-        this._visible = new Set(pagep);
-        // reorder DOM to the sorted page order
-        const body = this.$refs.body;
-        if (body) {
-          pagep.forEach((pk) => {
-            const tr = body.querySelector(`[data-dcc-pk="${cssEscape(pk)}"]`);
-            if (tr) body.appendChild(tr);
-          });
-        }
-      },
-      isVisible(pk) {
-        return this._visible.has(String(pk));
-      },
-      totalPages() {
-        return Math.max(1, Math.ceil(this.matchCount / this.perPage));
-      },
-      sortBy(index) {
-        if (this.sortIndex === index) this.sortDir *= -1;
-        else {
-          this.sortIndex = index;
-          this.sortDir = 1;
-        }
-        this.page = 1;
-        this.recompute();
-      },
-      sortCue(index) {
-        if (this.sortIndex !== index) return "";
-        return this.sortDir === 1 ? "▲" : "▼";
-      },
-      nextPage() {
-        if (this.page < this.totalPages()) {
-          this.page++;
-          this.recompute();
-        }
-      },
-      prevPage() {
-        if (this.page > 1) {
-          this.page--;
-          this.recompute();
-        }
-      },
-    }));
+		// Client-side table: rows are server-rendered <tr data-dcc-pk>. This
+		// component filters/sorts/paginates by reordering and x-show-ing those
+		// real nodes, so rich cells and row actions keep working. Zero requests.
+		window.Alpine.data("dccTable", (configId) => ({
+			...selectionState(),
+			meta: {}, // pk -> {"0": text, "1": text, ...}
+			order: [], // pk order as delivered by the server
+			search: "",
+			sortIndex: null,
+			sortDir: 1,
+			page: 1,
+			perPage: 25,
+			limit: 25, // infinite-scroll: rows shown so far
+			infiniteScroll: false,
+			matchCount: 0,
+			_visible: new Set(),
+			init() {
+				try {
+					const el = document.getElementById(configId);
+					const cfg = el ? JSON.parse(el.textContent) : {};
+					this.perPage = cfg.perPage || 25;
+					this.limit = this.perPage;
+					this.infiniteScroll = !!cfg.infiniteScroll;
+					(cfg.rows || []).forEach((r) => {
+						this.order.push(r._pk);
+						this.meta[r._pk] = r;
+					});
+				} catch (e) {
+					/* keep empty */
+				}
+				this._bindSelection(configId.replace(/-config$/, ""));
+				this.$watch("search", () => {
+					this.page = 1;
+					this.limit = this.perPage;
+					this.recompute();
+				});
+				this.$watch("perPage", () => {
+					this.page = 1;
+					this.limit = this.perPage;
+					this.recompute();
+				});
+				if (this.infiniteScroll) this._observeSentinel();
+				this.recompute();
+			},
+			_observeSentinel() {
+				const sentinel = this.$root.querySelector("[data-dcc-sentinel]");
+				if (!sentinel || !window.IntersectionObserver) return;
+				new IntersectionObserver((entries) => {
+					if (entries.some((e) => e.isIntersecting)) this.loadMore();
+				}).observe(sentinel);
+			},
+			loadMore() {
+				if (this.limit < this.matchCount) {
+					this.limit += this.perPage;
+					this.recompute();
+				}
+			},
+			_matches(pk) {
+				const row = this.meta[pk] || {};
+				const q = this.search.trim().toLowerCase();
+				if (q) {
+					const hay = Object.keys(row)
+						.filter((k) => k !== "_pk")
+						.map((k) => String(row[k]).toLowerCase())
+						.join(" ");
+					if (!hay.includes(q)) return false;
+				}
+				return true;
+			},
+			_sorted(pks) {
+				if (this.sortIndex === null) return pks;
+				const idx = String(this.sortIndex);
+				return [...pks].sort((a, b) => {
+					const av = (this.meta[a] || {})[idx] ?? "";
+					const bv = (this.meta[b] || {})[idx] ?? "";
+					const an = parseFloat(av);
+					const bn = parseFloat(bv);
+					const cmp =
+						!isNaN(an) && !isNaN(bn)
+							? an - bn
+							: String(av).localeCompare(String(bv), undefined, {
+									sensitivity: "base",
+								});
+					return cmp * this.sortDir;
+				});
+			},
+			recompute() {
+				const kept = this._sorted(this.order.filter((pk) => this._matches(pk)));
+				this.matchCount = kept.length;
+				let pagep;
+				if (this.infiniteScroll) {
+					pagep = kept.slice(0, this.limit);
+				} else {
+					if (this.page > this.totalPages()) this.page = this.totalPages();
+					const start = (this.page - 1) * this.perPage;
+					pagep = kept.slice(start, start + this.perPage);
+				}
+				this._visible = new Set(pagep);
+				// reorder DOM to the sorted page order
+				const body = this.$refs.body;
+				if (body) {
+					pagep.forEach((pk) => {
+						const tr = body.querySelector(`[data-dcc-pk="${cssEscape(pk)}"]`);
+						if (tr) body.appendChild(tr);
+					});
+				}
+			},
+			isVisible(pk) {
+				return this._visible.has(String(pk));
+			},
+			totalPages() {
+				return Math.max(1, Math.ceil(this.matchCount / this.perPage));
+			},
+			sortBy(index) {
+				if (this.sortIndex === index) this.sortDir *= -1;
+				else {
+					this.sortIndex = index;
+					this.sortDir = 1;
+				}
+				this.page = 1;
+				this.recompute();
+			},
+			sortCue(index) {
+				if (this.sortIndex !== index) return "";
+				return this.sortDir === 1 ? "▲" : "▼";
+			},
+			nextPage() {
+				if (this.page < this.totalPages()) {
+					this.page++;
+					this.recompute();
+				}
+			},
+			prevPage() {
+				if (this.page > 1) {
+					this.page--;
+					this.recompute();
+				}
+			},
+		}));
 
-    function cssEscape(value) {
-      return String(value).replace(/["\\]/g, "\\$&");
-    }
+		function cssEscape(value) {
+			return String(value).replace(/["\\]/g, "\\$&");
+		}
 
-    // Dashboard chart widget. Reads a json_script payload (#<id>-data) and hands
-    // it to the registered renderer for payload.library, drawing into
-    // <canvas x-ref="canvas">. htmx swaps the whole #<id>-content fragment on
-    // refresh/poll, so init() re-runs on fresh nodes; destroy() tears the
-    // instance down so Chart.js does not leak the canvas.
-    window.Alpine.data("dccChart", (elId) => ({
-      _instance: null,
-      init() {
-        this._draw();
-      },
-      destroy() {
-        if (this._instance && typeof this._instance.destroy === "function") {
-          this._instance.destroy();
-        }
-        this._instance = null;
-      },
-      _payload() {
-        try {
-          const el = document.getElementById(elId);
-          return el ? JSON.parse(el.textContent) : null;
-        } catch (e) {
-          return null;
-        }
-      },
-      _draw(attempt) {
-        attempt = attempt || 0;
-        const payload = this._payload();
-        const canvas = this.$refs.canvas;
-        if (!payload || !canvas) return;
-        ensureChartjsRenderer();
-        const renderer = window.dccWidgets.renderers[payload.library];
-        if (!renderer) {
-          // Chart.js may still be loading (defer, after Alpine). Retry briefly.
-          if (payload.library === "chartjs" && attempt < 50) {
-            setTimeout(() => this._draw(attempt + 1), 100);
-          }
-          return;
-        }
-        // A stale Chart.js instance may still own this canvas after a swap.
-        if (window.Chart && typeof window.Chart.getChart === "function") {
-          const prior = window.Chart.getChart(canvas);
-          if (prior) prior.destroy();
-        }
-        this.destroy();
-        this._instance = renderer(canvas, payload) || null;
-      },
-    }));
+		// Dashboard chart widget. Reads a json_script payload (#<id>-data) and hands
+		// it to the registered renderer for payload.library, drawing into
+		// <canvas x-ref="canvas">. htmx swaps the whole #<id>-content fragment on
+		// refresh/poll, so init() re-runs on fresh nodes; destroy() tears the
+		// instance down so Chart.js does not leak the canvas.
+		window.Alpine.data("dccChart", (elId) => ({
+			_instance: null,
+			init() {
+				this._draw();
+			},
+			destroy() {
+				if (this._instance && typeof this._instance.destroy === "function") {
+					this._instance.destroy();
+				}
+				this._instance = null;
+			},
+			_payload() {
+				try {
+					const el = document.getElementById(elId);
+					return el ? JSON.parse(el.textContent) : null;
+				} catch (e) {
+					return null;
+				}
+			},
+			_draw(attempt) {
+				attempt = attempt || 0;
+				const payload = this._payload();
+				const canvas = this.$refs.canvas;
+				if (!payload || !canvas) return;
+				ensureChartjsRenderer();
+				const renderer = window.dccWidgets.renderers[payload.library];
+				if (!renderer) {
+					// Chart.js may still be loading (defer, after Alpine). Retry briefly.
+					if (payload.library === "chartjs" && attempt < 50) {
+						setTimeout(() => this._draw(attempt + 1), 100);
+					}
+					return;
+				}
+				// A stale Chart.js instance may still own this canvas after a swap.
+				if (window.Chart && typeof window.Chart.getChart === "function") {
+					const prior = window.Chart.getChart(canvas);
+					if (prior) prior.destroy();
+				}
+				this.destroy();
+				this._instance = renderer(canvas, payload) || null;
+			},
+		}));
 
-    // Panel shell: mobile nav drawer + a persisted colour-theme toggle that
-    // writes data-theme onto <html> (dcc.css keys its dark palette off it).
-    // One collapsible sidebar group. `x-data="dccNav('<group-id>')"` on the
-    // <li>; the initial state is `data-default-open` unless the viewer has
-    // toggled this group before (persisted under `dcc-nav-open`).
-    window.Alpine.data("dccNav", (id) => ({
-      _open: false,
-      init() {
-        let stored = null;
-        try {
-          stored = JSON.parse(localStorage.getItem("dcc-nav-open") || "{}")[id];
-        } catch (e) {
-          /* no storage */
-        }
-        this._open = stored != null ? !!stored : this.$el.dataset.defaultOpen === "1";
-      },
-      isOpen() {
-        return this._open;
-      },
-      toggle() {
-        this._open = !this._open;
-        try {
-          const m = JSON.parse(localStorage.getItem("dcc-nav-open") || "{}");
-          m[id] = this._open;
-          localStorage.setItem("dcc-nav-open", JSON.stringify(m));
-        } catch (e) {
-          /* no storage */
-        }
-      },
-    }));
+		// Panel shell: mobile nav drawer + a persisted colour-theme toggle that
+		// writes data-theme onto <html> (dcc.css keys its dark palette off it).
+		// One collapsible sidebar group. `x-data="dccNav('<group-id>')"` on the
+		// <li>; the initial state is `data-default-open` unless the viewer has
+		// toggled this group before (persisted under `dcc-nav-open`).
+		window.Alpine.data("dccNav", (id) => ({
+			_open: false,
+			init() {
+				let stored = null;
+				try {
+					stored = JSON.parse(localStorage.getItem("dcc-nav-open") || "{}")[id];
+				} catch (e) {
+					/* no storage */
+				}
+				this._open =
+					stored != null ? !!stored : this.$el.dataset.defaultOpen === "1";
+			},
+			isOpen() {
+				return this._open;
+			},
+			toggle() {
+				this._open = !this._open;
+				try {
+					const m = JSON.parse(localStorage.getItem("dcc-nav-open") || "{}");
+					m[id] = this._open;
+					localStorage.setItem("dcc-nav-open", JSON.stringify(m));
+				} catch (e) {
+					/* no storage */
+				}
+			},
+		}));
 
-    window.Alpine.data("dccShell", () => ({
-      navOpen: false,
-      railed: false,
-      theme: "auto",
-      init() {
-        try {
-          this.theme = localStorage.getItem("dcc-theme") || "auto";
-          this.railed = localStorage.getItem("dcc-nav-railed") === "1";
-        } catch (e) {
-          this.theme = "auto";
-        }
-        this.applyTheme();
-        this.$watch("navOpen", (open) => {
-          document.body.classList.toggle("dcc-no-scroll", open);
-        });
-      },
-      toggleRail() {
-        this.railed = !this.railed;
-        try {
-          localStorage.setItem("dcc-nav-railed", this.railed ? "1" : "0");
-        } catch (e) {
-          /* no storage */
-        }
-      },
-      applyTheme() {
-        const root = document.documentElement;
-        if (this.theme === "auto") root.removeAttribute("data-theme");
-        else root.setAttribute("data-theme", this.theme);
-      },
-      cycleTheme() {
-        const order = ["auto", "light", "dark"];
-        this.theme = order[(order.indexOf(this.theme) + 1) % order.length];
-        try {
-          localStorage.setItem("dcc-theme", this.theme);
-        } catch (e) {
-          /* private mode: keep the in-memory value */
-        }
-        this.applyTheme();
-      },
-      themeLabel() {
-        return { auto: "◐", light: "☀", dark: "☾" }[this.theme] || "◐";
-      },
-    }));
+		window.Alpine.data("dccShell", () => ({
+			navOpen: false,
+			railed: false,
+			theme: "auto",
+			init() {
+				try {
+					this.theme = localStorage.getItem("dcc-theme") || "auto";
+					this.railed = localStorage.getItem("dcc-nav-railed") === "1";
+				} catch (e) {
+					this.theme = "auto";
+				}
+				this.applyTheme();
+				this.$watch("navOpen", (open) => {
+					document.body.classList.toggle("dcc-no-scroll", open);
+				});
+			},
+			toggleRail() {
+				this.railed = !this.railed;
+				try {
+					localStorage.setItem("dcc-nav-railed", this.railed ? "1" : "0");
+				} catch (e) {
+					/* no storage */
+				}
+			},
+			applyTheme() {
+				const root = document.documentElement;
+				if (this.theme === "auto") root.removeAttribute("data-theme");
+				else root.setAttribute("data-theme", this.theme);
+			},
+			cycleTheme() {
+				const order = ["auto", "light", "dark"];
+				this.theme = order[(order.indexOf(this.theme) + 1) % order.length];
+				try {
+					localStorage.setItem("dcc-theme", this.theme);
+				} catch (e) {
+					/* private mode: keep the in-memory value */
+				}
+				this.applyTheme();
+			},
+			themeLabel() {
+				return { auto: "◐", light: "☀", dark: "☾" }[this.theme] || "◐";
+			},
+		}));
 
-    window.Alpine.data("dccUpload", () => ({
-      preview: "",
-      show(event) {
-        const file = event.target.files && event.target.files[0];
-        if (file && file.type.startsWith("image/")) {
-          this.preview = URL.createObjectURL(file);
-        } else {
-          this.preview = "";
-        }
-      },
-    }));
+		window.Alpine.data("dccUpload", () => ({
+			preview: "",
+			show(event) {
+				const file = event.target.files && event.target.files[0];
+				if (file && file.type.startsWith("image/")) {
+					this.preview = URL.createObjectURL(file);
+				} else {
+					this.preview = "";
+				}
+			},
+		}));
 
-    // Notification bell: polls its endpoint (data-endpoint / data-interval on
-    // the root element) for the unread count and recent items. No websockets.
-    window.Alpine.data("dccBell", () => ({
-      open: false,
-      unread: 0,
-      items: [],
-      _url: "",
-      init() {
-        this._url = this.$el.dataset.endpoint || "";
-        if (!this._url) return;
-        const seconds = Number(this.$el.dataset.interval || 30);
-        this.refresh();
-        this._timer = setInterval(() => this.refresh(), Math.max(5, seconds) * 1000);
-        this.$el.addEventListener("dcc:refresh", () => this.refresh());
-      },
-      destroy() {
-        if (this._timer) clearInterval(this._timer);
-      },
-      refresh() {
-        fetch(this._url, { headers: { "X-Requested-With": "XMLHttpRequest" } })
-          .then((r) => (r.ok ? r.json() : null))
-          .then((data) => {
-            if (!data) return;
-            this.unread = data.unread || 0;
-            this.items = data.items || [];
-          })
-          .catch(() => {});
-      },
-      markRead() {
-        const token = (document.cookie.match(/csrftoken=([^;]+)/) || [])[1] || "";
-        fetch(this._url, { method: "POST", headers: { "X-CSRFToken": token } })
-          .then((r) => (r.ok ? r.json() : null))
-          .then(() => {
-            this.unread = 0;
-            this.items = this.items.map((n) => Object.assign({}, n, { read: true }));
-          })
-          .catch(() => {});
-      },
-    }));
-  }
+		// Notification bell: polls its endpoint (data-endpoint / data-interval on
+		// the root element) for the unread count and recent items. No websockets.
+		window.Alpine.data("dccBell", () => ({
+			open: false,
+			unread: 0,
+			items: [],
+			_url: "",
+			init() {
+				this._url = this.$el.dataset.endpoint || "";
+				if (!this._url) return;
+				const seconds = Number(this.$el.dataset.interval || 30);
+				this.refresh();
+				this._timer = setInterval(
+					() => this.refresh(),
+					Math.max(5, seconds) * 1000,
+				);
+				this.$el.addEventListener("dcc:refresh", () => this.refresh());
+			},
+			destroy() {
+				if (this._timer) clearInterval(this._timer);
+			},
+			refresh() {
+				fetch(this._url, { headers: { "X-Requested-With": "XMLHttpRequest" } })
+					.then((r) => (r.ok ? r.json() : null))
+					.then((data) => {
+						if (!data) return;
+						this.unread = data.unread || 0;
+						this.items = data.items || [];
+					})
+					.catch(() => {});
+			},
+			markRead() {
+				const token =
+					(document.cookie.match(/csrftoken=([^;]+)/) || [])[1] || "";
+				fetch(this._url, { method: "POST", headers: { "X-CSRFToken": token } })
+					.then((r) => (r.ok ? r.json() : null))
+					.then(() => {
+						this.unread = 0;
+						this.items = this.items.map((n) =>
+							Object.assign({}, n, { read: true }),
+						);
+					})
+					.catch(() => {});
+			},
+		}));
+	}
 
-  document.addEventListener("alpine:init", register);
-  if (window.Alpine) register();
+	document.addEventListener("alpine:init", register);
+	if (window.Alpine) register();
 
-  // Toasts. Two contracts, both re-emitted by htmx from HX-Trigger:
-  //   dcc:toast  -> a bare string (the pre-1.0 shorthand)
-  //   dcc:notify -> {level, title, body, url}, or an array of them for a batch
-  // The shell renders #dcc-toasts; this only falls back to creating it.
-  function toastHost() {
-    let host = document.getElementById("dcc-toasts");
-    if (!host) {
-      host = document.createElement("div");
-      host.id = "dcc-toasts";
-      host.className = "dcc-toasts";
-      document.body.appendChild(host);
-    }
-    return host;
-  }
-  function toast(detail) {
-    if (Array.isArray(detail)) {
-      detail.forEach(toast);
-      return;
-    }
-    const data =
-      typeof detail === "string"
-        ? { title: detail }
-        : detail && detail.value !== undefined
-          ? { title: detail.value }
-          : detail || {};
-    const level = data.level || "info";
-    const el = document.createElement("div");
-    el.className = "dcc-toast dcc-toast--" + level;
-    el.setAttribute("role", level === "error" ? "alert" : "status");
-    const text = [data.title, data.body].filter(Boolean).join(" — ") || "Done";
-    if (data.url) {
-      const link = document.createElement("a");
-      link.href = data.url;
-      link.textContent = text;
-      el.appendChild(link);
-    } else {
-      el.textContent = text;
-    }
-    toastHost().appendChild(el);
-    const ttl = level === "error" ? 6000 : 3200;
-    setTimeout(() => el.classList.add("is-leaving"), ttl);
-    setTimeout(() => el.remove(), ttl + 400);
-  }
-  document.body.addEventListener("dcc:toast", (e) => toast(e.detail));
-  document.body.addEventListener("dcc:notify", (e) => toast(e.detail));
-  // dcc:refresh is handled by htmx: the table shell carries a hidden element
-  // with hx-trigger="dcc:refresh from:body" that re-fetches its content.
+	// Toasts. Two contracts, both re-emitted by htmx from HX-Trigger:
+	//   dcc:toast  -> a bare string (the pre-1.0 shorthand)
+	//   dcc:notify -> {level, title, body, url}, or an array of them for a batch
+	// The shell renders #dcc-toasts; this only falls back to creating it.
+	function toastHost() {
+		let host = document.getElementById("dcc-toasts");
+		if (!host) {
+			host = document.createElement("div");
+			host.id = "dcc-toasts";
+			host.className = "dcc-toasts";
+			document.body.appendChild(host);
+		}
+		return host;
+	}
+	function toast(detail) {
+		if (Array.isArray(detail)) {
+			detail.forEach(toast);
+			return;
+		}
+		const data =
+			typeof detail === "string"
+				? { title: detail }
+				: detail && detail.value !== undefined
+					? { title: detail.value }
+					: detail || {};
+		const level = data.level || "info";
+		const el = document.createElement("div");
+		el.className = "dcc-toast dcc-toast--" + level;
+		el.setAttribute("role", level === "error" ? "alert" : "status");
+		const text = [data.title, data.body].filter(Boolean).join(" - ") || "Done";
+		if (data.url) {
+			const link = document.createElement("a");
+			link.href = data.url;
+			link.textContent = text;
+			el.appendChild(link);
+		} else {
+			el.textContent = text;
+		}
+		toastHost().appendChild(el);
+		const ttl = level === "error" ? 6000 : 3200;
+		setTimeout(() => el.classList.add("is-leaving"), ttl);
+		setTimeout(() => el.remove(), ttl + 400);
+	}
+	document.body.addEventListener("dcc:toast", (e) => toast(e.detail));
+	document.body.addEventListener("dcc:notify", (e) => toast(e.detail));
+	// dcc:refresh is handled by htmx: the table shell carries a hidden element
+	// with hx-trigger="dcc:refresh from:body" that re-fetches its content.
 
-  // -- clickable rows -------------------------------------------------------
-  // A row carries data-dcc-href (navigate) or data-dcc-action (htmx GET, e.g.
-  // opening a modal). Delegated + guarded so buttons/inputs inside the row keep
-  // working and text selection never triggers a navigation. Survives htmx swaps.
-  var ROW_INTERACTIVE = "a,button,input,select,textarea,label,.dcc-menu,[data-dcc-bulk]";
-  function rowTarget(el) {
-    return el.closest("[data-dcc-href],[data-dcc-action]");
-  }
-  document.addEventListener("click", function (e) {
-    var row = rowTarget(e.target);
-    if (!row || e.defaultPrevented) return;
-    if (e.target.closest(ROW_INTERACTIVE)) return;
-    if (window.getSelection && String(window.getSelection()).length) return;
-    var href = row.getAttribute("data-dcc-href");
-    if (href) {
-      if (e.metaKey || e.ctrlKey) window.open(href, "_blank");
-      else window.location.assign(href);
-      return;
-    }
-    var url = row.getAttribute("data-dcc-action");
-    if (url && window.htmx) {
-      window.htmx.ajax("GET", url, {
-        target: row.getAttribute("data-dcc-action-target") || "body",
-        swap: row.getAttribute("data-dcc-action-swap") || "innerHTML",
-      });
-    }
-  });
-  document.addEventListener("keydown", function (e) {
-    if (e.key !== "Enter") return;
-    var row = rowTarget(e.target);
-    if (row && e.target === row) {
-      e.preventDefault();
-      row.click();
-    }
-  });
+	// -- clickable rows -------------------------------------------------------
+	// A row carries data-dcc-href (navigate) or data-dcc-action (htmx GET, e.g.
+	// opening a modal). Delegated + guarded so buttons/inputs inside the row keep
+	// working and text selection never triggers a navigation. Survives htmx swaps.
+	var ROW_INTERACTIVE =
+		"a,button,input,select,textarea,label,.dcc-menu,[data-dcc-bulk]";
+	function rowTarget(el) {
+		return el.closest("[data-dcc-href],[data-dcc-action]");
+	}
+	document.addEventListener("click", function (e) {
+		var row = rowTarget(e.target);
+		if (!row || e.defaultPrevented) return;
+		if (e.target.closest(ROW_INTERACTIVE)) return;
+		if (window.getSelection && String(window.getSelection()).length) return;
+		var href = row.getAttribute("data-dcc-href");
+		if (href) {
+			if (e.metaKey || e.ctrlKey) window.open(href, "_blank");
+			else window.location.assign(href);
+			return;
+		}
+		var url = row.getAttribute("data-dcc-action");
+		if (url && window.htmx) {
+			window.htmx.ajax("GET", url, {
+				target: row.getAttribute("data-dcc-action-target") || "body",
+				swap: row.getAttribute("data-dcc-action-swap") || "innerHTML",
+			});
+		}
+	});
+	document.addEventListener("keydown", function (e) {
+		if (e.key !== "Enter") return;
+		var row = rowTarget(e.target);
+		if (row && e.target === row) {
+			e.preventDefault();
+			row.click();
+		}
+	});
 
-  // -- hover preview card --------------------------------------------------
-  // A row with a <template class="dcc-row-preview"> shows its content in a
-  // floating card after a short hover.
-  var previewCard = null;
-  var previewTimer = null;
-  function hidePreview() {
-    if (previewTimer) {
-      clearTimeout(previewTimer);
-      previewTimer = null;
-    }
-    if (previewCard) {
-      previewCard.remove();
-      previewCard = null;
-    }
-  }
-  function showPreview(row) {
-    var tpl = row.querySelector("template.dcc-row-preview");
-    if (!tpl) return;
-    hidePreview();
-    previewCard = document.createElement("div");
-    previewCard.className = "dcc-row-preview-card";
-    previewCard.appendChild(tpl.content.cloneNode(true));
-    document.body.appendChild(previewCard);
-    var r = row.getBoundingClientRect();
-    var c = previewCard.getBoundingClientRect();
-    var top = window.scrollY + r.bottom + 6;
-    if (r.bottom + c.height + 16 > window.innerHeight && r.top - c.height - 6 > 0) {
-      top = window.scrollY + r.top - c.height - 6;
-    }
-    var left = Math.min(
-      window.scrollX + r.left,
-      window.scrollX + window.innerWidth - c.width - 12
-    );
-    previewCard.style.top = top + "px";
-    previewCard.style.left = Math.max(8, left) + "px";
-  }
-  document.addEventListener("mouseover", function (e) {
-    var row = e.target.closest("[data-dcc-row]");
-    if (!row || !row.querySelector("template.dcc-row-preview")) return;
-    if (previewTimer) clearTimeout(previewTimer);
-    previewTimer = setTimeout(function () {
-      showPreview(row);
-    }, 350);
-  });
-  document.addEventListener("mouseout", function (e) {
-    var row = e.target.closest("[data-dcc-row]");
-    if (!row) return;
-    if (!e.relatedTarget || !row.contains(e.relatedTarget)) hidePreview();
-  });
-  document.addEventListener("scroll", hidePreview, true);
-  document.body.addEventListener("dcc:refresh", hidePreview);
+	// -- hover preview card --------------------------------------------------
+	// A row with a <template class="dcc-row-preview"> shows its content in a
+	// floating card after a short hover.
+	var previewCard = null;
+	var previewTimer = null;
+	function hidePreview() {
+		if (previewTimer) {
+			clearTimeout(previewTimer);
+			previewTimer = null;
+		}
+		if (previewCard) {
+			previewCard.remove();
+			previewCard = null;
+		}
+	}
+	function showPreview(row) {
+		var tpl = row.querySelector("template.dcc-row-preview");
+		if (!tpl) return;
+		hidePreview();
+		previewCard = document.createElement("div");
+		previewCard.className = "dcc-row-preview-card";
+		previewCard.appendChild(tpl.content.cloneNode(true));
+		document.body.appendChild(previewCard);
+		var r = row.getBoundingClientRect();
+		var c = previewCard.getBoundingClientRect();
+		var top = window.scrollY + r.bottom + 6;
+		if (
+			r.bottom + c.height + 16 > window.innerHeight &&
+			r.top - c.height - 6 > 0
+		) {
+			top = window.scrollY + r.top - c.height - 6;
+		}
+		var left = Math.min(
+			window.scrollX + r.left,
+			window.scrollX + window.innerWidth - c.width - 12,
+		);
+		previewCard.style.top = top + "px";
+		previewCard.style.left = Math.max(8, left) + "px";
+	}
+	document.addEventListener("mouseover", function (e) {
+		var row = e.target.closest("[data-dcc-row]");
+		if (!row || !row.querySelector("template.dcc-row-preview")) return;
+		if (previewTimer) clearTimeout(previewTimer);
+		previewTimer = setTimeout(function () {
+			showPreview(row);
+		}, 350);
+	});
+	document.addEventListener("mouseout", function (e) {
+		var row = e.target.closest("[data-dcc-row]");
+		if (!row) return;
+		if (!e.relatedTarget || !row.contains(e.relatedTarget)) hidePreview();
+	});
+	document.addEventListener("scroll", hidePreview, true);
+	document.body.addEventListener("dcc:refresh", hidePreview);
 })();

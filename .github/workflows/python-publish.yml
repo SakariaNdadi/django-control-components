@@ -24,7 +24,7 @@ jobs:
     runs-on: ubuntu-latest
     environment: pypi
     permissions:
-      id-token: write        # Trusted Publishing (OIDC) — no API token
+      id-token: write # Trusted Publishing (OIDC) - no API token
       attestations: write
       contents: read
     steps:

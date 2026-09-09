@@ -2,7 +2,7 @@
 
     A studio-built page and a hand-coded page must render identical markup.
 
-The studio is an authoring layer, never a parallel rendering stack — it writes
+The studio is an authoring layer, never a parallel rendering stack - it writes
 JSON that the same builders turn into the same components a dev would have
 written in Python. These tests build a UI both ways and diff the HTML.
 """
@@ -81,7 +81,7 @@ def test_block_tree_parity_python_vs_spec():
 
 def test_appshell_default_shell_matches_panels_base_html(soup):
     """Phase 3b groundwork: an ``AppShell`` with no topbar/footer must produce
-    the same frame as the hand-coded ``panels/base.html`` — ``<main
+    the same frame as the hand-coded ``panels/base.html`` - ``<main
     class="dcc-panel__main">`` as a *direct* child of ``.dcc-panel``, with no
     ``.dcc-panel__body`` wrapper (that wrapper drops ``.dcc-panel__main``'s
     max-width). This is the parity check that gates swapping base.html over.

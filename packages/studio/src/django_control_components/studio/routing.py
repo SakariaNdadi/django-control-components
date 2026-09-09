@@ -7,7 +7,7 @@ never by rebuilding the URLconf on save::
     urlpatterns = [
         path("studio/", include("django_control_components.studio.urls")),
         path("panel/", admin_panel.mount()),
-        path("", include(dcc_pages("site"))),   # public pages — mount LAST
+        path("", include(dcc_pages("site"))),   # public pages - mount LAST
     ]
 
 Inside a panel the equivalent catch-all is appended automatically (last, under a
@@ -31,7 +31,7 @@ from .models import Page
 def resolve_page(mount: str, panel: str, route: str, request: Any) -> Page:
     """The enabled :class:`Page` at ``route`` for this mount, or ``Http404``.
 
-    A page the visitor may not see raises **404, not 403** — a restricted page's
+    A page the visitor may not see raises **404, not 403** - a restricted page's
     existence must not leak from the status code.
     """
     try:

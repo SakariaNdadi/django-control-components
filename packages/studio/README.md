@@ -4,7 +4,7 @@ A **development-only** prototyping tool for
 [django-control-components](https://github.com/SakariaNdadi/django-control-components),
 in the spirit of `django-debug-toolbar`: wire up panel resources, dashboards,
 nav, and role access from the browser to try backend ideas fast, then build
-the real UI. `manage.py check` warns if it's installed with `DEBUG=False` —
+the real UI. `manage.py check` warns if it's installed with `DEBUG=False` -
 pull it out of `INSTALLED_APPS` before deploying.
 
 ## Install

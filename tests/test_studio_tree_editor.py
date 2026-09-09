@@ -2,7 +2,7 @@
 
 The interactive editing lives in ``dcc-studio.js`` (``dccTree`` + the
 ``x-recurse`` directive) and is not unit-testable here; what this file locks
-down is the server contract it depends on — the palette exposing each block's
+down is the server contract it depends on - the palette exposing each block's
 slots, and a nested tree in the shape ``dccTree`` produces surviving a
 save / hydrate round-trip.
 """

@@ -1,11 +1,11 @@
-"""A ``DataSource`` — the widget ``.query({...})`` DSL generalised into a prop
+"""A ``DataSource`` - the widget ``.query({...})`` DSL generalised into a prop
 any block or widget can carry to pull rows from a model, server-side only.
 
     {"model": "shop.Order", "fields": ["id", "total", "customer__name"],
      "filter": {"status": "open"}, "order_by": ["-created_at"], "limit": 25}
 
 Every path is checked against ``introspect.safe_paths(model, request, depth=1)``
-— the same allowlist ``_validate_spec_paths`` enforces — and the model must be
+- the same allowlist ``_validate_spec_paths`` enforces - and the model must be
 listed in ``DCC["STUDIO_MODELS"]``. No ORM key ever comes from a request:
 ``tables/query.py``'s rule holds here too.
 """

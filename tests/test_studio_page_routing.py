@@ -66,7 +66,7 @@ def test_restricted_site_page_404s_for_anonymous(client, urlconf):
     Page.objects.create(
         mount="site", route="secret", title="Secret", visibility=Visibility.RESTRICTED, tree=_grid()
     )
-    assert client.get("/secret").status_code == 404  # not 403 — existence must not leak
+    assert client.get("/secret").status_code == 404  # not 403 - existence must not leak
 
 
 def test_restricted_site_page_renders_for_a_granted_user(client, urlconf, django_user_model):

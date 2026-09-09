@@ -61,7 +61,7 @@ def block(
     category: str = "block",
 ) -> Callable[[type[Block]], type[Block]]:
     """Class decorator: register a custom :class:`Block` so it is draggable in
-    the studio palette immediately — the sugar form of ``BLOCK_TYPES.register``.
+    the studio palette immediately - the sugar form of ``BLOCK_TYPES.register``.
 
         @block("Callout", icon="bullhorn")
         class Callout(Block):

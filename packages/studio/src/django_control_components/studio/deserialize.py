@@ -218,8 +218,8 @@ def _check_document_bytes(doc: Any) -> None:
 def _block_gate(node: dict[str, Any], request: Any) -> bool:
     """Server-side visibility for a block node.
 
-    ``perms`` — a list of permission name strings, ANDed, checked with
-    ``has_perm`` (superuser passes). ``when`` — a single ``@alias`` predicate
+    ``perms`` - a list of permission name strings, ANDed, checked with
+    ``has_perm`` (superuser passes). ``when`` - a single ``@alias`` predicate
     resolved through ``DCC["STUDIO_CALLABLES"]`` and called with the request.
     The ``visible`` / ``hidden`` props are presentation only and not consulted
     here.
@@ -251,9 +251,9 @@ def build_block_tree_from_spec(doc: dict[str, Any], *, request: Any = None) -> A
     """Hydrate a stored block document into a :class:`Block` tree, or ``None``.
 
     ``doc`` is the ``{"schema_version", "root"}`` envelope (a bare root node is
-    also accepted). Reuses the spec sandbox unchanged — byte ceiling, depth
+    also accepted). Reuses the spec sandbox unchanged - byte ceiling, depth
     ceiling (``_MAX_TREE_DEPTH``), JSON-only config, ``CODE_ONLY_SETTERS`` and
-    privileged-setter rejection — then prunes any node whose server-side
+    privileged-setter rejection - then prunes any node whose server-side
     ``perms`` / ``when`` gate fails.
     """
     from ..blocks import BLOCK_TYPES
@@ -384,7 +384,7 @@ def resolve_series_query(spec: dict[str, Any]) -> list[tuple[Any, Any]]:
 
 
 def resolve_stat_query(spec: dict[str, Any]) -> Any:
-    """Like :func:`resolve_series_query` but no ``group_by`` — a single scalar."""
+    """Like :func:`resolve_series_query` but no ``group_by`` - a single scalar."""
     from django.db.models import Avg, Max, Min, Sum
 
     model = _check_query_shape(spec)

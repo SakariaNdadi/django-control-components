@@ -1,4 +1,4 @@
-"""Phase 9: the escape hatches — @block decorator, extended ALIASABLE_KEYS,
+"""Phase 9: the escape hatches - @block decorator, extended ALIASABLE_KEYS,
 and `dcc_scaffold --eject` (spec -> Python)."""
 
 from __future__ import annotations

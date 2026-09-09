@@ -5,7 +5,7 @@ Add to ``MIDDLEWARE`` after ``MessageMiddleware``::
     "django_control_components.studio.middleware.ToastMiddleware",
 
 On an htmx request it drains any pending messages into an ``HX-Trigger``
-``dcc:notify`` payload, which ``dcc.js`` renders as a toast — so an ordinary
+``dcc:notify`` payload, which ``dcc.js`` renders as a toast - so an ordinary
 view's ``messages.success(request, "Saved")`` shows up with no extra code.
 Only htmx responses are touched, so a normal page load still renders its
 messages the usual way.

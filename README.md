@@ -4,7 +4,7 @@ Filament-inspired schema, table, and action builders for Django. Declare UI in
 Python; it renders itself through [django-cotton](https://django-cotton.com/),
 wired to real `django.forms` validation.
 
-> **`0.0.1`** (alpha) — a full rebuild. The old prop-driven cotton templates are
+> **`0.0.1`** (alpha) - a full rebuild. The old prop-driven cotton templates are
 > gone. See [MIGRATION.md](MIGRATION.md) and [CHANGELOG.md](CHANGELOG.md).
 
 ## Status
@@ -16,18 +16,18 @@ wired to real `django.forms` validation.
 | django.forms bridge (decorate a `Form`/`ModelForm`, real validation) | ✅ |
 | Reactive searchable `Select` / `MultiSelect`; conditional visibility (zero requests) | ✅ |
 | Image upload + Pillow validation + processing + thumbnails | ✅ |
-| `htmx.py` adapter — every `hx-*` from one file | ✅ |
-| Tables — auto client/server by row count; **keyset streaming** over millions (no `COUNT`) | ✅ |
+| `htmx.py` adapter - every `hx-*` from one file | ✅ |
+| Tables - auto client/server by row count; **keyset streaming** over millions (no `COUNT`) | ✅ |
 | Actions (row / bulk / modal / page), key-addressed, authorize twice; select-all-matching bulk | ✅ |
-| Wizard (`dcc[wizard]`, django-formtools) — **htmx step swapping** | ✅ |
+| Wizard (`dcc[wizard]`, django-formtools) - **htmx step swapping** | ✅ |
 | Panels / Resources (list · create · edit · view · **delete**), admin-independent | ✅ |
 | Infolists; dashboard **widgets** + `DashboardPage`; custom pages | ✅ |
-| Studio — dev-only rapid prototyping from stored JSON (`dcc[studio]`, `django_control_components.studio`) | ✅ |
+| Studio - dev-only rapid prototyping from stored JSON (`dcc[studio]`, `django_control_components.studio`) | ✅ |
 | Global search, relation managers, a visual dashboard builder | 🔜 |
 
 ## Docs
 
-Start with [Architecture](docs/architecture.md) — the render model every other
+Start with [Architecture](docs/architecture.md) - the render model every other
 doc builds on. Then:
 
 [Settings & install](docs/settings.md) · [Views & mixins](docs/views-and-mixins.md) ·
@@ -38,9 +38,9 @@ doc builds on. Then:
 [Actions](docs/actions.md) · [Infolists](docs/infolists.md) ·
 [Wizards](docs/wizards.md) · [UI primitives](docs/ui.md) · [Images](docs/images.md) ·
 [Panels & Resources](docs/panels.md) · [Widgets](docs/widgets.md) ·
-[Studio (dev-only)](docs/no-code.md) — index: [docs/](docs/README.md)
+[Studio (dev-only)](docs/no-code.md) - index: [docs/](docs/README.md)
 
-A complete running project — every builder wired to a live SQLite database —
+A complete running project - every builder wired to a live SQLite database -
 lives in [`web/`](web/).
 
 ## Install
@@ -58,11 +58,11 @@ INSTALLED_APPS = [
 ]
 ```
 
-Add `{% dcc_assets %}` to your base template `<head>` — it emits the stylesheet,
+Add `{% dcc_assets %}` to your base template `<head>` - it emits the stylesheet,
 the small Alpine helpers, htmx, Alpine and the icon-set stylesheet. Pass
 `htmx=False` / `alpine=False` / `icons=False` for anything the host page already
-loads. For rapid backend prototyping — wiring up a resource or dashboard
-against real models before you build its UI — install the `studio` extra and
+loads. For rapid backend prototyping - wiring up a resource or dashboard
+against real models before you build its UI - install the `studio` extra and
 also add `"django_control_components.studio"` to `INSTALLED_APPS`. Studio is a
 development tool, like `django-debug-toolbar`: a system check warns
 (`dcc_studio.W003`) if it's still installed with `DEBUG=False`, and it should
@@ -122,12 +122,12 @@ class ArticleCreateView(SchemaFormMixin, CreateView):
 </form>
 ```
 
-The schema **never validates** — your Django form does. Field labels, help text,
+The schema **never validates** - your Django form does. Field labels, help text,
 choices and `required` are inherited from the form unless you override them.
 Submitting with JavaScript disabled still works: every control is a real,
 correctly-named HTML input.
 
-### Fluent or kwargs — same object
+### Fluent or kwargs - same object
 
 ```python
 TextInput.make("email").label("Email").required()

@@ -7,11 +7,11 @@
 >
 > **Studio moved to its own distribution.** `django_control_components.studio` now
 > ships in `django-control-components-studio`. Install it with
-> `pip install "django-control-components[studio]"` — the import path and
+> `pip install "django-control-components[studio]"` - the import path and
 > `INSTALLED_APPS` entry are unchanged. A `Panel.studio()` / `.dynamic()` mount
 > without the extra now raises `ImproperlyConfigured`. Studio is documented as a
 > **dev-only** rapid-prototyping tool (like `django-debug-toolbar`), not a
-> production feature — see [docs/no-code.md](docs/no-code.md).
+> production feature - see [docs/no-code.md](docs/no-code.md).
 
 1.0 is a hard break. The old templates were defective (unescaped JS
 interpolation, a table that shipped every row's full model dict to the browser)
@@ -32,7 +32,7 @@ and are not carried forward. There is no compatibility shim.
 | `<c-dcc-button>` | `<c-dcc.button>` |
 | `<c-dcc-h>` | `<c-dcc.heading>` |
 | `<c-dcc-modal>` | `<c-dcc.modal>` |
-| `<c-dcc-table>` | *removed — use `Table.make(...)` (Python)* |
+| `<c-dcc-table>` | *removed - use `Table.make(...)` (Python)* |
 
 ## Styling
 
@@ -74,5 +74,5 @@ a template.
 ## Errors
 
 Field errors render server-side from `form.errors`. Remove any `errorTimer`,
-`errorDivClass`, or `validationUrl` props — use `.live()` on a field for opt-in
+`errorDivClass`, or `validationUrl` props - use `.live()` on a field for opt-in
 debounced validation instead.

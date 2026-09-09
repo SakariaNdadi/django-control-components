@@ -2,7 +2,7 @@
  * Tailwind 4 source for consumers who want to theme or purge the component
  * styles with their own build. The package already ships a compiled,
  * dependency-free stylesheet at
- * src/django_control_components/static/dcc/dcc.css — use this only if you want
+ * src/django_control_components/static/dcc/dcc.css - use this only if you want
  * to override tokens or tree-shake.
  *
  *   npx @tailwindcss/cli -i css/dcc.css -o path/to/output.css
@@ -14,29 +14,52 @@
 @source "../src/django_control_components/templates";
 
 @theme {
-  --color-dcc-bg: #ffffff;
-  --color-dcc-fg: #171717;
-  --color-dcc-border: #d4d4d4;
-  --color-dcc-primary: #171717;
-  --radius-dcc: 0.375rem;
+	--color-dcc-bg: #ffffff;
+	--color-dcc-fg: #171717;
+	--color-dcc-border: #d4d4d4;
+	--color-dcc-primary: #171717;
+	--radius-dcc: 0.375rem;
 }
 
 @layer components {
-  /* The compiled stylesheet is authoritative; mirror its rules here if you
+	/* The compiled stylesheet is authoritative; mirror its rules here if you
      fork the styling. Kept intentionally small so the default build stays the
      hand-authored file. */
-  .dcc-btn {
-    @apply inline-flex items-center gap-2 rounded-[var(--radius-dcc)] px-3.5 py-2 text-sm font-medium;
-  }
-  .dcc-input {
-    @apply w-full rounded-[var(--radius-dcc)] border px-2.5 py-2 text-sm;
-  }
+	.dcc-btn {
+		@apply inline-flex items-center gap-2 rounded-[var(--radius-dcc)] px-3.5 py-2 text-sm font-medium;
+	}
+	.dcc-input {
+		@apply w-full rounded-[var(--radius-dcc)] border px-2.5 py-2 text-sm;
+	}
 
-  /* Badge variant hook — mirror of the compiled stylesheet. */
-  .dcc-badge--primary { background: color-mix(in srgb, var(--dcc-primary) 12%, var(--dcc-bg)); color: var(--dcc-primary); }
-  .dcc-badge--secondary,
-  .dcc-badge--muted { background: var(--dcc-surface); color: var(--dcc-muted); }
-  .dcc-badge--success { background: color-mix(in srgb, var(--dcc-success, #16a34a) 16%, var(--dcc-bg)); color: var(--dcc-success, #16a34a); }
-  .dcc-badge--danger { background: color-mix(in srgb, var(--dcc-danger) 15%, var(--dcc-bg)); color: var(--dcc-danger); }
-  .dcc-badge--warning { background: color-mix(in srgb, var(--dcc-warning, #b45309) 18%, var(--dcc-bg)); color: var(--dcc-warning, #b45309); }
+	/* Badge variant hook - mirror of the compiled stylesheet. */
+	.dcc-badge--primary {
+		background: color-mix(in srgb, var(--dcc-primary) 12%, var(--dcc-bg));
+		color: var(--dcc-primary);
+	}
+	.dcc-badge--secondary,
+	.dcc-badge--muted {
+		background: var(--dcc-surface);
+		color: var(--dcc-muted);
+	}
+	.dcc-badge--success {
+		background: color-mix(
+			in srgb,
+			var(--dcc-success, #16a34a) 16%,
+			var(--dcc-bg)
+		);
+		color: var(--dcc-success, #16a34a);
+	}
+	.dcc-badge--danger {
+		background: color-mix(in srgb, var(--dcc-danger) 15%, var(--dcc-bg));
+		color: var(--dcc-danger);
+	}
+	.dcc-badge--warning {
+		background: color-mix(
+			in srgb,
+			var(--dcc-warning, #b45309) 18%,
+			var(--dcc-bg)
+		);
+		color: var(--dcc-warning, #b45309);
+	}
 }

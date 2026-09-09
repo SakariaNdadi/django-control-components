@@ -46,7 +46,7 @@ def _check_dependencies(app_configs: Any, **kwargs: Any) -> list[CheckMessage]:
 @register()
 def _check_unauthorized_actions(app_configs: Any, **kwargs: Any) -> list[CheckMessage]:
     """Warn about ``Action`` s with no ``.authorize()`` rule while
-    ``DCC["ACTIONS_DEFAULT_DENY"]`` is False — those run for anyone who can see
+    ``DCC["ACTIONS_DEFAULT_DENY"]`` is False - those run for anyone who can see
     the row. Silent once default-deny is on, or once every action is authorized.
 
     The action registry is populated at render time, so this rebuilds each

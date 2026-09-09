@@ -1,9 +1,9 @@
 # Developer Documentation & UI/UX Hub
 
-> **Version `0.0.1`** (Alpha — `0.x` permits breaking changes; see [CHANGELOG](../CHANGELOG.md)).
+> **Version `0.0.1`** (Alpha - `0.x` permits breaking changes; see [CHANGELOG](../CHANGELOG.md)).
 >
 > The core (`schemas`, `tables`, `wizards`, `actions`, `infolists`, `panels`,
-> `widgets`, `ui`) is active and tested. **Studio** — the visual builder — ships
+> `widgets`, `ui`) is active and tested. **Studio** - the visual builder - ships
 > in the optional `[studio]` extra as a **dev-only** prototyping tool
 > (`DEBUG=True`; remove it before deploying, per check `dcc_studio.W003`).
 
@@ -113,7 +113,7 @@ In your base template `<head>` (e.g., `base.html`):
 {% dcc_assets %}
 ```
 
-*(Emits `dcc.css`, the icon-set `<link>` (Font Awesome by default), htmx, `dcc.js`, the Alpine focus plugin, and Alpine.js — in that order. Pass `htmx=False`, `alpine=False`, `focus=False`, or `icons=False` for anything the host page already loads).*
+*(Emits `dcc.css`, the icon-set `<link>` (Font Awesome by default), htmx, `dcc.js`, the Alpine focus plugin, and Alpine.js - in that order. Pass `htmx=False`, `alpine=False`, `focus=False`, or `icons=False` for anything the host page already loads).*
 
 ---
 

@@ -4,32 +4,34 @@
 {% block title %}Studio{% endblock %}
 
 {% block content %}
-<header class="dcc-panel__header"><h1>Studio</h1></header>
+<header class="dcc-panel__header">
+    <h1>Studio</h1>
+</header>
 
 <div class="dcc-studio">
-  {% for p in studio_panels %}
-  <a class="dcc-studio__panel" href="{% url 'dcc_studio:nav' panel=p.name %}">
-    <h2>{% dcc_icon "bars" %} {{ p.brand_label|default:p.name }} navigation</h2>
-    <p class="dcc-field__help">Build the sidebar — links, groups, icons, per-group visibility.</p>
-  </a>
-  {% endfor %}
-  <a class="dcc-studio__panel" href="{% url 'dcc_studio:pages' %}">
-    <h2>{% dcc_icon "file-lines" %} Pages</h2>
-    <p class="dcc-field__help">Build public and in-app pages from a block tree — index, about, dashboards.</p>
-  </a>
-  <a class="dcc-studio__panel" href="{% url 'dcc_studio:dashboards' %}">
-    <h2>{% dcc_icon "gauge-high" %} Dashboards</h2>
-    <p class="dcc-field__help">Compose analytics dashboards from widgets, no code.</p>
-  </a>
-  <a class="dcc-studio__panel" href="{% url 'dcc_studio:resources' %}">
-    <h2>{% dcc_icon "table" %} Resources</h2>
-    <p class="dcc-field__help">Scaffold a model into a working list / form / detail resource.</p>
-  </a>
-  {% if request.user.is_superuser %}
-  <a class="dcc-studio__panel" href="{% url 'dcc_studio:roles' %}">
-    <h2>{% dcc_icon "users" %} Users &amp; Roles</h2>
-    <p class="dcc-field__help">Control which groups can see each studio object.</p>
-  </a>
-  {% endif %}
+    {% for p in studio_panels %}
+    <a class="dcc-studio__panel" href="{% url 'dcc_studio:nav' panel=p.name %}">
+        <h2>{% dcc_icon "bars" %} {{ p.brand_label|default:p.name }} navigation</h2>
+        <p class="dcc-field__help">Build the sidebar - links, groups, icons, per-group visibility.</p>
+    </a>
+    {% endfor %}
+    <a class="dcc-studio__panel" href="{% url 'dcc_studio:pages' %}">
+        <h2>{% dcc_icon "file-lines" %} Pages</h2>
+        <p class="dcc-field__help">Build public and in-app pages from a block tree - index, about, dashboards.</p>
+    </a>
+    <a class="dcc-studio__panel" href="{% url 'dcc_studio:dashboards' %}">
+        <h2>{% dcc_icon "gauge-high" %} Dashboards</h2>
+        <p class="dcc-field__help">Compose analytics dashboards from widgets, no code.</p>
+    </a>
+    <a class="dcc-studio__panel" href="{% url 'dcc_studio:resources' %}">
+        <h2>{% dcc_icon "table" %} Resources</h2>
+        <p class="dcc-field__help">Scaffold a model into a working list / form / detail resource.</p>
+    </a>
+    {% if request.user.is_superuser %}
+    <a class="dcc-studio__panel" href="{% url 'dcc_studio:roles' %}">
+        <h2>{% dcc_icon "users" %} Users &amp; Roles</h2>
+        <p class="dcc-field__help">Control which groups can see each studio object.</p>
+    </a>
+    {% endif %}
 </div>
 {% endblock %}

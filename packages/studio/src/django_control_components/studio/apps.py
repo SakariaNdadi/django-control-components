@@ -57,7 +57,7 @@ def _check_studio(app_configs: Any, **kwargs: Any) -> list[CheckMessage]:
                 "django_control_components.studio is installed with DEBUG=False.",
                 hint=(
                     "Studio is a development tool for rapidly prototyping backend "
-                    "resources before building real UI — it is not meant to run in "
+                    "resources before building real UI - it is not meant to run in "
                     "production. Remove it from INSTALLED_APPS (and its urls.py "
                     "include) outside local/dev settings."
                 ),

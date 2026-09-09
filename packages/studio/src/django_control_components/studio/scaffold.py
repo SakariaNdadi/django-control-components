@@ -154,7 +154,7 @@ _COLUMN_IMPORTS = {
 def eject_to_python(label: str, spec: dict[str, Any], *, class_name: str | None = None) -> str:
     """Render a stored ``{table, schema, infolist}`` spec as a Python
     ``Resource`` subclass a team can drop into version control and edit freely
-    — the escape hatch out of no-code.
+    - the escape hatch out of no-code.
 
     Only the list table is materialised as code; the create/edit schema and the
     infolist fall back to the framework defaults, which a dev then overrides by

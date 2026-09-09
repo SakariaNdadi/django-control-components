@@ -27,12 +27,12 @@ class Visibility(models.TextChoices):
 class AccessControlled(models.Model):
     """Mixin: a row's audience, resolved by an explicit grant, never by a deny.
 
-    ``is_visible_to``: superuser → yes; then by ``visibility`` —
+    ``is_visible_to``: superuser → yes; then by ``visibility`` -
     ``PUBLIC`` → yes (anonymous included); ``AUTHENTICATED`` → any signed-in
     user; ``RESTRICTED`` → ``required_permission`` deny gate, then the ``users``
     / ``groups`` grants. An ungranted ``RESTRICTED`` row is invisible.
 
-    This controls **visibility only** — a nav item pointing at a resource the
+    This controls **visibility only** - a nav item pointing at a resource the
     user lacks ``view_`` permission for is still dropped by the nav builder and
     still 403s if hit directly.
     """
@@ -70,7 +70,7 @@ class AccessControlled(models.Model):
 
 
 def visible_queryset(queryset: models.QuerySet[Any], user: Any) -> models.QuerySet[Any]:
-    """The ``AccessControlled`` rows in ``queryset`` visible to ``user`` — one
+    """The ``AccessControlled`` rows in ``queryset`` visible to ``user`` - one
     query, for nav rendering."""
     public = Q(visibility=Visibility.PUBLIC)
     if user is None or not user.is_authenticated:
@@ -83,7 +83,7 @@ def visible_queryset(queryset: models.QuerySet[Any], user: Any) -> models.QueryS
         | Q(users=user)
         | Q(groups__in=user.groups.all())
     )
-    # required_permission is a string check we cannot express in SQL — rows that
+    # required_permission is a string check we cannot express in SQL - rows that
     # carry one are filtered in Python by the caller when it matters. For nav the
     # extra rows are still gated by is_visible_to() before display.
     return queryset.filter(grant).distinct()
@@ -106,7 +106,7 @@ class DashboardSpec(AccessControlled):
 
     ``model`` is a ``app_label.ModelName`` string resolved at request time; the
     JSON columns describe the list table, the create/edit schema and the view
-    infolist. No callables, no import paths — see :mod:`.deserialize`.
+    infolist. No callables, no import paths - see :mod:`.deserialize`.
     """
 
     slug = models.SlugField(unique=True, max_length=100)
@@ -289,12 +289,12 @@ class NavDocument(models.Model):
 
 
 class Page(AccessControlled):
-    """An arbitrary page — index, about, dashboards, in-app screens — assembled
+    """An arbitrary page - index, about, dashboards, in-app screens - assembled
     in the studio as a block tree instead of a ``PanelPage`` subclass.
 
     ``tree`` holds the root block node; ``schema_version`` is the spec-migration
     version it was written with. ``document`` returns the tree lazily upgraded to
-    the current version — the first real call site of :mod:`.specmigrations`.
+    the current version - the first real call site of :mod:`.specmigrations`.
     """
 
     class Mount(models.TextChoices):
@@ -393,7 +393,7 @@ class Notification(models.Model):
 
 
 class UserPreference(models.Model):
-    """Per-user studio preferences — the home dashboard override and shell state."""
+    """Per-user studio preferences - the home dashboard override and shell state."""
 
     user = models.OneToOneField(
         settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="dcc_preference"
