@@ -1,10 +1,18 @@
+from __future__ import annotations
+
 import datetime
 
-from django.db import migrations
+from django.apps import AppConfig
+from django.db.models.signals import post_migrate
 
 
-def seed(apps, schema_editor):
-    Task = apps.get_model("demo", "Task")
+def _seed_tasks(sender, **kwargs):
+    """Fill an empty database with a handful of demo rows so the catalog's
+    live Table, Widget and Resource examples have something to render. Runs
+    after every migrate; the ``exists()`` guard makes it idempotent and
+    keeps it out of the committed migration history."""
+    from .models import Task
+
     if Task.objects.exists():
         return
     today = datetime.date.today()
@@ -34,19 +42,9 @@ def seed(apps, schema_editor):
     )
 
 
-def unseed(apps, schema_editor):
-    Task = apps.get_model("demo", "Task")
-    Task.objects.filter(
-        title__in=[
-            "Ship the release",
-            "Write the changelog",
-            "Review open PRs",
-            "Update dependencies",
-            "Fix flaky test",
-        ]
-    ).delete()
+class DemoConfig(AppConfig):
+    name = "demo"
+    default_auto_field = "django.db.models.BigAutoField"
 
-
-class Migration(migrations.Migration):
-    dependencies = [("demo", "0001_initial")]
-    operations = [migrations.RunPython(seed, unseed)]
+    def ready(self) -> None:
+        post_migrate.connect(_seed_tasks, sender=self)

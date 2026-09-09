@@ -44,6 +44,16 @@ def test_code_resource_is_grouped(urlconf, django_user_model):
     assert any(c.label.lower().startswith("article") for c in content.children)
 
 
+def test_stored_nodes_skipped_when_studio_not_installed(urlconf, django_user_model, settings):
+    """A panel in a project that never installed the studio app must not touch
+    its (unmigrated / absent) tables - build_nav returns the code tree only."""
+    studio = "django_control_components.studio"
+    settings.INSTALLED_APPS = [a for a in settings.INSTALLED_APPS if a != studio]
+    root = django_user_model.objects.create_superuser("noS", "ns@x.io", "x")
+    tree = build_nav(panel, _req("/nav/", root))
+    assert any(n.label == "Content" for n in tree if n.is_heading)
+
+
 def test_navitem_url_target_and_active_state(urlconf, django_user_model):
     root = django_user_model.objects.create_superuser("root2", "r2@x.io", "x")
     NavItem.objects.create(

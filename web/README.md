@@ -8,13 +8,14 @@ resource defined entirely from stored JSON.
 ```bash
 # from the repo root
 uv sync
-uv run --project web python web/manage.py migrate
-uv run --project web python web/manage.py seed --fresh
+uv run --project web python web/manage.py migrate   # builds an ephemeral SQLite db and seeds demo rows
 uv run --project web python web/manage.py runserver
 ```
 
-Open <http://127.0.0.1:8000/>. The dashboard links every feature. Sign in for the
-panel — seeded superuser is **demo / demo**.
+Open <http://127.0.0.1:8000/>. The dashboard links every feature; no login is
+required. The database (`web/db.sqlite3`) is throwaway — it is gitignored and
+rebuilt by `migrate`, which fills an empty db with demo `Task` rows via a
+`post_migrate` hook in `demo/apps.py`.
 
 ## What to try
 
@@ -29,16 +30,12 @@ panel — seeded superuser is **demo / demo**.
 | **Comments (no-code)** `/panel/d/comments/` | A full resource — table, form, infolist — defined by one stored `DashboardSpec` JSON row. No Python subclass. |
 | **Django admin** `/admin/` | Same credentials; runs alongside the panel, untouched |
 
-## Seed flags
+## Reseeding
 
-- `--fresh` — wipe demo data first
-- `--big 60000` — bulk rows so the articles table flips to **server-side streaming**
-  (keyset cursor, no `COUNT(*)`, append-on-scroll)
-- `--no-images` — skip avatar / cover generation (faster)
+Delete `web/db.sqlite3` and rerun `migrate` — the `post_migrate` hook refills it.
 
 ## Large-dataset mode
 
-`--big 60000` (or lowering `DCC["TABLE_CLIENT_SIDE_MAX_ROWS"]` in
-`web/config/settings.py`) switches `/articles/` to server mode: the first page
-renders, then a sentinel row appends the next batch as you scroll. Watch the query
-log — there is no `SELECT COUNT(*)`.
+Lower `DCC["TABLE_CLIENT_SIDE_MAX_ROWS"]` in `web/config/settings.py` to push a
+table into server mode: the first page renders, then a sentinel row appends the
+next batch as you scroll. Watch the query log — there is no `SELECT COUNT(*)`.

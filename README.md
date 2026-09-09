@@ -150,7 +150,6 @@ uv sync
 uv run pytest -q
 uv run nox -s lint typecheck coverage
 uv run --project web python web/manage.py migrate
-uv run --project web python web/manage.py seed
 uv run --project web python web/manage.py runserver
 ```
 

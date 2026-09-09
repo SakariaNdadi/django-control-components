@@ -61,6 +61,10 @@ def _auto_nodes(panel: Panel, request: HttpRequest) -> list[NavNode]:
 
 
 def _stored_nodes(panel: Panel, request: HttpRequest) -> list[NavNode]:
+    from django.apps import apps
+
+    if not apps.is_installed("django_control_components.studio"):
+        return []
     try:
         from ..studio.models import NavItem
     except Exception:
