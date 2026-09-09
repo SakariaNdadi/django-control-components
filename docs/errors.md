@@ -7,18 +7,18 @@ a stack trace surfaces one of these types.
 
 ```text
 Exception
-└── DCCError                       core/exceptions.py — base for every library error
+└── DCCError                       core/exceptions.py - base for every library error
     ├── SchemaError                a schema references a field the form does not have
     ├── ThumbnailBackendError      DCC["THUMBNAIL_BACKEND"] could not be imported
     └── ClosureInjectionError      a config closure declared a non-injectable parameter
 
 django.core.exceptions.ValidationError
 └── ImageValidationError           an uploaded image failed validation
-    (also the studio raises plain ValidationError — see no-code.md)
+    (also the studio raises plain ValidationError - see no-code.md)
 ```
 
 Catch `DCCError` to catch every library-specific error at once. `ImageValidationError`
-is deliberately **not** a `DCCError` — it is a Django `ValidationError` so it
+is deliberately **not** a `DCCError` - it is a Django `ValidationError` so it
 surfaces as a normal form error.
 
 ## `DCCError` subclasses
@@ -29,7 +29,7 @@ surfaces as a normal form error.
 
 Raised by `forms_bridge.check_alignment` when a field you declared in a schema
 (`TextInput.make("naem")`) is not present on the bound Django form. Fired from
-`Schema.build_form()` and from `Schema.render(form=...)` — so a schema that
+`Schema.build_form()` and from `Schema.render(form=...)` - so a schema that
 renders fine unbound can raise the moment you pass a narrower form.
 
 **Fix:** correct the field name, add the field to the form, or (for a
@@ -40,7 +40,7 @@ deliberately partial form) use `build_standalone_form` / `.strict()`.
 > `Cannot import THUMBNAIL_BACKEND '<path>'`
 
 Raised by `get_thumbnail_backend()` when `DCC["THUMBNAIL_BACKEND"]` is set to a
-dotted path that `import_string` cannot resolve. This is the **only** trigger —
+dotted path that `import_string` cannot resolve. This is the **only** trigger -
 an empty thumbnail result does not raise (a table's `ImageColumn` also swallows
 any backend exception and falls back to the original URL).
 
@@ -49,11 +49,11 @@ any backend exception and falls back to the original URL).
 > `<fn> requests ['reqeust']; injectable names are ['component', 'context', 'form', 'get', 'operation', 'record', 'request', 'set', 'state', 'user']`
 
 Raised by `evaluate()` at render time when a configuration closure declares a
-parameter name that is not injectable — including a typo. Applies to any closure
+parameter name that is not injectable - including a typo. Applies to any closure
 passed to a `@setter` that goes through `evaluate` (`.label(fn)`, `.visible(fn)`,
 `.state(fn)`, `Table.record_url(fn)`, widget `.value(fn)`, …).
 
-**Not** raised by `Action.action(fn)` — that callback uses a plain parameter
+**Not** raised by `Action.action(fn)` - that callback uses a plain parameter
 match and an undeclared name is a normal `TypeError` from the call.
 
 ## `ImageValidationError`
@@ -63,7 +63,7 @@ A `django.core.exceptions.ValidationError` subclass, raised by `validate_image`
 
 | message | condition |
 |---|---|
-| `File is larger than <n> bytes.` | over `.max_size(...)` — checked first, before SVG |
+| `File is larger than <n> bytes.` | over `.max_size(...)` - checked first, before SVG |
 | `SVG uploads are rejected by default …` | an SVG without `.allow_svg()` |
 | `Pillow is required for image fields. …` | PIL not installed on an image field |
 | `Image exceeds the pixel limit.` | over `DCC["IMAGE_MAX_PIXELS"]` (decompression bomb) |
@@ -86,7 +86,7 @@ A `django.core.exceptions.ValidationError` subclass, raised by `validate_image`
 | `ValueError(f"{View} needs a `table` or `get_table()`")` | `TableMixin.get_table()` | `table` is `None` and `get_table` not overridden |
 | `ValueError(f"Unsafe attribute name: {key!r}")` | `AttributeBag.set()` | key is empty or contains whitespace or any of `" ' > / =` |
 | `ValueError(f"ChartWidget.kind must be one of [...]")` | `ChartWidget.kind(...)` | a kind outside `{line, bar, area, pie, doughnut, radar}` |
-| `AssertionError("Action not bound to an owner")` | `Action.url()` | called before `bind_owner()` — the action is not exposed by a registered owner |
+| `AssertionError("Action not bound to an owner")` | `Action.url()` | called before `bind_owner()` - the action is not exposed by a registered owner |
 | `RuntimeError("WizardView needs django-formtools. …")` | `WizardView.as_view()` | the `[wizard]` extra is not installed |
 | `NotImplementedError("Implement done() to persist the collected data.")` | `WizardView.done()` | the base method was not overridden |
 | `AttributeError(f"Unknown DCC setting: {name!r}. …")` | `dcc_settings.<name>` | a mistyped `DCC` key |
@@ -94,14 +94,14 @@ A `django.core.exceptions.ValidationError` subclass, raised by `validate_image`
 
 ## HTTP responses from the endpoints
 
-Not exceptions — status codes the internal views return.
+Not exceptions - status codes the internal views return.
 
 | view | status | condition |
 |---|---|---|
 | `ActionView` | `404` | unknown owner key or action name (`registry.resolve` → `None`) |
-| `ActionView` | `403` | `action.is_authorized(...)` false — on GET **and** on POST |
-| `ActionView` | `200` (empty body) | a modal action succeeded — htmx clears the mount, dialog closes |
-| `ActionView` | `204` | an inline action succeeded — the row is not blanked |
+| `ActionView` | `403` | `action.is_authorized(...)` false - on GET **and** on POST |
+| `ActionView` | `200` (empty body) | a modal action succeeded - htmx clears the mount, dialog closes |
+| `ActionView` | `204` | an inline action succeeded - the row is not blanked |
 | `ActionView` | `200` (modal re-rendered) | the schema form failed validation |
 | `SchemaValidateView` | `404` | unknown schema key, or `_field` names no field in the schema |
 | `SchemaValidateView` | `400` | the `_field` POST parameter is missing |

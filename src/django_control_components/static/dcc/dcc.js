@@ -29,8 +29,31 @@
     }
   }
 
+  // django-control-components was built and tested against Alpine 3.x. A host
+  // that adds its own Alpine <script> (instead of passing alpine=False to
+  // {% dcc_assets %} and owning the load order) risks two Alpine cores
+  // fighting over the same DOM, or a version this library was never tested
+  // against. Neither is detectable from Python at request time - the check
+  // has to run here, once Alpine itself is on the page.
+  var dccAlpineChecked = false;
+  function warnOnAlpineMismatch() {
+    if (dccAlpineChecked || !window.Alpine) return;
+    dccAlpineChecked = true;
+    var version = window.Alpine.version || "";
+    if (version && version.split(".")[0] !== "3") {
+      console.warn(
+        "[django-control-components] Alpine " +
+          version +
+          " detected; this package is built against Alpine 3.x. " +
+          "dccShell/modals/dropdowns/tables may misbehave. " +
+          'If you load your own Alpine, pass {% dcc_assets alpine=False %} and match versions.'
+      );
+    }
+  }
+
   function register() {
     if (!window.Alpine) return;
+    warnOnAlpineMismatch();
 
     // Reactive mirror of a form's field values, so `.visible_when(...)` (compiled
     // to x-show="$dccField('name') == ...") re-evaluates when a sibling changes.

@@ -1,0 +1,110 @@
+{% extends "django_control_components/panels/base.html" %}
+{% load static %}
+{% block head_extra %}<link rel="stylesheet" href="{% static 'demo/docs.css' %}">{% endblock %}
+{% block content %}
+  <header class="dcc-panel__header dcc-docs__pageheader" data-family="wizards">
+    <div>
+      <span class="dcc-docs__familybadge">wizards</span>
+      <h1>Wizard Views & Multi-Step Flows</h1>
+      <p class="dcc-docs__summary">Multi-step forms over <code>django-formtools</code>, with seamless htmx step swapping, back/forward navigation, per-step validation, and review steps.</p>
+    </div>
+  </header>
+  <div class="dcc-docs__prose" style="max-width: 52rem;">
+    {% if live_wizard_html %}
+    <div style="background: var(--dcc-surface); border: 1px solid var(--dcc-border); border-radius: var(--dcc-radius); padding: 1.5rem; margin: 1.5rem 0;">
+      <h3 style="margin-top: 0; margin-bottom: 0.5rem;">Interactive Live Wizard Demo</h3>
+      <p style="color: var(--dcc-muted); font-size: 0.9rem; margin-bottom: 1.25rem;">
+        This is a live, session-backed 3-step wizard with real Django form validation, htmx step swapping, and a review infolist:
+      </p>
+      {{ live_wizard_html|safe }}
+    </div>
+    {% endif %}
+
+    <h2>Installation</h2>
+    <p>Wizards rely on <code>django-formtools</code> for secure session storage and state handling:</p>
+    <pre><code>uv add "django-control-components[wizard]"</code></pre>
+
+
+    <h2>How Wizards Work</h2>
+    <p><code>WizardView</code> inherits from <code>SessionWizardView</code>. Instead of full page reloads, each step submit posts over htmx and replaces only the wizard container (<code>#dcc-wizard-*</code>). If JavaScript is disabled, normal full-page POSTs work out of the box.</p>
+
+    <h2>Complete Runnable View Example</h2>
+    <pre><code>from django.shortcuts import redirect
+from django_control_components.wizards import WizardView, WizardStep
+from django_control_components.schemas import Schema, TextInput, Select, Toggle
+from django_control_components.infolists import Infolist, TextEntry
+from myapp.forms import DetailsForm, SettingsForm
+from myapp.models import Project
+
+class ProjectCreateWizard(WizardView):
+    # Optional styling hooks
+    wizard_class = "project-wizard"
+    show_step_nav = True
+
+    steps_config = [
+        # Step 1: Form step with Schema
+        WizardStep(
+            "details",
+            Schema.make()
+            .form(DetailsForm)
+            .strict()
+            .schema([
+                TextInput.make("name").required(),
+                TextInput.make("description"),
+            ]),
+            title="Details",
+            heading="Project Basics",
+            description="Enter project name and general summary.",
+        ),
+        # Step 2: Second form step
+        WizardStep(
+            "settings",
+            Schema.make()
+            .form(SettingsForm)
+            .strict()
+            .schema([
+                Select.make("tier").options([("free", "Free"), ("pro", "Pro")]),
+                Toggle.make("is_public"),
+            ]),
+            title="Settings",
+            heading="Configuration",
+        ),
+        # Step 3: Review / Confirmation step using Infolist
+        WizardStep(
+            "review",
+            Infolist.make().schema([
+                TextEntry.make("name").label("Project Name"),
+                TextEntry.make("tier").label("Selected Plan"),
+                TextEntry.make("is_public").label("Public Access"),
+            ]),
+            title="Review",
+            heading="Review & Confirm",
+            description="Verify the project details before creating.",
+            record=lambda view: view.get_all_cleaned_data(),
+        ),
+    ]
+
+    def done(self, form_list, **kwargs):
+        # Automatically gathered from all step forms:
+        data = self.get_all_cleaned_data()
+        project = Project.objects.create(**data)
+        return redirect("project-detail", pk=project.pk)</code></pre>
+
+    <h2>Template Usage</h2>
+    <p>A default template ships with the package, but you can render it inside your own template using <code>step_html</code>:</p>
+    <pre><code>{% templatetag openblock %} extends "base.html" {% templatetag closeblock %}
+
+{% templatetag openblock %} block content {% templatetag closeblock %}
+  &lt;div class="max-w-3xl mx-auto py-8"&gt;
+    {{ step_html }}
+  &lt;/div&gt;
+{% templatetag openblock %} endblock {% templatetag closeblock %}</code></pre>
+
+    <h2>Customizing Appearance</h2>
+    <p>Customize wizard styles using CSS custom properties via <code>wizard_attrs</code>:</p>
+    <pre><code>class CustomWizard(WizardView):
+    wizard_attrs = {
+        "style": "--dcc-wizard-accent: #4f46e5; --dcc-wizard-radius: 0.75rem;"
+    }</code></pre>
+  </div>
+{% endblock %}

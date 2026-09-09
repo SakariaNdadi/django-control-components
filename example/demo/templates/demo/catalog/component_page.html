@@ -1,0 +1,46 @@
+{% extends "django_control_components/panels/base.html" %}
+{% load dcc_tags static %}
+{% block head_extra %}
+  <link rel="stylesheet" href="{% static 'demo/docs.css' %}">
+  {% for asset in widget_assets %}
+  {% if asset.kind == "style" %}<link rel="stylesheet" href="{{ asset.url }}">{% else %}<script defer src="{{ asset.url }}"></script>{% endif %}
+  {% endfor %}
+{% endblock %}
+{% block content %}
+  <header class="dcc-panel__header dcc-docs__pageheader" data-family="{{ spec.family }}">
+    <div>
+      <span class="dcc-docs__familybadge">{{ spec.family }}</span>
+      <h1>{{ spec.title }}</h1>
+      {% if spec.summary %}<p class="dcc-docs__summary">{{ spec.summary }}</p>{% endif %}
+    </div>
+  </header>
+
+  <div class="dcc-docs__layout">
+    <div class="dcc-docs__body">
+      {% for demo in demos %}{% dcc_render demo %}{% endfor %}
+
+      {% if spec.props_table %}
+      <section class="dcc-docs__props">
+        <h2>Setters</h2>
+        <table class="dcc-table">
+          <thead><tr><th>Setter</th><th>Type</th><th>Description</th></tr></thead>
+          <tbody>
+            {% for setter, type_, desc in spec.props_table %}
+            <tr><td><code>{{ setter }}</code></td><td>{{ type_ }}</td><td>{{ desc }}</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </section>
+      {% endif %}
+    </div>
+
+    {% if demos|length > 1 %}
+    <nav class="dcc-docs__onpage" aria-label="On this page">
+      <p class="dcc-docs__onpage-title">On this page</p>
+      <ul>
+        {% for demo in spec.examples %}<li><a href="#{{ demo.title|slugify }}">{{ demo.title }}</a></li>{% endfor %}
+      </ul>
+    </nav>
+    {% endif %}
+  </div>
+{% endblock %}

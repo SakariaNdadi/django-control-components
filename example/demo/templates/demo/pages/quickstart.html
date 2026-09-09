@@ -1,0 +1,69 @@
+{% extends "django_control_components/panels/base.html" %}
+{% load static %}
+{% block head_extra %}<link rel="stylesheet" href="{% static 'demo/docs.css' %}">{% endblock %}
+{% block content %}
+  <header class="dcc-panel__header dcc-docs__pageheader" data-family="schemas">
+    <div>
+      <span class="dcc-docs__familybadge">schemas</span>
+      <h1>Quickstart</h1>
+      <p class="dcc-docs__summary">Build responsive form layouts in Python decorating standard Django Form / ModelForm instances.</p>
+    </div>
+  </header>
+  <div class="dcc-docs__prose" style="max-width: 52rem;">
+    <p>A <code>Schema</code> decorates an existing Django <code>Form</code> /
+      <code>ModelForm</code> - it never validates itself, Django's form does.</p>
+
+    <h2>1. Define the Schema</h2>
+    <pre><code>from django_control_components.schemas import Schema, Section, TextInput, Select, Toggle
+from myapp.forms import TaskForm
+
+def task_schema():
+    return (
+        Schema.make()
+        .form(TaskForm)
+        .schema(
+            [
+                Section.make("Task Information")
+                .columns(2)
+                .schema(
+                    [
+                        TextInput.make("title").required().column_span_full(),
+                        Select.make("priority").searchable(),
+                        Toggle.make("is_active"),
+                    ]
+                ),
+            ]
+        )
+    )</code></pre>
+
+    <h2>2. Wire into Django View</h2>
+    <pre><code>from django.views.generic import CreateView
+from django.urls import reverse_lazy
+from django_control_components.mixins import SchemaFormMixin
+from myapp.models import Task
+
+class TaskCreateView(SchemaFormMixin, CreateView):
+    model = Task
+    template_name = "tasks/form.html"
+    success_url = reverse_lazy("task-list")
+
+    def get_schema(self):
+        return task_schema()</code></pre>
+
+    <h2>3. Template Rendering</h2>
+    <pre><code>{% templatetag openblock %} extends "base.html" {% templatetag closeblock %}
+
+{% templatetag openblock %} block content {% templatetag closeblock %}
+&lt;form method="post" enctype="multipart/form-data"&gt;
+  {% templatetag openblock %} csrf_token {% templatetag closeblock %}
+  {{ schema_html }}
+  &lt;button type="submit" class="dcc-btn dcc-btn--primary"&gt;Save&lt;/button&gt;
+&lt;/form&gt;
+{% templatetag openblock %} endblock {% templatetag closeblock %}</code></pre>
+
+    <p>See the <a href="{% url "dcc-panel-docs:page-full-example" %}">Full example</a>
+      for a complete <code>Resource</code> wiring a <code>Table</code>, a
+      <code>Schema</code> and an <code>Infolist</code> together, or browse
+      every component under <strong>Components</strong> on the left.</p>
+  </div>
+{% endblock %}

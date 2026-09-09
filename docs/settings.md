@@ -30,11 +30,11 @@ Add to your base template `<head>`:
 ```
 
 It emits, **in this order**: `dcc.css`, the icon-set `<link>`, htmx, `dcc.js`,
-the `@alpinejs/focus` plugin, Alpine. The order matters — `dcc.js` registers an
+the `@alpinejs/focus` plugin, Alpine. The order matters - `dcc.js` registers an
 `alpine:init` listener before Alpine scans the DOM, and the focus plugin must
 load before Alpine core (`x-trap` in modals/drawers).
 
-Pass `False` for anything the host page already loads — and then **you** own the
+Pass `False` for anything the host page already loads - and then **you** own the
 ordering:
 
 ```django
@@ -42,8 +42,22 @@ ordering:
 {% dcc_assets focus=False %}                {# you load @alpinejs/focus yourself #}
 ```
 
+Loading your own Alpine **without** passing `alpine=False` double-loads it (two
+Alpine cores on one page - `{% dcc_assets %}` still emits its own `<script>`
+tag). This cannot be caught from Python at request time, so `dcc.js` checks
+`Alpine.version` once Alpine starts and logs a `console.warn` if it is not a `3.x`
+release - the package is only built and tested against Alpine 3.
+
+#### Why Alpine.js over Hyperscript for DCC Components
+
+Alpine and Hyperscript are not equivalent in DCC:
+- **Stateful Reactive Directives**: DCC's components (`dccShell`, `dccTable`, `dccForm`, `dccBulk`, `dccChart`, `dccSelect`, `dccUpload`, `dccBell` in `dcc.js`, over 600 lines) are real stateful entities: reactive form-field mirroring for `.visible_when(...)`, table selection tracking, chart re-draws on data refresh, and focus-trapped modals.
+- **Role Differentiation**: `htmx` handles backend mutations and DOM fragment swaps, while `Alpine.js` manages in-page reactive state, client-side table filtering, and input masking. Hyperscript is an event/behavior DSL designed for inline event toggles, not full reactive component data trees (`x-data`, `x-show`, `x-model`, `Alpine.data()`).
+- **Configuration over Migration**: Avoiding double-instantiation conflicts requires only passing `{% dcc_assets alpine=False %}` when loading an external Alpine script tag.
+
 For the studio builder page (dev-only), also add `{% dcc_studio_assets %}`
 (after `{% dcc_assets %}`).
+
 
 ### URLs
 
@@ -65,7 +79,7 @@ This adds `dcc:action` (`a/<owner_key>/<action_name>/`) and `dcc:schema-validate
 
 All configuration is one dict in your Django settings. Read it through the
 `dcc_settings` shim so a **typo raises** instead of silently returning `None`
-(`conf.py:39-44`) — `dcc_settings.NOSUCH` → `AttributeError("Unknown DCC
+(`conf.py:39-44`) - `dcc_settings.NOSUCH` → `AttributeError("Unknown DCC
 setting: 'NOSUCH'. Valid keys: [...]")`.
 
 ```python
@@ -84,27 +98,27 @@ DCC = {
 
 | Key | Type | Default | What reads it / what breaks if wrong |
 |---|---|---|---|
-| `TABLE_CLIENT_SIDE_MAX_ROWS` | int | `200` | `Table._resolve_mode` — at or below this row count a table renders client-side (zero background requests). Too high → huge DOM; too low → server round-trips for small tables. |
+| `TABLE_CLIENT_SIDE_MAX_ROWS` | int | `200` | `Table._resolve_mode` - at or below this row count a table renders client-side (zero background requests). Too high → huge DOM; too low → server round-trips for small tables. |
 | `TABLE_PER_PAGE_CHOICES` | list[int] | `[10, 25, 50, 100]` | `Table.per_page_choices` fallback. Only the **first** value is used as the page size unless the table calls `.paginate([...])` (which then also renders the "Rows" picker in server mode). |
 | `LIVE_VALIDATION_DEBOUNCE_MS` | int | `400` | `Field.live()` default debounce for the per-field validate round-trip. |
-| `IMAGE_MAX_PIXELS` | int | `24_000_000` | `validate_image` — sets `PIL.Image.MAX_IMAGE_PIXELS` and promotes `DecompressionBombWarning` to an error **before** decode. Lower = stricter bomb guard. |
+| `IMAGE_MAX_PIXELS` | int | `24_000_000` | `validate_image` - sets `PIL.Image.MAX_IMAGE_PIXELS` and promotes `DecompressionBombWarning` to an error **before** decode. Lower = stricter bomb guard. |
 | `THUMBNAIL_BACKEND` | dotted path \| `None` | `None` | `get_thumbnail_backend()`. `None` → probe `easy_thumbnails`, then fall back to `PillowThumbnailBackend`. A bad path raises `ThumbnailBackendError`. |
-| `URL_PREFIX` | str | `"dcc/"` | The intended mount prefix for the internal endpoints. Reversing uses the `dcc` namespace, so this is documentation more than enforcement — but keep your `include(...)` prefix in sync. |
-| `ICON_SET` | dotted path | `…icons.FontAwesome` | `icons.active_set()` — the class rendering `{% dcc_icon %}` / every component icon. Must satisfy the `IconSet` protocol. |
+| `URL_PREFIX` | str | `"dcc/"` | The intended mount prefix for the internal endpoints. Reversing uses the `dcc` namespace, so this is documentation more than enforcement - but keep your `include(...)` prefix in sync. |
+| `ICON_SET` | dotted path | `…icons.FontAwesome` | `icons.active_set()` - the class rendering `{% dcc_icon %}` / every component icon. Must satisfy the `IconSet` protocol. |
 | `ICON_ASSET_URL` | str \| `None` | FontAwesome 6.7.2 CDN CSS | The `<link>` `{% dcc_assets %}` emits for icons. `None` → the set self-hosts / emits nothing. |
 | `STUDIO_MODELS` | list[str] | `[]` | `"app_label.Model"` entries a stored studio spec or a widget `.query({...})` may aggregate over. A model not in this list is refused. |
-| `VENDOR_ASSETS` | bool | `False` | `{% dcc_assets %}` — `True` serves htmx / Alpine / focus from your own static files instead of jsDelivr. Run `manage.py dcc_vendor_assets --dest <static dir>` to fetch the pinned files first. Air-gapped and privacy-sensitive deploys. |
+| `VENDOR_ASSETS` | bool | `False` | `{% dcc_assets %}` - `True` serves htmx / Alpine / focus from your own static files instead of jsDelivr. Run `manage.py dcc_vendor_assets --dest <static dir>` to fetch the pinned files first. Air-gapped and privacy-sensitive deploys. |
 | `VENDOR_ASSET_DIR` | str | `"dcc/vendor/"` | Static path prefix the vendored copies are served from when `VENDOR_ASSETS`. |
 | `ASSET_SRI` | dict[str, str] | `{}` | `{cdn_url: "sha384-…"}`. Any CDN asset URL present is emitted with `integrity` + `crossorigin="anonymous"`. Ignored for a URL served via `VENDOR_ASSETS`. |
 
 | `STUDIO_ADMIN_ENTRY` | bool | `True` | Show a "Studio" entry in the Django admin index (redirects to `/studio/`). Set `False` if the project has no `django.contrib.admin` or wants its own entry point. |
 
 Alpine is pinned exactly (`ALPINE_VERSION` in `templatetags/dcc_tags.py`), not a
-floating `3.x.x` range — bump it deliberately, in lockstep with the vendored files.
+floating `3.x.x` range - bump it deliberately, in lockstep with the vendored files.
 
 ### Live re-read
 
-`dcc_settings` reads `settings.DCC` on **every** access — no process restart
+`dcc_settings` reads `settings.DCC` on **every** access - no process restart
 needed for a change to take effect. The icon registry memoises its resolved set,
 but a `setting_changed` receiver clears that cache, so
 `@override_settings(DCC=...)` in tests works.
@@ -116,18 +130,123 @@ but a `setting_changed` receiver clears that cache, so
 | id | level | condition |
 |---|---|---|
 | `django_control_components.E001` | Error | `django_cotton` is not in `INSTALLED_APPS` |
-| `django_control_components.W002` | Warning | no `django.template.backends.django.DjangoTemplates` backend in `TEMPLATES` — component rendering (`render_to_string`) will fail |
-| `django_control_components.E010` | Error | `DCC` contains an unknown key (a typo — the shim would raise on first access) |
+| `django_control_components.W002` | Warning | no `django.template.backends.django.DjangoTemplates` backend in `TEMPLATES` - component rendering (`render_to_string`) will fail |
+| `django_control_components.E010` | Error | `DCC` contains an unknown key (a typo - the shim would raise on first access) |
 | `django_control_components.E011` | Error | `DCC["ICON_SET"]` cannot be imported |
 | `django_control_components.W011` | Warning | a `DCC["STUDIO_MODELS"]` / `STUDIO_RESOURCE_MODELS` label does not resolve to a model |
 | `django_control_components.W012` | Warning | a `DCC["STUDIO_CALLABLES"]` dotted path cannot be imported |
 | `dcc_studio.E001` | Error | `django_control_components.studio` is installed without `django_control_components` |
 | `dcc_studio.W002` | Warning | `DCC["STUDIO_ADMIN_ENTRY"]` is on but the studio URLs are not mounted (`include("django_control_components.studio.urls")`) |
-| `dcc_studio.W003` | Warning | `django_control_components.studio` is installed with `DEBUG=False` — studio is a dev-only tool, remove it before deploying |
+| `dcc_studio.W003` | Warning | `django_control_components.studio` is installed with `DEBUG=False` - studio is a dev-only tool, remove it before deploying |
 
-## Styling
+## Styling & Overrides
 
-Components emit semantic `dcc-*` classes and ship a dependency-free stylesheet
-(`css/dcc.css` — design tokens as CSS custom properties, light/dark aware). To
-theme or purge with Tailwind 4, point a build at `css/dcc.css` instead of loading
-the prebuilt file.
+Components emit semantic `dcc-*` classes and ship a dependency-free stylesheet (`dcc.css` - design tokens as CSS custom properties, light/dark aware).
+
+### 1. Global Theme Overrides (CSS Custom Properties)
+
+Load your custom stylesheet after `{% dcc_assets %}`:
+
+```html
+<head>
+  {% load dcc_tags %}
+  {% dcc_assets %}
+  <link rel="stylesheet" href="{% static 'css/theme.css' %}">
+</head>
+```
+
+```css
+/* static/css/theme.css */
+:root {
+  /* Brand colors */
+  --dcc-primary: #0284c7;        /* Sky blue primary buttons / active nav */
+  --dcc-primary-fg: #ffffff;     /* Button text */
+  
+  /* Geometry & Typography */
+  --dcc-radius: 0.75rem;         /* Rounded corners */
+  --dcc-font: "Inter", -apple-system, sans-serif;
+  --dcc-gap: 1.25rem;
+  
+  /* Surfaces & Borders */
+  --dcc-bg: #f8fafc;
+  --dcc-surface: #ffffff;
+  --dcc-border: #e2e8f0;
+  
+  /* Badges & Alert States */
+  --dcc-success: #10b981;
+  --dcc-danger: #ef4444;
+}
+
+/* Dark theme overrides */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --dcc-bg: #0f172a;
+    --dcc-surface: #1e293b;
+    --dcc-border: #334155;
+    --dcc-primary: #38bdf8;
+    --dcc-primary-fg: #0f172a;
+  }
+}
+```
+
+### 2. Scoped Per-Component / Per-Container Overrides
+
+#### A. Scoped Wizard Styling via Python Attributes
+
+```python
+from django_control_components.wizards import WizardView
+
+
+class CheckoutWizard(WizardView):
+    wizard_class = "custom-checkout-card"
+    wizard_attrs = {
+        "style": (
+            "--dcc-wizard-bg: #f8fafc; "
+            "--dcc-wizard-accent: #10b981; "
+            "--dcc-wizard-accent-fg: #ffffff; "
+            "--dcc-wizard-pad: 2rem; "
+            "--dcc-wizard-radius: 1rem;"
+        )
+    }
+```
+
+#### B. Scoped Table Styling via Container Class
+
+```html
+<div class="my-custom-table-wrapper">
+  {{ table_html }}
+</div>
+
+<style>
+  .my-custom-table-wrapper {
+    --dcc-radius: 0.5rem;
+    --dcc-border: #cbd5e1;
+  }
+  .my-custom-table-wrapper .dcc-table tbody tr:hover {
+    background-color: #f1f5f9;
+  }
+</style>
+```
+
+### 3. Tailwind CSS v4 Source Compilation & Purging
+
+Point `@tailwindcss/cli` at `css/dcc.css`:
+
+```css
+/* src/my-app.css */
+@import "tailwindcss";
+@source "../templates";
+@source "../src/django_control_components/templates";
+
+@theme {
+  --color-dcc-primary: #6366f1;
+  --radius-dcc: 0.5rem;
+}
+```
+
+Compile with CLI:
+
+```bash
+npx @tailwindcss/cli -i src/my-app.css -o static/dist/app.min.css
+```
+

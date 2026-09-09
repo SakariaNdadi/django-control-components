@@ -41,40 +41,40 @@ Every widget:
 | method | effect |
 | --- | --- |
 | `.make(*args, **kwargs)` | construct; keyword args are applied as setters |
-| `.id(str)` | stable id — the `?_dcc_widget=<id>` refresh handle and json_script id. Auto-assigned `w0`, `w1`, … when unset |
+| `.id(str)` | stable id - the `?_dcc_widget=<id>` refresh handle and json_script id. Auto-assigned `w0`, `w1`, … when unset |
 | `.columns(n)` | grid span (stat 1, chart/bar-list 2, table 3 by default) |
 | `.poll(seconds)` | re-fetch the content fragment on an interval |
 | `.refresh_on(event="dcc:refresh")` | re-fetch when a page event fires. `ChartWidget` and `StatWidget` do this by default, so a table/resource mutation (which fires `dcc:refresh`) repaints them |
 
 ## `StatWidget`
 
-`StatWidget.make(label, value=None)` — `.value(x | callable)`, `.description(text)`,
+`StatWidget.make(label, value=None)` - `.value(x | callable)`, `.description(text)`,
 `.icon(name)`, `.query({...})`. A callable value may take `request`.
 
-## `ChartWidget` — Chart.js
+## `ChartWidget` - Chart.js
 
 `ChartWidget.make(label)`:
 
-- `.kind("line" | "bar" | "area" | "pie" | "doughnut" | "radar")` — `area` is a
+- `.kind("line" | "bar" | "area" | "pie" | "doughnut" | "radar")` - `area` is a
   filled line.
-- `.data(pairs | {labels, datasets} | callable)` — a `(label, value)` list becomes
+- `.data(pairs | {labels, datasets} | callable)` - a `(label, value)` list becomes
   one dataset; a Chart.js `{labels, datasets}` dict passes straight through.
-- `.options(dict)` — merged over `{responsive: true, maintainAspectRatio: false}`.
-- `.query({...})` — the no-code data path (below).
+- `.options(dict)` - merged over `{responsive: true, maintainAspectRatio: false}`.
+- `.query({...})` - the no-code data path (below).
 
-Chart.js loads from the CDN, on demand, only on dashboards that use a chart — the
+Chart.js loads from the CDN, on demand, only on dashboards that use a chart - the
 `DashboardPage` collects each widget's `assets` and emits them once in the page
 `<head>`. Nothing is added to `{% dcc_assets %}`.
 
 ## `BarListWidget`
 
-`BarListWidget.make(label).data([(label, value), …])` — a dependency-free CSS bar
+`BarListWidget.make(label).data([(label, value), …])` - a dependency-free CSS bar
 chart. No JavaScript, no CDN. Good for a compact breakdown where a full charting
 library is overkill.
 
 ## `TableWidget`
 
-`TableWidget.make(label, table)` — `table` is a `Table` or `table(request)`. The
+`TableWidget.make(label, table)` - `table` is a `Table` or `table(request)`. The
 table keeps its own toolbar, pagination and refresh.
 
 ## Writing a custom widget
@@ -104,7 +104,7 @@ class SparklineWidget(Widget):
 ```
 
 ```django
-{# myapp/widgets/sparkline.html — the content fragment only, no outer .dcc-widget #}
+{# myapp/widgets/sparkline.html - the content fragment only, no outer .dcc-widget #}
 <div class="dcc-widget__label">{{ label }}</div>
 <div x-data="mySparkline('{{ payload_id }}')">
   {{ payload|json_script:payload_id }}
@@ -112,7 +112,7 @@ class SparklineWidget(Widget):
 </div>
 ```
 
-The `x-data` must be a single factory call taking the `payload_id` string — no
+The `x-data` must be a single factory call taking the `payload_id` string - no
 other `{{ }}` inside `x-data` (a template-linting test enforces this).
 
 ## Registering a charting library
@@ -137,7 +137,7 @@ on teardown, so an htmx fragment swap does not leak the canvas/DOM.
 ## No-code: `.query({...})`
 
 `ChartWidget.query()` and `StatWidget.query()` take a constrained aggregation spec
-resolved server-side — the only chart data path expressible in a stored
+resolved server-side - the only chart data path expressible in a stored
 `PanelDashboard` JSON row:
 
 ```json
@@ -145,7 +145,7 @@ resolved server-side — the only chart data path expressible in a stored
 {"model": "blog.Article", "aggregate": "sum", "aggregate_field": "views"}
 ```
 
-- `model` **must** be listed in `DCC["STUDIO_MODELS"]` — a spec cannot aggregate an
+- `model` **must** be listed in `DCC["STUDIO_MODELS"]` - a spec cannot aggregate an
   arbitrary table.
 - `aggregate` ∈ `{count, sum, avg, min, max}`; anything but `count` needs
   `aggregate_field`.
@@ -177,5 +177,5 @@ PanelDashboard.objects.create(
 ```
 
 `Panel(...).dynamic()` serves it at `<panel>/dash/<slug>/` and lists it in the
-sidebar. As with resource specs, the client only ever sends the dashboard slug —
+sidebar. As with resource specs, the client only ever sends the dashboard slug -
 never a model label or a type name.

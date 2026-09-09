@@ -1,8 +1,8 @@
 # Architecture
 
-Read this once before the subsystem docs. Every builder in the library —
+Read this once before the subsystem docs. Every builder in the library -
 `Schema`, `Table`, `Action`, `Widget`, `Infolist`, the schema fields, the layout
-containers — shares the machinery described here. The subsystem docs assume it.
+containers - shares the machinery described here. The subsystem docs assume it.
 
 ## The one-sentence model
 
@@ -23,7 +23,7 @@ response:
 | Python objects render leaf templates via `render_to_string`, **never** round-trip through a `<c-…>` tag string (`core/renderer.py:14-20`) | The props are already a typed dict. Stringifying them into a tag is exactly where escaping bugs come from. |
 | Component instances hold **configuration only**; per-request data flows through `RenderContext` (`core/component.py:49-51`, `core/context.py:17-22`) | One instance can render concurrently against different requests with no cross-talk. You can build a schema once at import time and reuse it. |
 | Every `hx-*` attribute is produced by `htmx.py`; **no template contains a literal `hx-*`** (`htmx.py:1-7`) | Migrating htmx versions is a one-file change. A test greps the template tree to enforce it. |
-| The client only ever sends **opaque string keys** (an owner key, an action name, a schema key, a spec slug) — never an import path, model label, or callable | An unknown key is a 404, not a stack trace. A tampered key cannot reach code that was not registered. |
+| The client only ever sends **opaque string keys** (an owner key, an action name, a schema key, a spec slug) - never an import path, model label, or callable | An unknown key is a 404, not a stack trace. A tampered key cannot reach code that was not registered. |
 | Validation is **always** Django's form (`schemas/schema.py:21-26`) | There is exactly one validation path. A schema decorates a `Form`/`ModelForm`; it never validates. |
 | Modal and menu bodies are **pre-rendered HTML strings** | A lint test forbids `{{ }}` inside `x-data="{…}"` (see *Design invariants* below), so the Python render path has no slot mechanism to hand a template into an Alpine component. |
 
@@ -50,7 +50,7 @@ needs. **Do not override `render`.**
 
 ## `RenderContext`
 
-A frozen, slotted dataclass — per-request state for one render pass
+A frozen, slotted dataclass - per-request state for one render pass
 (`core/context.py:15-49`).
 
 | Field | Default | Meaning |
@@ -69,7 +69,7 @@ A frozen, slotted dataclass — per-request state for one render pass
 - `ctx.resolve(name)` → the value bound to an injectable closure parameter (see
   *Closures* below).
 
-Because the context is frozen, you never mutate it — you derive a new one with
+Because the context is frozen, you never mutate it - you derive a new one with
 `child()`.
 
 ## The fluent / kwargs duality
@@ -91,7 +91,7 @@ Consequences you must know:
 - A plain method that is **not** `@setter` cannot be passed as a kwarg. These are
   fluent-only: `column_span_full()`, `visible_when(...)`, `when(...)`,
   `hidden_when(...)`, `Schema.schema()` / `Schema.form()` / `Schema.model()`,
-  `HasChildComponents.schema()` (so `Section(schema=[...])` raises — call
+  `HasChildComponents.schema()` (so `Section(schema=[...])` raises - call
   `.schema([...])`).
 - `Column`, `Filter`, `Action`, `Widget` each re-implement the same
   unknown-setter `TypeError` check; the message wording varies slightly.
@@ -99,7 +99,7 @@ Consequences you must know:
 ## `UNSET` vs `None`
 
 `UNSET` (`core/component.py:16-37`) is a falsy singleton meaning *"the caller said
-nothing — inherit the default or the bound Django field."* `None` is a real
+nothing - inherit the default or the bound Django field."* `None` is a real
 configured value meaning *"render nothing here"* (e.g. `.label(None)` suppresses a
 label that would otherwise be inherited from the form field). Setters store what
 you pass; resolution falls back to the Django field only when the value is
@@ -109,7 +109,7 @@ you pass; resolution falls back to the Django field only when the value is
 
 Accumulates HTML attributes and renders them escaped (`core/attributes.py:13-75`).
 
-- **`class` is the only attribute that merges** — a caller-supplied class is
+- **`class` is the only attribute that merges** - a caller-supplied class is
   appended to the component's own classes, deduped, order preserved. Every other
   key is last-write-wins.
 - Setting a value of `None` or `False` drops the attribute (you cannot force
@@ -118,17 +118,17 @@ Accumulates HTML attributes and renders them escaped (`core/attributes.py:13-75`
   omitted when falsy.
 - `set(key, value)` **raises `ValueError`** if the key is empty or contains
   whitespace or any of `" ' > / =`.
-- htmx attribute bags are `AttributeBag`s — `Button.attributes(bag)` merges an
+- htmx attribute bags are `AttributeBag`s - `Button.attributes(bag)` merges an
   `htmx.get(...)` result straight in.
 
-## Closures — configuration values that are callables
+## Closures - configuration values that are callables
 
 Almost every setter accepts a callable instead of a literal: `.label(fn)`,
 `.visible(fn)`, `.state(fn)`, `Action.action(fn)`, `Table.record_url(fn)`, a
 widget's `.value(fn)`, and so on. When the value is rendered, `evaluate()`
 (`core/evaluate.py:57-76`) runs it:
 
-1. **Non-callables and classes pass straight through** — a class is *not*
+1. **Non-callables and classes pass straight through** - a class is *not*
    instantiated. Passing `SomeClass` where you meant `SomeClass()` silently
    returns the class.
 2. A callable is inspected for its parameter names and invoked with **only the
@@ -148,11 +148,11 @@ widget's `.value(fn)`, and so on. When the value is rendered, `evaluate()`
    | `set` | a no-op on the server render path (there is no live state to write back) |
 
 3. A callable that declares **any other parameter name** raises
-   `ClosureInjectionError` (a `DCCError`) at render time — including a typo like
+   `ClosureInjectionError` (a `DCCError`) at render time - including a typo like
    `reqeust`.
 
 So `lambda record: reverse("edit", args=[record.pk])` and
-`lambda r, user: ...` (no — `r` is not injectable; use `request`) — declare the
+`lambda r, user: ...` (no - `r` is not injectable; use `request`) - declare the
 exact injectable names.
 
 See [callbacks.md](callbacks.md) for every call site and its specific contract.
@@ -191,12 +191,12 @@ endpoints turn a miss into `Http404`.
 
 | Tag | Purpose |
 |---|---|
-| `{% dcc_assets alpine=True htmx=True icons=True focus=True %}` | Emit `dcc.css`, the icon-set `<link>`, htmx, `dcc.js`, the Alpine focus plugin, and Alpine — in that order. Pass `False` for anything the host page already loads. |
+| `{% dcc_assets alpine=True htmx=True icons=True focus=True %}` | Emit `dcc.css`, the icon-set `<link>`, htmx, `dcc.js`, the Alpine focus plugin, and Alpine - in that order. Pass `False` for anything the host page already loads. |
 | `{% dcc_render component %}` | Render a Python component instance; wires `request` and `form` from the template context into a fresh `RenderContext`. |
 | `{% dcc_form schema %}` / `{% dcc_form schema form=other_form %}` | Render a bound schema as a full `<form>` including CSRF and a submit button. |
 | `{% dcc_icon "rocket" css_class="text-lg" %}` | Render one icon through the active icon set. |
 | `{% dcc_studio_assets %}` | The dev-only studio builder's CSS + JS. Emit inside a page that already ran `{% dcc_assets %}`. |
-| `{% get_field_errors form "name" %}` | **Deprecated** — emits `DeprecationWarning`, removed next minor. The forms bridge renders field errors itself. |
+| `{% get_field_errors form "name" %}` | **Deprecated** - emits `DeprecationWarning`, removed next minor. The forms bridge renders field errors itself. |
 
 **Load order is load-bearing** (`dcc_tags.py:43-50`): `dcc.js` must load before
 Alpine so it can register its `alpine:init` listener before Alpine scans the DOM;
@@ -225,7 +225,7 @@ shapes:
 
 ## Where to go next
 
-- [settings.md](settings.md) — every `DCC[...]` key, install, system checks.
-- [views-and-mixins.md](views-and-mixins.md) — every view and mixin, MRO rules.
-- [callbacks.md](callbacks.md) — every user-supplied callable and its contract.
-- [errors.md](errors.md) — every exception and what triggers it.
+- [settings.md](settings.md) - every `DCC[...]` key, install, system checks.
+- [views-and-mixins.md](views-and-mixins.md) - every view and mixin, MRO rules.
+- [callbacks.md](callbacks.md) - every user-supplied callable and its contract.
+- [errors.md](errors.md) - every exception and what triggers it.

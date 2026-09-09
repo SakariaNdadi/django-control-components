@@ -7,17 +7,17 @@
 - renders its own shell **and** its own content fragment;
 - picks **client- or server-side mode** by row count;
 - answers its own htmx requests (sort, filter, search, paginate, scroll);
-- is an **action owner** — row and bulk actions register against it.
+- is an **action owner** - row and bulk actions register against it.
 
 **No querystring value ever reaches the ORM as a key.** A requested sort must
 name a column that declared itself `sortable`; the ORM path then comes from that
 column's `sort_field()`. Search builds a `Q` over columns that declared
 themselves `searchable`, nothing else (`tables/query.py:1-8`). A filter value
-that does not clean is dropped — never a 500 (`tables/filters.py:1-6`).
+that does not clean is dropped - never a 500 (`tables/filters.py:1-6`).
 
 Why keyset pagination in server mode: deep `OFFSET` and `SELECT COUNT(*)` both
 scale badly. Server mode orders by `(sort_column, pk)`, asks for "the page after
-this row", and fetches `per_page + 1` to know whether more exist — no count, no
+this row", and fetches `per_page + 1` to know whether more exist - no count, no
 offset (`tables/cursor.py:1-10`). The cursor token is an opaque base64 of
 `[sort_value, pk]`; it carries no column name, so a tampered token can at worst
 point at a wrong row inside the already-scoped queryset.
@@ -25,16 +25,34 @@ point at a wrong row inside the already-scoped queryset.
 ## Quick start
 
 ```python
+from django.http import HttpResponse
+from django.shortcuts import get_object_or_404
 from django.urls import reverse
-from django_control_components.tables import (
-    Table,
-    TextColumn,
-    DateColumn,
-    BooleanColumn,
-    SelectFilter,
-    TernaryFilter,
-)
+from django.utils.html import format_html
+from django.views.generic import TemplateView
+from django_control_components import htmx
 from django_control_components.actions import Action, BulkAction
+from django_control_components.tables import (
+    BadgeColumn,
+    BooleanColumn,
+    DateColumn,
+    SelectFilter,
+    Table,
+    TableMixin,
+    TernaryFilter,
+    TextColumn,
+)
+from myapp.models import Article
+
+
+def save_quick_edit(request, record, data):
+    record.title = data.get("title", record.title)
+    record.save()
+    # Return htmx toast notification / trigger
+    return HttpResponse(
+        status=200,
+        headers={"HX-Trigger": '{"dcc-toast": {"message": "Article updated successfully", "variant": "success"}}'},
+    )
 
 
 def article_table(request):
@@ -45,7 +63,10 @@ def article_table(request):
             [
                 TextColumn.make("title").sortable().searchable().limit(64),
                 TextColumn.make("author.name").label("Author").sortable(sort_field="author__name"),
-                BooleanColumn.make("featured").labels(("★", "—")),
+                BadgeColumn.make("status").colors(
+                    {"draft": "muted", "review": "secondary", "live": "success"}
+                ),
+                BooleanColumn.make("featured").labels(("★", "-")),
                 DateColumn.make("created_at").label("Created").since().sortable(),
             ]
         )
@@ -60,19 +81,30 @@ def article_table(request):
                 Action.make("edit")
                 .icon("pen")
                 .to_url(lambda record: reverse("article-edit", args=[record.pk])),
-                Action.make("quick_edit")
-                .icon("pen-to-square")
-                .collapsed()
-                .modal(quick_edit_schema())
-                .action(save_quick_edit),
+                Action.make("delete")
+                .icon("trash")
+                .variant("danger")
+                .requires_confirmation(
+                    title="Delete Article?",
+                    message="This action cannot be undone. Are you sure?",
+                )
+                .action(lambda record: record.delete()),
             ]
         )
         .bulk_actions(
             [
                 BulkAction.make("publish")
                 .icon("rocket")
-                .requires_confirmation()
+                .requires_confirmation(
+                    title="Publish Selected?",
+                    message="Publish all selected articles immediately?",
+                )
                 .action(lambda records: records.update(status="live")),
+                BulkAction.make("archive")
+                .icon("box-archive")
+                .variant("danger")
+                .requires_confirmation()
+                .action(lambda records: records.update(status="archived")),
             ]
         )
         .searchable()
@@ -80,16 +112,13 @@ def article_table(request):
         .record_url(lambda record: reverse("article-edit", args=[record.pk]))
         .record_preview(
             lambda record: format_html(
-                "<strong>{}</strong><p>{}</p>", record.title, record.body[:200]
+                "<strong>{}</strong><p class='text-sm text-gray-500'>{}</p>",
+                record.title,
+                record.body[:200] if hasattr(record, "body") else "",
             )
         )
+        .empty_message("No articles found matching your criteria.")
     )
-```
-
-Render it from a view with `TableMixin`:
-
-```python
-from django_control_components.tables.views import TableMixin
 
 
 class ArticleListView(TableMixin, TemplateView):
@@ -99,13 +128,46 @@ class ArticleListView(TableMixin, TemplateView):
         return article_table(self.request)
 ```
 
+### Full Template (`articles/list.html`)
+
 ```django
-{{ table_html }}
+{% extends "base.html" %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto py-8">
+  <!-- Alerts & notifications container (auto-listens to dcc-toast events) -->
+  <div id="dcc-toast-container" class="fixed bottom-4 right-4 z-50 flex flex-col gap-2"></div>
+
+  <div class="flex justify-between items-center mb-6">
+    <h1 class="text-2xl font-bold">Article Management</h1>
+    <a href="{% url 'article-create' %}" class="dcc-btn dcc-btn--primary">
+      {% dcc_icon "plus" %} New Article
+    </a>
+  </div>
+
+  <!-- Renders full interactive table shell and action handlers -->
+  {{ table_html }}
+</div>
+{% endblock %}
 ```
 
-## `Table` — configuration
+---
 
-All methods are **fluent-only** and return `self`. (They are not `@setter`s —
+## 🔔 Alerts, Confirmations & Toast Notifications
+
+Tables integrate with action triggers and modal dialogs:
+
+1. **Confirmation Modals**:
+   - Calling `.requires_confirmation(title="...", message="...")` on `Action` or `BulkAction` intercepts click events and prompts the user via a focus-trapped confirmation modal before dispatching any POST request.
+2. **Success & Error Feedback**:
+   - Action callbacks can return standard responses or set `HX-Trigger` headers to trigger client-side notifications/toasts without reloading the page.
+3. **Modal Form Overlays**:
+   - `Action.make("quick_edit").modal(schema).action(callback)` renders full interactive form dialogs over the active table row without losing scroll state or filter parameters.
+
+
+## `Table` - configuration
+
+All methods are **fluent-only** and return `self`. (They are not `@setter`s -
 `Table` has no kwargs constructor.)
 
 | Method | Effect |
@@ -119,7 +181,7 @@ All methods are **fluent-only** and return `self`. (They are not `@setter`s —
 | `.default_sort("field" \| "-field")` | initial sort; `-` prefix = descending |
 | `.paginate([10, 25, 50])` | page size = first value; a "Rows" `<select>` offers the rest |
 | `.pagination_position("left" \| "center" \| "right")` | pager placement (default `right`) |
-| `.page_numbers()` | classic numbered pages — one `COUNT(*)` per render |
+| `.page_numbers()` | classic numbered pages - one `COUNT(*)` per render |
 | `.stream()` | keyset cursor + append-on-scroll; safe over millions of rows |
 | `.infinite_scroll()` | no pager; rows append on scroll |
 | `.load_more_button()` | with streaming, a click instead of auto-append |
@@ -141,7 +203,7 @@ All methods are **fluent-only** and return `self`. (They are not `@setter`s —
 
 ### Pagination strategy interactions
 
-- `.infinite_scroll()` **forces** the streaming strategy — it overrides
+- `.infinite_scroll()` **forces** the streaming strategy - it overrides
   `.page_numbers()` and `.stream()` (`tables/table.py:137-140`).
 - The "rows per page" `<select>` renders **only** when you passed **more than one**
   choice to `.paginate([...])` **and** the table is in server mode
@@ -164,7 +226,7 @@ Import from `django_control_components.tables`.
 
 ### Every column setter
 
-`Column.make(name, **kwargs)` — `name` may be dotted (`"author.name"`), walked
+`Column.make(name, **kwargs)` - `name` may be dotted (`"author.name"`), walked
 safely (see [architecture.md](architecture.md#safe-attribute-traversal)).
 
 | Setter | Note |
@@ -177,10 +239,10 @@ safely (see [architecture.md](architecture.md#safe-attribute-traversal)).
 | `.allow_html()` | opt a computed cell **out of escaping** (`mark_safe`). The only sanctioned way to emit markup; pair with `.state(fn)` returning `format_html(...)` |
 | `.state(fn)` | override the displayed value; `lambda record: ...` |
 
-`.state(fn)` without `.allow_html()` renders the returned string **escaped** —
+`.state(fn)` without `.allow_html()` renders the returned string **escaped** -
 so `format_html("<b>{}</b>", x)` shows the literal tags. Add `.allow_html()`.
 
-Query-string values never reach `order_by` / `filter` as keys — a requested sort
+Query-string values never reach `order_by` / `filter` as keys - a requested sort
 must name a `sortable` column; a search only touches `searchable` columns.
 
 ## Filters
@@ -196,7 +258,7 @@ must name a `sortable` column; a search only touches `searchable` columns.
 | `TernaryFilter` | `BooleanFilter` with All / Yes / No choices |
 
 Setters: `.label(str)`, `.field("orm__path")` (the ORM field, default = name).
-Filters round-trip to the server on `change` in **both** modes — client-side
+Filters round-trip to the server on `change` in **both** modes - client-side
 value/display equality is unreliable, especially for booleans
 (`tables/table.py:467-469`). A garbage value is dropped, never a 500.
 
@@ -205,18 +267,18 @@ value/display equality is unreliable, especially for booleans
 `.actions([...])` renders one button per action in a trailing column. See
 [actions.md](actions.md) for the full `Action` API.
 
-- `.to_url(fn)` — a link, navigates to a page. **Checked first** — if set, the
+- `.to_url(fn)` - a link, navigates to a page. **Checked first** - if set, the
   callback / modal never runs.
-- `.modal(schema).action(fn)` — opens the schema's form in a modal bound to the
+- `.modal(schema).action(fn)` - opens the schema's form in a modal bound to the
   row's record; `.action(fn)` persists it.
-- `.modal(fn)` — renders `fn(record=...)` HTML in a modal.
-- `.requires_confirmation()` / `.modal()` — a confirm dialog.
-- `.action(fn)` alone — `hx-post`, then a toast + table refresh.
-- `.collapsed()` — fold this action into a trailing **"⋯" menu**.
+- `.modal(fn)` - renders `fn(record=...)` HTML in a modal.
+- `.requires_confirmation()` / `.modal()` - a confirm dialog.
+- `.action(fn)` alone - `hx-post`, then a toast + table refresh.
+- `.collapsed()` - fold this action into a trailing **"⋯" menu**.
 - `.icon(name)`, `.variant("secondary" | "danger" | …)`, `.visible(fn)`,
   `.authorize("app.perm" | fn)`.
 
-Callback params are injected by name — `request`, `user`, `record` (row) /
+Callback params are injected by name - `request`, `user`, `record` (row) /
 `records` (bulk), `data` (a `.modal(schema)` form's cleaned data). See
 [callbacks.md](callbacks.md).
 
@@ -226,7 +288,7 @@ Callback params are injected by name — `request`, `user`, `record` (row) /
 in once rows are ticked. Selecting rows survives a client-mode filter round-trip.
 
 Tick the header checkbox, then **"Select every matching row"**: the bulk action
-receives the **filtered queryset itself** (unmaterialised), not a pk list — so
+receives the **filtered queryset itself** (unmaterialised), not a pk list - so
 `records.update(...)` runs as one statement over millions of rows.
 
 The endpoint re-scopes the ticked pks against `Table.get_action_queryset(request)`
@@ -243,7 +305,7 @@ BulkAction.make("archive").requires_confirmation()
 | call | effect |
 |---|---|
 | `.record_url(fn)` | clicking a row (bar buttons/inputs) navigates to `fn(record)` (full page); ⌘/Ctrl-click opens a new tab; row is keyboard-focusable, Enter activates |
-| `.record_action(action)` | a row click fires an `Action` — typically `.modal(...)` or `.to_url(...)` |
+| `.record_action(action)` | a row click fires an `Action` - typically `.modal(...)` or `.to_url(...)` |
 | `.record_preview(fn)` | hovering a row (~350 ms) pops a floating card with `fn(record)` HTML |
 
 `record_url` wins if both `record_url` and `record_action` are set
@@ -251,7 +313,7 @@ BulkAction.make("archive").requires_confirmation()
 inputs, the selection checkbox, the "⋯" menu) never trigger the row action, and
 text selection is ignored.
 
-## Presentation — feed
+## Presentation - feed
 
 `.presentation("feed")` renders rows as a borderless list. The first cell is the
 title, middle cells the meta line, the last cell a trailing element (3+ columns).
@@ -269,19 +331,19 @@ Table.make(Article.objects.order_by("-created_at")[:6])
 
 - **MRO:** place `TableMixin` **before** the Django view (`TemplateView`,
   `ListView`) so `super().get()` / `super().get_context_data()` resolve to it.
-  Place **auth mixins after** `TableMixin` — `dispatch` (where auth runs) still
+  Place **auth mixins after** `TableMixin` - `dispatch` (where auth runs) still
   fires first, and the fragment is served from `get`, after `dispatch`.
 - **Class attributes:** `table: Table | None = None`,
   `table_context_name = "table_html"`.
 - **Override `get_table(self) -> Table`** to build the table per request.
   Returning `self.table` when `None` raises
   `ValueError(f"{type(self).__name__} needs a `table` or `get_table()`")`.
-- `get()` — on an `HX-Request` whose `?_dcc_table` equals this table's id,
+- `get()` - on an `HX-Request` whose `?_dcc_table` equals this table's id,
   returns `HttpResponse(table.render_content(request))` (the fragment); else
   `super().get(...)`. **Do not override** unless you reproduce that contract.
 - `get_context_data()` adds `{table_context_name: table.render(request)}`.
 
-In a panel `Resource`, the table comes from `build_table(*, request)` — see
+In a panel `Resource`, the table comes from `build_table(*, request)` - see
 [panels.md](panels.md).
 
 ## Calling a table directly
@@ -297,7 +359,7 @@ the table as an action owner if it has any actions.
 ## Callbacks
 
 `record_url`, `record_action` targets, `record_preview`, and any column
-`.state(fn)` / `.visible(fn)` are closures — injected by parameter name from
+`.state(fn)` / `.visible(fn)` are closures - injected by parameter name from
 `{record, request, user, form, operation, context, component, get, state}`. See
 [callbacks.md](callbacks.md).
 
@@ -305,13 +367,13 @@ the table as an action owner if it has any actions.
 
 - `.infinite_scroll()` overrides `.page_numbers()` and `.stream()`.
 - The rows-per-page picker needs `.paginate([>1 choices])` **and** server mode.
-- `.client_side()` / `.server_side()` disable the row-count auto-probe — a table
+- `.client_side()` / `.server_side()` disable the row-count auto-probe - a table
   forced client-side with 100k rows renders 100k rows.
-- `record_url` + `record_action` — `record_url` wins.
+- `record_url` + `record_action` - `record_url` wins.
 - A column `.state(fn)` returning HTML needs `.allow_html()` or it renders
   escaped.
 - Reaching the action endpoint requires the table to have been rendered at least
-  once in the process (so `_register()` ran) — a bare `Action` never rendered by
+  once in the process (so `_register()` ran) - a bare `Action` never rendered by
   an owner is a 404.
 
 ## Settings
@@ -324,7 +386,7 @@ the table as an action owner if it has any actions.
 ## Known sharp edges
 
 - `ImageColumn.thumbnail(...)` swallows **any** exception from the thumbnail
-  backend and falls back to the original image URL — a misconfigured backend
+  backend and falls back to the original image URL - a misconfigured backend
   fails silently in a table (it does raise elsewhere; see [images.md](images.md)).
 - The grid width is fixed (100% of its container); height follows the row count
   on the page.

@@ -1,15 +1,13 @@
 from django.conf import settings
 from django.conf.urls.static import static
-from django.contrib import admin
 from django.urls import include, path
+from django.views.generic import RedirectView
 
-from demo.panels import admin_panel
+from demo.panels import docs_panel
 
 urlpatterns = [
-    path("admin/", admin.site.urls),
     path("dcc/", include("django_control_components.urls")),
-    path("studio/", include("django_control_components.studio.urls")),
-    admin_panel.mount(),
-    path("", include("demo.urls")),
+    docs_panel.mount(),
     *static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT),
 ]
+

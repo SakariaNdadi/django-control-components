@@ -1,0 +1,160 @@
+{% extends "django_control_components/panels/base.html" %}
+{% load static dcc_tags %}
+{% block head_extra %}<link rel="stylesheet" href="{% static 'demo/docs.css' %}">{% endblock %}
+{% block content %}
+  <header class="dcc-panel__header dcc-docs__pageheader" data-family="panels">
+    <div>
+      <span class="dcc-docs__familybadge" style="background: var(--dcc-docs-family-tables);">panels & resources</span>
+      <h1>Full End-to-End Example: Panels & Resources</h1>
+      <p class="dcc-docs__summary">How entire admin-independent CRUD surfaces and dashboard pages are constructed directly in pure Python using <code>Panel</code>, <code>Resource</code>, and <code>Widget</code> builders - without needing Studio.</p>
+    </div>
+  </header>
+
+  <div class="dcc-docs__prose" style="max-width: 54rem;">
+    <div style="background: var(--dcc-surface); border: 1px solid var(--dcc-border); border-radius: var(--dcc-radius); padding: 1.25rem; margin: 1.5rem 0;">
+      <h3 style="margin-top: 0;">Try the Live Resource</h3>
+      <p style="margin-bottom: 1rem; color: var(--dcc-muted);">The demo app runs this live <code>TaskResource</code> wired to a real SQLite database:</p>
+      <a class="dcc-btn dcc-btn--primary" href="{{ tasks_url }}">{% dcc_icon "list-check" %} Open Live Tasks Resource</a>
+    </div>
+
+    <h2>1. Architecture: Panels & Resources</h2>
+    <p>The entire catalog and demo app are defined in Python source code:</p>
+    <ul>
+      <li><code>Panel</code>: The root routing container and sidebar navigation manager.</li>
+      <li><code>Resource</code>: Wires one Django model to List (<code>Table</code>), Create/Edit (<code>Schema</code>), and View (<code>Infolist</code>).</li>
+      <li><code>DashboardPage</code> + <code>Widget</code>: Metric overview pages combining <code>StatWidget</code>, <code>ChartWidget</code> (Chart.js), <code>BarListWidget</code>, and <code>TableWidget</code>.</li>
+    </ul>
+
+
+    <h2>2. Defining a Complete Model Resource</h2>
+    <pre><code>from django import forms
+from django_control_components.panels import Resource
+from django_control_components.schemas import Schema, Section, TextInput, Select, Toggle
+from django_control_components.tables import Table, TextColumn, BadgeColumn, BooleanColumn, DateColumn, SelectFilter
+from django_control_components.infolists import Infolist, TextEntry, BadgeEntry, BooleanEntry, DateEntry
+from myapp.models import Task
+
+class TaskResource(Resource):
+    model = Task
+    navigation_icon = "list-check"
+    navigation_group = "Operations"
+    create_redirect = "list"
+
+    @classmethod
+    def can(cls, request, action, obj=None):
+        # Open to all in demo, or use standard Django permissions:
+        # return request.user.has_perm(f"myapp.{action}_task")
+        return True
+
+    # 1. List Page: Keyset-streamed interactive table
+    @classmethod
+    def build_table(cls, *, request):
+        return (
+            Table.make(cls.get_queryset(request))
+            .id("tasks-table")
+            .columns([
+                TextColumn.make("title").sortable().searchable(),
+                BadgeColumn.make("priority").colors({
+                    "low": "muted",
+                    "medium": "secondary",
+                    "high": "danger",
+                }),
+                BooleanColumn.make("done").labels(("✓ Done", "- In Progress")),
+                DateColumn.make("due_date").since().sortable(),
+            ])
+            .filters([
+                SelectFilter.make("priority").options(Task.Priority.choices),
+            ])
+            .default_sort("-due_date")
+            .searchable()
+        )
+
+    # 2. Create & Edit Pages: Bound Schema Form
+    @classmethod
+    def build_schema(cls, *, request):
+        return (
+            Schema.make()
+            .model(Task, fields=["title", "priority", "done", "due_date"])
+            .schema([
+                Section.make("Task Information")
+                .columns(2)
+                .schema([
+                    TextInput.make("title").required().column_span_full(),
+                    Select.make("priority"),
+                    Toggle.make("done"),
+                ]),
+                TextInput.make("due_date"),
+            ])
+        )
+
+    # 3. View Record Page: Read-only Infolist
+    @classmethod
+    def build_infolist(cls, *, request):
+        return (
+            Infolist.make()
+            .schema([
+                TextEntry.make("title").label("Task Title"),
+                BadgeEntry.make("priority").colors({"high": "danger"}),
+                BooleanEntry.make("done").label("Status Completed"),
+                DateEntry.make("due_date").label("Target Date"),
+            ])
+        )</code></pre>
+
+    <h2>3. Adding a Dashboard with Chart.js Widgets</h2>
+    <p>Dashboard pages compose metrics and charts with zero client scaffolding - <code>Chart.js</code> loads automatically on-demand via CDN when a <code>ChartWidget</code> is rendered:</p>
+
+    <pre><code>from django_control_components.panels import (
+    DashboardPage,
+    StatWidget,
+    ChartWidget,
+    BarListWidget,
+    TableWidget,
+)
+
+class AnalyticsDashboard(DashboardPage):
+    page_title = "Executive Overview"
+    nav_label = "Analytics"
+    nav_icon = "chart-line"
+
+    def widgets(self, request):
+        return [
+            # Metric Card with auto-polling (every 30s)
+            StatWidget.make("Total Tasks", Task.objects.count())
+                .icon("list-check")
+                .poll(30),
+
+            # Chart.js Interactive Line/Bar/Area/Pie Chart
+            ChartWidget.make("Tasks by Priority")
+                .kind("bar")
+                .data([
+                    ("Low Priority", Task.objects.filter(priority="low").count()),
+                    ("Medium Priority", Task.objects.filter(priority="medium").count()),
+                    ("High Priority", Task.objects.filter(priority="high").count()),
+                ])
+                .columns(2),
+
+            # Lightweight CSS-only Bar List (Zero JS)
+            BarListWidget.make("Breakdown")
+                .data([("Done", 12), ("Pending", 4)]),
+        ]</code></pre>
+
+    <h2>4. Mounting the Panel</h2>
+    <pre><code># app/panels.py
+from django_control_components.panels import Panel
+
+app_panel = (
+    Panel("admin")
+    .path("admin-panel")
+    .brand("Enterprise Control", "shield-halved")
+    .resources([TaskResource])
+    .pages([AnalyticsDashboard])
+    .auth(lambda request: request.user.is_staff)
+)
+
+# config/urls.py
+urlpatterns = [
+    app_panel.mount(),  # Serves /admin-panel/, /admin-panel/tasks/, etc.
+]</code></pre>
+  </div>
+{% endblock %}
+

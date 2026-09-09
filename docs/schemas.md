@@ -5,7 +5,7 @@
 A `Schema` describes a form's **layout and presentation**. It decorates an
 existing Django `Form` / `ModelForm` (or a model, via `modelform_factory`).
 
-**A schema never validates.** There is exactly one validation path — Django's
+**A schema never validates.** There is exactly one validation path - Django's
 form (`schemas/schema.py:21-26`). Field labels, help text, choices and `required`
 are inherited from the form unless you override them per field. Every control is
 a real, correctly-named HTML input, so submitting with JavaScript disabled still
@@ -92,40 +92,40 @@ class ArticleCreateView(SchemaFormMixin, CreateView):
 Or render just the fields inside your own `<form>`:
 `{{ schema.render(request=request, form=form) }}`.
 
-## `Schema` — configuration
+## `Schema` - configuration
 
-All configuration methods are **fluent-only** (not `@setter` — you cannot pass
+All configuration methods are **fluent-only** (not `@setter` - you cannot pass
 them as `Schema()` kwargs) and return `self`.
 
 | Method | Effect |
 |---|---|
 | `Schema.make()` | construct |
 | `.form(FormClass)` | decorate a hand-written `Form` / `ModelForm` |
-| `.model(Model, *, fields="__all__")` | decorate a model — builds a `ModelForm` via `modelform_factory` |
+| `.model(Model, *, fields="__all__")` | decorate a model - builds a `ModelForm` via `modelform_factory` |
 | `.schema([...])` / `.components([...])` | the tree of fields and layout containers (aliases; identical) |
 | `.strict(value=True)` | render **only** the fields you declared |
 
-**`.form()` vs `.model()` — do not rely on both.** `get_form_class()` returns
+**`.form()` vs `.model()` - do not rely on both.** `get_form_class()` returns
 `_form_class` if set, otherwise builds one from `_model`
 (`schemas/schema.py:68-73`). Calling `.model()` after `.form()` has no effect.
 Calling neither raises `ValueError("Schema needs .form(FormClass) or .model(Model)
 before rendering")` at first render.
 
-**`.strict()` — what it changes.** By default the schema appends every form field
-you did *not* name — as a `<input type=hidden>` if the widget is hidden, else a
+**`.strict()` - what it changes.** By default the schema appends every form field
+you did *not* name - as a `<input type=hidden>` if the widget is hidden, else a
 plain `TextInput` (`schemas/schema.py:157-168`). This keeps a `ModelForm` valid
 even if you forgot a required field. `.strict()` disables the append: unnamed
 fields are neither rendered nor submitted, so a required one that you omitted
 will fail validation on save. Use `.strict()` for deliberately partial forms
 (wizard steps, modals).
 
-## `Schema` — methods you call
+## `Schema` - methods you call
 
 | Method | Returns | Use |
 |---|---|---|
 | `get_form_class()` | `type[BaseForm]` | the Django form class this schema validates through |
 | `is_modelform()` | `bool` | whether that class is a `ModelForm` |
-| `to_form_class()` | `type[BaseForm]` | a real Django form with **only the declared fields** — used by wizard steps, action modals, filter forms |
+| `to_form_class()` | `type[BaseForm]` | a real Django form with **only the declared fields** - used by wizard steps, action modals, filter forms |
 | `build_form(*args, **kwargs)` | `BaseForm` | bind the **full** form; runs `check_alignment` (see errors) and attaches image validators. Pops `instance=` if not a `ModelForm`. |
 | `build_standalone_form(*args, **kwargs)` | `BaseForm` | bind a form of **only declared fields** (`to_form_class()` path); attaches image validators, no alignment check |
 | `image_specs()` | `dict[str, dict]` | field name → image spec, for every `FileUpload` |
@@ -159,11 +159,11 @@ Import from `django_control_components.schemas`.
 
 `Select` / `MultiSelect` / `Radio`:
 
-- `.options([(value, label), …])` or `.options({value: label})` — an explicit list.
+- `.options([(value, label), …])` or `.options({value: label})` - an explicit list.
 - With no `.options(...)`, options come from the bound model field's `choices`
   (empty / `None` values skipped).
 - `.searchable()` adds a client-side filter box over the options already in the
-  page — no request.
+  page - no request.
 
 ### Common field setters
 
@@ -177,7 +177,7 @@ Every field, via the concern mixins ([architecture.md](architecture.md#the-fluen
 | `.required()`, `.disabled()`, `.readonly()` | `HasState` | default arg `True`; each accepts a bool or a closure |
 | `.default(value)` | `HasState` | used as the value when no form is bound |
 | `.column_span(n)` | `HasColumnSpan` | `@setter` |
-| `.column_span_full()` | `HasColumnSpan` | **fluent-only** — not a kwarg |
+| `.column_span_full()` | `HasColumnSpan` | **fluent-only** - not a kwarg |
 | `.extra_attributes({...})` | `Component` | merges; `class` appends |
 | `.visible(bool\|fn)` / `.hidden(bool\|fn)` | `Component` | server-side; a hidden field renders `""` |
 | `.when(cond)` / `.hidden_when(cond)` | `Component` | fluent-only aliases of `visible` / `hidden` |
@@ -188,10 +188,10 @@ Every field, via the concern mixins ([architecture.md](architecture.md#the-fluen
 comes from the Django field. To actually make a field required, set it on the
 form.
 
-### Conditional visibility — `.visible_when(...)`
+### Conditional visibility - `.visible_when(...)`
 
 Compiles a small predicate to an Alpine `x-show` that re-evaluates live as
-sibling fields change — **no round-trip** (`schemas/visibility.py`).
+sibling fields change - **no round-trip** (`schemas/visibility.py`).
 
 ```python
 TextInput.make("published_at").visible_when("status", equals="live")
@@ -204,7 +204,7 @@ in `.visible(fn)` (evaluated once at render, **not** reactive), or a `.live()`
 round-trip. Multiple `.visible_when(...)` calls on one field are AND-ed. With
 JavaScript off the field simply shows.
 
-### Live validation — `.live()`
+### Live validation - `.live()`
 
 `.live()` (or `.live(400)` ms) posts the single field to the schema-validate
 endpoint on `change` and swaps that field's error slot. The debounce defaults to
@@ -223,13 +223,13 @@ fields or nested layouts (fluent-only). All support `.visible()` / `.hidden()`.
 | `Section` | titled block | `.columns(n)` (default 1), `.description(str)` |
 | `Grid` | column grid | `.columns(n)` (default 2) |
 | `Fieldset` | `<fieldset>` | `.columns(n)` (default 1) |
-| `Tab` | one tab body | — (use inside `Tabs`) |
-| `Tabs` | tab strip + panels | — |
+| `Tab` | one tab body | - (use inside `Tabs`) |
+| `Tabs` | tab strip + panels | - |
 
-**`Tabs.schema()` accepts only `Tab` instances** — anything else raises
+**`Tabs.schema()` accepts only `Tab` instances** - anything else raises
 `TypeError("Tabs.schema() accepts only Tab instances")` (`schemas/layout.py:101-106`).
 
-`Section.make("Title")` — the positional argument is the title. `Grid.make()`
+`Section.make("Title")` - the positional argument is the title. `Grid.make()`
 takes no title.
 
 ## Views & mixins
@@ -245,7 +245,7 @@ Drives a `FormView` / `CreateView` / `UpdateView` from a schema.
 - **Override `get_schema(self) -> Schema`** to build the schema per request.
   Returning `self.schema` when it is `None` raises
   `ValueError(f"{type(self).__name__} needs a `schema` or `get_schema()`")`.
-- `get_form_class()` returns `get_schema().get_form_class()` — you do not set
+- `get_form_class()` returns `get_schema().get_form_class()` - you do not set
   `form_class`.
 - `get_context_data()` adds `schema` and `schema_html` (rendered with the bound
   `context["form"]` and `self.object`).
@@ -270,27 +270,27 @@ The endpoint behind `.live()`. See [views-and-mixins.md](views-and-mixins.md).
 ```
 
 Panels and action modals build a standalone form from the declared fields with
-`schema.build_standalone_form(...)` — same bind/render path, no full-form leak.
+`schema.build_standalone_form(...)` - same bind/render path, no full-form leak.
 
 ## Callbacks
 
 Any field setter can take a closure. Injected by parameter name from
-`{record, request, user, form, operation, context, component, get, state}` — see
+`{record, request, user, form, operation, context, component, get, state}` - see
 [callbacks.md](callbacks.md). `get("other_field")` reads the current bound value
 of a sibling, so `.label(lambda get: "Ship to " + (get("country") or "?"))`
 works.
 
 ## Constraints / do not combine
 
-- `.form()` and `.model()` — `.form()` wins; don't expect `.model()` after it to
+- `.form()` and `.model()` - `.form()` wins; don't expect `.model()` after it to
   do anything.
 - `.strict(True)` + omitting a required form field → validation fails on save
   with no visible input to fix it. Either declare the field or drop `.strict()`.
-- `Tabs.schema([...])` — `Tab` instances only.
+- `Tabs.schema([...])` - `Tab` instances only.
 - `Field(name=None)` → `ValueError("<Field> requires a field name")`. Every field
   needs a name.
 - `.visible_when(...)` is client-side and reactive; `.visible(fn)` is server-side
-  and evaluated once. They are different tools — don't expect `.visible(fn)` to
+  and evaluated once. They are different tools - don't expect `.visible(fn)` to
   react to form edits.
 - A declared field name that is not on the Django form → `SchemaError` at
   `build_form` / `render` time (see [errors.md](errors.md)).
@@ -305,7 +305,7 @@ works.
 
 - `MultiSelect` is searchable by default; `Select` is not. Pass
   `.searchable(False)` to opt out.
-- `.required()` on a field is cosmetic — it draws the marker; it does not add a
+- `.required()` on a field is cosmetic - it draws the marker; it does not add a
   validator.
 - A schema built from `.model(Model, fields=[...])` still validates every field
   the generated `ModelForm` includes. If you list fewer `fields` than you render,

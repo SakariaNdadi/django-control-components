@@ -1,0 +1,149 @@
+{% extends "django_control_components/panels/base.html" %}
+{% load static dcc_tags %}
+{% block head_extra %}<link rel="stylesheet" href="{% static 'demo/docs.css' %}">{% endblock %}
+{% block content %}
+  <header class="dcc-panel__header dcc-docs__pageheader" data-family="panels">
+    <div>
+      <span class="dcc-docs__familybadge" style="background: var(--dcc-docs-family-tables);">panels & resources</span>
+      <h1>Panels, Resources & Dashboards</h1>
+      <p class="dcc-docs__summary">
+        An admin-independent surface in pure Python. A <code>Panel</code> mounts a collection of <code>Resource</code> CRUD views and <code>DashboardPage</code> metric grids into your Django routing without touching <code>django.contrib.admin</code>.
+      </p>
+    </div>
+  </header>
+
+  <div class="dcc-docs__prose" style="max-width: 54rem;">
+    <h2>1. The Mental Model</h2>
+    <p>A <code>Panel</code> provides a dedicated, branded URL namespace and sidebar navigation. Within a panel:</p>
+    <ul>
+      <li><strong><code>Resource</code></strong>: Maps a single Django Model to four automatic CRUD pages:
+        <ul>
+          <li><strong>List Page</strong>: Rendered via <code>build_table()</code> with keyset streaming, sorting, search, and bulk actions.</li>
+          <li><strong>Create Page</strong>: Rendered via <code>build_schema()</code> validating against Django form classes.</li>
+          <li><strong>Edit Page</strong>: Form schema bound to the active model record.</li>
+          <li><strong>View Page</strong>: Read-only presentation layout rendered via <code>build_infolist()</code>.</li>
+        </ul>
+      </li>
+      <li><strong><code>DashboardPage</code></strong>: Custom analytics/metric dashboards composed of <code>StatWidget</code>, <code>ChartWidget</code> (Chart.js), <code>BarListWidget</code>, and embedded <code>TableWidget</code>.</li>
+      <li><strong><code>PanelPage</code></strong>: Any custom template-backed page integrated into the panel's navigation structure.</li>
+    </ul>
+
+    <h2>2. Defining a Model Resource</h2>
+    <p>Every method is an explicit classmethod taking <code>request</code>, preventing request cross-contamination:</p>
+
+    <pre><code>from django_control_components.panels import Resource
+from django_control_components.schemas import Schema, Section, TextInput, Select, Toggle
+from django_control_components.tables import Table, TextColumn, BadgeColumn, BooleanColumn, DateColumn, SelectFilter
+from django_control_components.infolists import Infolist, TextEntry, BadgeEntry
+from myapp.models import Task
+
+class TaskResource(Resource):
+    model = Task
+    navigation_icon = "list-check"
+    navigation_group = "Operations"
+    create_redirect = "list"  # "list" or "edit"
+
+    @classmethod
+    def can(cls, request, action, obj=None):
+        # Fine-grained permissions: "view", "add", "change", "delete"
+        return request.user.has_perm(f"myapp.{action}_task")
+
+    @classmethod
+    def get_queryset(cls, request):
+        # Multi-tenant or row-level scoping
+        return cls.model.objects.filter(company=request.user.company)
+
+    @classmethod
+    def build_table(cls, *, request):
+        return (
+            Table.make(cls.get_queryset(request))
+            .id("tasks-table")
+            .columns([
+                TextColumn.make("title").sortable().searchable(),
+                BadgeColumn.make("priority").colors({"high": "danger", "medium": "secondary", "low": "muted"}),
+                BooleanColumn.make("done").labels(("Done", "Pending")),
+                DateColumn.make("due_date").since(),
+            ])
+            .filters([
+                SelectFilter.make("priority").options(Task.Priority.choices),
+            ])
+            .searchable()
+            .default_sort("-due_date")
+        )
+
+    @classmethod
+    def build_schema(cls, *, request):
+        return (
+            Schema.make()
+            .model(Task, fields=["title", "priority", "done", "due_date"])
+            .schema([
+                Section.make("Task Details")
+                .columns(2)
+                .schema([
+                    TextInput.make("title").required().column_span_full(),
+                    Select.make("priority"),
+                    Toggle.make("done"),
+                    TextInput.make("due_date"),
+                ])
+            ])
+        )
+
+    @classmethod
+    def build_infolist(cls, *, request):
+        return (
+            Infolist.make().schema([
+                TextEntry.make("title"),
+                BadgeEntry.make("priority"),
+                TextEntry.make("due_date"),
+            ])
+        )</code></pre>
+
+    <h2>3. Defining Dashboards & Metric Widgets</h2>
+    <pre><code>from django_control_components.panels import DashboardPage, StatWidget, ChartWidget, BarListWidget
+from myapp.models import Task
+
+class AnalyticsDashboard(DashboardPage):
+    page_title = "Overview"
+    nav_label = "Analytics"
+    nav_icon = "chart-pie"
+
+    def widgets(self, request):
+        return [
+            StatWidget.make("Open Tasks", Task.objects.filter(done=False).count())
+                .icon("clock")
+                .poll(30),
+            ChartWidget.make("Tasks by Priority")
+                .kind("bar")
+                .data([
+                    ("Low", Task.objects.filter(priority="low").count()),
+                    ("Medium", Task.objects.filter(priority="medium").count()),
+                    ("High", Task.objects.filter(priority="high").count()),
+                ])
+                .columns(2),
+            BarListWidget.make("Completion Breakdown")
+                .data([("Complete", 24), ("In Progress", 6)]),
+        ]</code></pre>
+
+    <h2>4. Mounting the Panel in `urls.py`</h2>
+    <pre><code>from django.urls import path
+from django_control_components.panels import Panel
+from myapp.panels import TaskResource, AnalyticsDashboard
+
+admin_panel = (
+    Panel("admin")
+    .path("admin-panel")
+    .brand("Operations Hub", "shield-halved")
+    .resources([TaskResource])
+    .pages([AnalyticsDashboard])
+    .auth(lambda request: request.user.is_staff)
+)
+
+urlpatterns = [
+    admin_panel.mount(),  # Routes all /admin-panel/* URLs
+]</code></pre>
+
+    <h2>5. Try the Live Implementation</h2>
+    <p>The demo app includes a fully functional TaskResource configured with the code above:</p>
+    <p><a class="dcc-btn dcc-btn--primary" href="{% url 'dcc-panel-docs:task-list' %}">{% dcc_icon "list-check" %} View Live Tasks Resource Demo</a></p>
+  </div>
+{% endblock %}

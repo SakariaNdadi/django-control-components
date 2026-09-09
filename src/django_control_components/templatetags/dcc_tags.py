@@ -57,6 +57,10 @@ def dcc_assets(
     Set ``DCC["VENDOR_ASSETS"] = True`` to serve htmx / Alpine / focus from the
     project's own static files; ``DCC["ASSET_SRI"]`` adds integrity hashes to any
     CDN asset that stays remote.
+
+    Loading your own Alpine without ``alpine=False`` double-loads it. ``dcc.js``
+    warns in the console (``Alpine.version`` mismatch) if it can't verify a 3.x
+    release, since a version mismatch can't be caught from Python.
     """
     from ..conf import dcc_settings
     from ..htmx import HTMX_SRC

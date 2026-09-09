@@ -34,6 +34,10 @@ class Resource:
     navigation_icon: ClassVar[str] = ""
     navigation_group: ClassVar[str] = ""
 
+    #: where a successful *create* (not edit) lands: "edit" (default - review
+    #: what you just created) or "list".
+    create_redirect: ClassVar[str] = "edit"
+
     # -- identity -------------------------------------------------
 
     @classmethod

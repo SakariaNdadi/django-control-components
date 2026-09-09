@@ -15,6 +15,11 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     "django_cotton",
     "django_control_components",
+    # Not used for a studio-authored resource here (the catalog is dev-only per
+    # its own docs) - installed only because panels/nav.py's stored-nav lookup
+    # imports django_control_components.studio.models unconditionally whenever
+    # the package is importable, regardless of INSTALLED_APPS, and needs its
+    # migrations applied to avoid an OperationalError.
     "django_control_components.studio",
     "demo",
 ]
@@ -40,7 +45,6 @@ TEMPLATES = [
                 "django.template.context_processors.request",
                 "django.contrib.auth.context_processors.auth",
                 "django.contrib.messages.context_processors.messages",
-                "demo.context.shell",
             ],
             "builtins": ["django_cotton.templatetags.cotton"],
         },
@@ -72,8 +76,8 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 # django-control-components
 DCC = {
     "TABLE_CLIENT_SIDE_MAX_ROWS": 200,
-    # Models a stored studio dashboard's ChartWidget.query({...}) may aggregate.
-    "STUDIO_MODELS": ["demo.Article", "demo.Comment"],
+    # No admin/studio UI mounted in this project - the catalog is its own panel.
+    "STUDIO_ADMIN_ENTRY": False,
 }
 
 # Content-Security-Policy: Alpine needs 'unsafe-eval'. htmx, Alpine, Chart.js and

@@ -294,6 +294,8 @@ class Panel:
         return (patterns, self.namespace)
 
     def mount(self) -> URLResolver:
+        prefix = f"{self._path}/" if self._path else ""
         return path(
-            f"{self._path}/", include((self.urls[0], self.namespace), namespace=self.namespace)
+            prefix, include((self.urls[0], self.namespace), namespace=self.namespace)
         )
+

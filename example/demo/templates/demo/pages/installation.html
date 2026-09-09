@@ -1,0 +1,135 @@
+{% extends "django_control_components/panels/base.html" %}
+{% load static %}
+{% block head_extra %}<link rel="stylesheet" href="{% static 'demo/docs.css' %}">{% endblock %}
+{% block content %}
+  <header class="dcc-panel__header">
+    <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem;">
+      <div>
+        <span class="dcc-docs__familybadge" style="background: var(--dcc-docs-accent);">v0.0.1 Alpha</span>
+        <h1 style="margin-top: 0.25rem;">Installation & Setup</h1>
+      </div>
+      <div style="background: var(--dcc-docs-accent-soft); border: 1px solid var(--dcc-docs-accent); border-radius: 9999px; padding: 0.25rem 0.85rem; font-size: 0.8rem; font-weight: 600; color: var(--dcc-docs-accent);">
+        ✨ Studio Prototyping UI Coming Soon
+      </div>
+    </div>
+  </header>
+  <div class="dcc-docs__prose" style="max-width: 52rem;">
+    <p>Filament-inspired schema, table, and action builders for Django. Declare
+      UI in Python; it renders itself through
+      <a href="https://django-cotton.com/" target="_blank" rel="noopener">django-cotton</a>,
+      wired to real <code>django.forms</code> validation.</p>
+
+    <h2>Recommended Install (with uv)</h2>
+    <pre><code># Base installation
+uv add django-control-components
+
+# Optional extras:
+uv add "django-control-components[wizard]"  # Multi-step forms (django-formtools)
+uv add "django-control-components[images]"  # Image upload & Pillow processing
+
+# Install everything at once:
+uv add "django-control-components[wizard,images]"</code></pre>
+
+    <p><small style="color: var(--dcc-muted);">Or using standard pip: <code>pip install "django-control-components[wizard,images]"</code></small></p>
+
+    <h2>Settings Configuration</h2>
+    <pre><code>INSTALLED_APPS = [
+    # ...
+    "django_cotton",  # must precede django_control_components
+    "django_control_components",
+]</code></pre>
+
+    <h2>Asset Loading</h2>
+    <p>Add <code>{% templatetag openblock %} dcc_assets {% templatetag closeblock %}</code>
+      to your base template <code>&lt;head&gt;</code> - it emits the stylesheet, htmx,
+      Alpine, the focus plugin, and Tabler icons automatically:</p>
+    <pre><code>&lt;head&gt;
+  {% templatetag openblock %} load dcc_tags {% templatetag closeblock %}
+  {% templatetag openblock %} dcc_assets {% templatetag closeblock %}
+&lt;/head&gt;</code></pre>
+
+    <h2>Pinned Client Dependencies</h2>
+    <ul>
+      <li><strong>Font Awesome</strong>: <code>v6.7.2 Free</code> (Solid, Regular, Brands, Duotone)</li>
+      <li><strong>htmx</strong>: <code>v2.0.4</code> (transparent partial DOM updating & step navigation)</li>
+      <li><strong>Alpine.js</strong>: <code>v3.17.1</code> (+ <code>@alpinejs/focus v3.17.1</code> for modal trap)</li>
+    </ul>
+
+    <h3>Preventing Duplicate Alpine Instances</h3>
+    <p>If your project already includes Alpine.js globally, pass <code>alpine=False</code> to prevent duplicate instances and conflicts:</p>
+    <pre><code>{% templatetag openblock %} dcc_assets alpine=False {% templatetag closeblock %}</code></pre>
+    <p><small style="color: var(--dcc-muted);">DCC's components (<code>dccTable</code>, <code>dccForm</code>, <code>dccChart</code>, <code>dccSelect</code>, etc.) rely on Alpine's reactive directives (<code>x-data</code>, <code>x-model</code>, <code>x-show</code>, <code>Alpine.data()</code>) for instantaneous in-page UI state alongside htmx mutations.</small></p>
+
+
+    <h2>Customizing & Overriding CSS</h2>
+    <p>The library provides semantic tokens as CSS custom properties. You can customize styling globally, per-component, or via Tailwind CSS v4:</p>
+
+    <h3>1. Global Design Tokens</h3>
+    <pre><code>/* static/css/theme.css */
+:root {
+  --dcc-primary: #0284c7;        /* Sky blue primary buttons / active nav */
+  --dcc-primary-fg: #ffffff;     /* Button text */
+  --dcc-radius: 0.75rem;         /* Rounded corners */
+  --dcc-font: "Inter", system-ui, sans-serif;
+  --dcc-gap: 1.25rem;
+  --dcc-bg: #f8fafc;
+  --dcc-surface: #ffffff;
+  --dcc-border: #e2e8f0;
+  --dcc-success: #10b981;
+  --dcc-danger: #ef4444;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --dcc-bg: #0f172a;
+    --dcc-surface: #1e293b;
+    --dcc-border: #334155;
+    --dcc-primary: #38bdf8;
+    --dcc-primary-fg: #0f172a;
+  }
+}</code></pre>
+
+    <h3>2. Scoped Per-Component Overrides</h3>
+    <p>Target a specific wizard view with <code>wizard_attrs</code>:</p>
+    <pre><code>class CheckoutWizard(WizardView):
+    wizard_class = "custom-checkout-card"
+    wizard_attrs = {
+        "style": "--dcc-wizard-bg: #f8fafc; --dcc-wizard-accent: #10b981; --dcc-wizard-radius: 1rem;"
+    }</code></pre>
+
+    <p>Or wrap tables and cards inside scoped containers:</p>
+    <pre><code>&lt;div class="my-custom-table-wrapper"&gt;
+  {{ table_html }}
+&lt;/div&gt;
+
+&lt;style&gt;
+  .my-custom-table-wrapper {
+    --dcc-radius: 0.5rem;
+    --dcc-border: #cbd5e1;
+  }
+  .my-custom-table-wrapper .dcc-table tbody tr:hover {
+    background-color: #f1f5f9;
+  }
+&lt;/style&gt;</code></pre>
+
+    <h3>3. Tailwind CSS v4 Purging</h3>
+    <p>Point <code>@tailwindcss/cli</code> at <code>css/dcc.css</code> to compile and purge:</p>
+    <pre><code>/* src/my-app.css */
+@import "tailwindcss";
+@source "../templates";
+@source "../src/django_control_components/templates";
+
+@theme {
+  --color-dcc-primary: #6366f1;
+  --radius-dcc: 0.5rem;
+}</code></pre>
+    <pre><code>npx @tailwindcss/cli -i src/my-app.css -o static/dist/app.min.css</code></pre>
+
+    <h2>Next Steps</h2>
+    <p>Browse every component in the <strong>Components</strong> list on the left,
+      check out <a href="{% url "dcc-panel-docs:page-wizards" %}">Wizard Views</a>,
+      or jump straight to the <a href="{% url "dcc-panel-docs:page-quickstart" %}">Quickstart</a>.</p>
+  </div>
+{% endblock %}
+
+

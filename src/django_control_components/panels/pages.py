@@ -165,6 +165,8 @@ class _FormPage(_ResourcePage):
             schema = self.resource.build_schema(request=request)
             if schema.image_specs():
                 schema.process_images(saved)
+            if self.action == "add" and self.resource.create_redirect == "list":
+                return redirect(self._url("list"))
             return redirect(self._url("edit", pk=saved.pk))
         return self._render(request, form)
 

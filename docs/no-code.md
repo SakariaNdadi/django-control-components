@@ -6,10 +6,10 @@ Python subclasses. It mounts at **its own URL**, entered from the Django admin,
 and is never part of the app it builds.
 
 It exists to let you wire up a resource, dashboard, or nav entry against real
-models and see it work immediately — before you write the Python (or the real
+models and see it work immediately - before you write the Python (or the real
 UI) yourself. Treat it like `django-debug-toolbar`: a development aid, not a
 shipped feature. `manage.py check` warns (`dcc_studio.W003`) if it's installed
-with `DEBUG=False` — pull `django_control_components.studio` out of
+with `DEBUG=False` - pull `django_control_components.studio` out of
 `INSTALLED_APPS` and its `urls.py` include before deploying.
 
 ## Enable it
@@ -38,7 +38,7 @@ urlpatterns = [
 
 The studio hub is at `/studio/` (URL namespace `dcc_studio`), gated by the
 `dcc_studio.use_studio` permission. A "Studio" entry also appears in the Django
-admin index for anyone holding that permission — disable it with
+admin index for anyone holding that permission - disable it with
 `DCC["STUDIO_ADMIN_ENTRY"] = False`.
 
 Calling `.studio()` or `.dynamic()` on a `Panel` without the extra installed
@@ -51,7 +51,7 @@ admin_panel = Panel("admin").path("panel").resources([...]).studio()
 `.studio()` marks the panel as an authoring target (so the studio's sidebar
 builder can edit its nav) and implies `.dynamic()`. `.dynamic()` adds
 `d/<slug>/…` routes that resolve a `DashboardSpec` row per request, plus its
-entries to `panel.navigation()` — this is the **runtime** rendering and stays on
+entries to `panel.navigation()` - this is the **runtime** rendering and stays on
 the panel, unaffected by where the builder is mounted.
 
 ## The spec
@@ -68,7 +68,7 @@ DashboardSpec.objects.create(
     table={
         "columns": [
             {"type": "TextColumn", "name": "author_name", "config": {"sortable": True}},
-            {"type": "BooleanColumn", "name": "approved", "config": {"labels": ["✓", "—"]}},
+            {"type": "BooleanColumn", "name": "approved", "config": {"labels": ["✓", "-"]}},
         ],
         "filters": [{"type": "TernaryFilter", "name": "approved"}],
         "default_sort": "author_name",
@@ -96,12 +96,12 @@ DashboardSpec.objects.create(
 
 ## What a spec cannot do
 
-- **Name a type that isn't registered** — only `COLUMN_TYPES` / `FILTER_TYPES` /
+- **Name a type that isn't registered** - only `COLUMN_TYPES` / `FILTER_TYPES` /
   `FIELD_TYPES` / `ENTRY_TYPES` members. No import paths.
-- **Carry a callable** — `config` must be JSON (`str`/`int`/`float`/`bool`/`null`/
+- **Carry a callable** - `config` must be JSON (`str`/`int`/`float`/`bool`/`null`/
   `list`/`dict`). Setters that take code (`state`, `action`, `authorize`,
   `visible`, `hidden`) are rejected outright.
-- **Invent a model** — `model` must resolve via `apps.get_model`. Studio configures
+- **Invent a model** - `model` must resolve via `apps.get_model`. Studio configures
   views over *existing* models; it does not create migrations.
 
 Specs are validated in `DashboardSpec.clean()` (called from `save()`), so a bad

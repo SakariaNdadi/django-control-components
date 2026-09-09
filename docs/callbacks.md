@@ -1,9 +1,9 @@
 # Callbacks & closures
 
 Every place you hand the library a function, and its exact contract. Two
-mechanisms are in play — know which one a given call site uses.
+mechanisms are in play - know which one a given call site uses.
 
-## Mechanism 1 — `evaluate()` (configuration closures)
+## Mechanism 1 - `evaluate()` (configuration closures)
 
 Used by almost every `@setter` that accepts a value: `.label(fn)`, `.help_text(fn)`,
 `.visible(fn)`, `.hidden(fn)`, `.when(fn)`, `.state(fn)`, `.authorize(fn)`,
@@ -13,21 +13,21 @@ Used by almost every `@setter` that accepts a value: `.label(fn)`, `.help_text(f
 Rules (`core/evaluate.py:57-76`):
 
 1. A non-callable passes through unchanged. **A class passes through un-instantiated**
-   — `.state(MyThing)` returns the class, it does not call it.
+   - `.state(MyThing)` returns the class, it does not call it.
 2. A callable is invoked with **only the parameters it declares, by name**, from
    this set:
 
    | name | value |
    |---|---|
-   | `record` | `ctx.record` — the row / object being rendered |
+   | `record` | `ctx.record` - the row / object being rendered |
    | `request` | `ctx.request` |
    | `user` | `ctx.user` (`request.user` or `None`) |
-   | `form` | `ctx.form` — the bound Django form (schemas) |
+   | `form` | `ctx.form` - the bound Django form (schemas) |
    | `operation` | `"create"` / `"edit"` / `"view"` |
    | `context` | the `RenderContext` itself |
    | `component` | the component instance being rendered |
    | `get` / `state` | `get("field_name")` → the current bound value of a sibling form field (or the `default` you pass) |
-   | `set` | a no-op on the server render path — there is no live state to write back |
+   | `set` | a no-op on the server render path - there is no live state to write back |
 
 3. A callable declaring **any other name** (including a typo like `reqeust`)
    raises `ClosureInjectionError` at render time.
@@ -40,11 +40,11 @@ TextInput.make("published_at").visible(lambda get: get("status") == "live")  # o
 Action.make("delete").authorize(lambda user, record: record.owner_id == user.id)
 ```
 
-## Mechanism 2 — `Action.action(fn)` (the action callback)
+## Mechanism 2 - `Action.action(fn)` (the action callback)
 
 Used **only** by `.action(fn)` on an `Action` / `BulkAction`
 (`actions/action.py:312-332`). Parameters are matched by name against a fixed
-list; there is no `evaluate`, so `ClosureInjectionError` does not apply — an
+list; there is no `evaluate`, so `ClosureInjectionError` does not apply - an
 undeclared parameter is a plain `TypeError` when the callback is called.
 
 | param | single `Action` | `BulkAction` |
@@ -55,7 +55,7 @@ undeclared parameter is a plain `TypeError` when the callback is called.
 | `record` | the row (`records[0]` or `None`) | **not passed** |
 | `records` | not passed | a list of rows, **or the unmaterialised `QuerySet`** for "select every matching row" |
 
-Return value is ignored. The callback runs **uncaught** — raise to abort with a
+Return value is ignored. The callback runs **uncaught** - raise to abort with a
 500, or handle failure yourself. The success toast fires regardless of what the
 callback did.
 
@@ -75,9 +75,9 @@ def publish(records):  # BulkAction
 | setter | mechanism | fires | contract |
 |---|---|---|---|
 | `.label / .help_text / .placeholder / .hint / .icon (fn)` | evaluate | on render | return the string (or `None`) |
-| `.required / .disabled / .readonly (fn)` | evaluate | on render | return a bool; **cosmetic only** — real validation is on the form |
-| `.visible / .hidden / .when / .hidden_when (fn)` | evaluate | on render | return a bool; evaluated **once** — not reactive. For reactive use `.visible_when(...)` (a compiled Alpine expression, no closure) |
-| `.default(value)` | — | — | a plain value; used when no form is bound |
+| `.required / .disabled / .readonly (fn)` | evaluate | on render | return a bool; **cosmetic only** - real validation is on the form |
+| `.visible / .hidden / .when / .hidden_when (fn)` | evaluate | on render | return a bool; evaluated **once** - not reactive. For reactive use `.visible_when(...)` (a compiled Alpine expression, no closure) |
+| `.default(value)` | - | - | a plain value; used when no form is bound |
 
 ### Table
 
@@ -86,7 +86,7 @@ def publish(records):  # BulkAction
 | `column.state(fn)` | evaluate (`ctx.child(record=...)`) | per cell | return the display value; wrap markup in `format_html` **and** add `.allow_html()` |
 | `record_url(fn)` | evaluate | per row | return a URL string; falsy → no row link |
 | `record_preview(fn)` | evaluate | per row (rendered eagerly) | return HTML (use `format_html`); shown on hover |
-| `record_action(action)` | — | — | an `Action`; its own callback follows mechanism 2 |
+| `record_action(action)` | - | - | an `Action`; its own callback follows mechanism 2 |
 | column `.visible(fn)` etc. | evaluate | on render | as schema fields |
 
 ### Actions
@@ -94,7 +94,7 @@ def publish(records):  # BulkAction
 | setter | mechanism | contract |
 |---|---|---|
 | `.action(fn)` | mechanism 2 | see above |
-| `.authorize("app.perm")` | — | `user.has_perm(perm, record)` — checked at render **and** POST |
+| `.authorize("app.perm")` | - | `user.has_perm(perm, record)` - checked at render **and** POST |
 | `.authorize(fn)` | evaluate | return a bool; checked at render **and** POST |
 | `.visible(fn)` | evaluate | return a bool; hides the trigger |
 | `.to_url(fn)` | evaluate | return a URL; **short-circuits** `.action` / `.modal` |
@@ -119,9 +119,9 @@ def publish(records):  # BulkAction
 | hook | signature | fires | contract |
 |---|---|---|---|
 | `Panel.auth(*guards)` | `guard(request) -> bool` | before every panel page (`dispatch`) | falsy → `PermissionDenied` |
-| `Resource.get_queryset` | `(request) -> QuerySet` | per request | the rows this resource exposes — the scoping boundary |
+| `Resource.get_queryset` | `(request) -> QuerySet` | per request | the rows this resource exposes - the scoping boundary |
 | `Resource.can` | `(request, action, obj=None) -> bool` | per page | `action` ∈ `{"view", "add", "change", "delete"}` |
-| `Resource.build_table / build_schema / build_infolist` | `(cls, *, request) -> …` | per request | **classmethods** — never store request state on the class |
+| `Resource.build_table / build_schema / build_infolist` | `(cls, *, request) -> …` | per request | **classmethods** - never store request state on the class |
 
 ### Widgets
 
@@ -135,11 +135,11 @@ def publish(records):  # BulkAction
 
 ## Constraints
 
-- Do not raise from an `evaluate` closure to signal "hide" — return a falsy value.
+- Do not raise from an `evaluate` closure to signal "hide" - return a falsy value.
   A raise there is a 500.
 - A closure that needs the request user must declare `user` or `request`, spelled
   exactly.
 - `get("field")` only works while a form is bound (schemas). Elsewhere it returns
   the default.
 - `component` and `context` give you escape hatches, but a closure that reaches
-  into `context.extra` is coupling to internals — prefer the named injectables.
+  into `context.extra` is coupling to internals - prefer the named injectables.

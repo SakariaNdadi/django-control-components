@@ -1,0 +1,318 @@
+/*
+ * Docs-site skin — additive tokens/rules on top of the shipped dcc.css.
+ * Namespaced like the library's own --dcc-wizard-* / --dcc-widget-* blocks,
+ * and scoped to this project's templates only (nothing here touches the
+ * core stylesheet). Adds:
+ *   1. An accent colour + a real badge-variant palette (dcc.css ships the
+ *      `.dcc-badge--<variant>` *hook* but no variant colours at all — every
+ *      badge in the shipped default renders unstyled).
+ *   2. A warmer, more confident nav / hero / card treatment for the catalog.
+ *   3. Family-coded page headers so the sidebar's flat A–Z list still reads
+ *      as six distinct subsystems once you land on a page.
+ */
+
+:root {
+  /* -- accent ------------------------------------------------------- */
+  --dcc-docs-accent: #4f46e5;
+  --dcc-docs-accent-fg: #ffffff;
+  --dcc-docs-accent-soft: #eef2ff;
+  --dcc-docs-code-bg: #0f1117;
+  --dcc-docs-code-fg: #e5e7eb;
+
+  /* -- real badge-variant palette (dcc.css defines only the hook) --- */
+  --dcc-docs-success-bg: #dcfce7;
+  --dcc-docs-success-fg: #166534;
+  --dcc-docs-danger-bg: #fee2e2;
+  --dcc-docs-danger-fg: #991b1b;
+  --dcc-docs-muted-bg: #f4f4f5;
+  --dcc-docs-muted-fg: #52525b;
+  --dcc-docs-secondary-bg: #e0e7ff;
+  --dcc-docs-secondary-fg: #3730a3;
+  --dcc-docs-primary-bg: #4f46e5;
+  --dcc-docs-primary-fg: #ffffff;
+
+  /* -- one accent per family, used on the page header + chips ------- */
+  --dcc-docs-family-ui: #4f46e5;
+  --dcc-docs-family-schemas: #0891b2;
+  --dcc-docs-family-tables: #b45309;
+  --dcc-docs-family-infolists: #15803d;
+  --dcc-docs-family-widgets: #be185d;
+  --dcc-docs-family-actions: #dc2626;
+  --dcc-docs-family-wizards: #0d9488;
+  --dcc-docs-family-blocks: #6d28d9;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --dcc-docs-accent: #818cf8;
+    --dcc-docs-accent-fg: #0f1117;
+    --dcc-docs-accent-soft: #1e1b4b;
+    --dcc-docs-code-bg: #0a0b0f;
+    --dcc-docs-code-fg: #e5e7eb;
+    --dcc-docs-success-bg: #052e16;
+    --dcc-docs-success-fg: #86efac;
+    --dcc-docs-danger-bg: #450a0a;
+    --dcc-docs-danger-fg: #fca5a5;
+    --dcc-docs-muted-bg: #27272a;
+    --dcc-docs-muted-fg: #a1a1aa;
+    --dcc-docs-secondary-bg: #312e81;
+    --dcc-docs-secondary-fg: #c7d2fe;
+    --dcc-docs-primary-bg: #818cf8;
+    --dcc-docs-primary-fg: #0f1117;
+    --dcc-docs-family-ui: #818cf8;
+    --dcc-docs-family-schemas: #22d3ee;
+    --dcc-docs-family-tables: #fbbf24;
+    --dcc-docs-family-infolists: #4ade80;
+    --dcc-docs-family-widgets: #f472b6;
+    --dcc-docs-family-actions: #f87171;
+    --dcc-docs-family-wizards: #2dd4bf;
+    --dcc-docs-family-blocks: #a78bfa;
+  }
+}
+:root[data-theme="dark"] {
+  --dcc-docs-accent: #818cf8;
+  --dcc-docs-accent-fg: #0f1117;
+  --dcc-docs-accent-soft: #1e1b4b;
+  --dcc-docs-code-bg: #0a0b0f;
+  --dcc-docs-code-fg: #e5e7eb;
+  --dcc-docs-success-bg: #052e16;
+  --dcc-docs-success-fg: #86efac;
+  --dcc-docs-danger-bg: #450a0a;
+  --dcc-docs-danger-fg: #fca5a5;
+  --dcc-docs-muted-bg: #27272a;
+  --dcc-docs-muted-fg: #a1a1aa;
+  --dcc-docs-secondary-bg: #312e81;
+  --dcc-docs-secondary-fg: #c7d2fe;
+  --dcc-docs-primary-bg: #818cf8;
+  --dcc-docs-primary-fg: #0f1117;
+  --dcc-docs-family-ui: #818cf8;
+  --dcc-docs-family-schemas: #22d3ee;
+  --dcc-docs-family-tables: #fbbf24;
+  --dcc-docs-family-infolists: #4ade80;
+  --dcc-docs-family-widgets: #f472b6;
+  --dcc-docs-family-actions: #f87171;
+  --dcc-docs-family-wizards: #2dd4bf;
+  --dcc-docs-family-blocks: #a78bfa;
+}
+
+/* ---- real colours for the badge-variant hook dcc.css ships bare ---- */
+.dcc-badge--success  { background: var(--dcc-docs-success-bg);   color: var(--dcc-docs-success-fg); }
+.dcc-badge--danger   { background: var(--dcc-docs-danger-bg);    color: var(--dcc-docs-danger-fg); }
+.dcc-badge--muted    { background: var(--dcc-docs-muted-bg);     color: var(--dcc-docs-muted-fg); }
+.dcc-badge--secondary{ background: var(--dcc-docs-secondary-bg); color: var(--dcc-docs-secondary-fg); }
+.dcc-badge--primary  { background: var(--dcc-docs-primary-bg);   color: var(--dcc-docs-primary-fg); }
+
+/* ---- sidebar: pin to the viewport so it scrolls itself -------------
+ * dcc.css already sets `.dcc-nav { overflow-y: auto }`, but `.dcc-panel`
+ * is only `min-height: 100vh` on a row flex with default stretch
+ * alignment - once the main content is taller than the viewport, the nav
+ * column stretches to match it (no height constraint below the content's
+ * own height), so its internal scrollbar never engages and the whole page
+ * scrolls together instead. Pinning the nav to the viewport height fixes
+ * that without touching the shipped stylesheet. */
+@media (min-width: 48.0625rem) {
+  .dcc-panel__nav {
+    position: sticky;
+    top: 0;
+    height: 100vh;
+  }
+}
+
+/* ---- sidebar: accent brand + accent active state ------------------- */
+.dcc-panel__brand { color: var(--dcc-docs-accent); }
+.dcc-panel__brand strong { color: var(--dcc-fg); margin-left: 0.35rem; }
+.dcc-nav__grouplabel {
+  color: var(--dcc-docs-accent);
+  font-weight: 700;
+  letter-spacing: 0.06em;
+}
+.dcc-nav__link.is-active {
+  background: var(--dcc-docs-accent);
+  color: var(--dcc-docs-accent-fg);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--dcc-docs-accent) 60%, transparent);
+}
+.dcc-nav__link:hover:not(.is-active) { background: var(--dcc-docs-accent-soft); color: var(--dcc-docs-accent); }
+
+/* ---- page header: family-coded ------------------------------------- */
+.dcc-docs__pageheader { border-bottom: 1px solid var(--dcc-border); padding-bottom: 1rem; }
+.dcc-docs__familybadge {
+  display: inline-block;
+  text-transform: uppercase;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  padding: 0.15rem 0.55rem;
+  border-radius: 999px;
+  margin-bottom: 0.5rem;
+  color: #fff;
+  background: var(--dcc-docs-accent);
+}
+.dcc-docs__pageheader[data-family="ui"]         .dcc-docs__familybadge { background: var(--dcc-docs-family-ui); }
+.dcc-docs__pageheader[data-family="schemas"]    .dcc-docs__familybadge { background: var(--dcc-docs-family-schemas); }
+.dcc-docs__pageheader[data-family="tables"]     .dcc-docs__familybadge { background: var(--dcc-docs-family-tables); }
+.dcc-docs__pageheader[data-family="infolists"]  .dcc-docs__familybadge { background: var(--dcc-docs-family-infolists); }
+.dcc-docs__pageheader[data-family="widgets"]    .dcc-docs__familybadge { background: var(--dcc-docs-family-widgets); }
+.dcc-docs__pageheader[data-family="actions"]    .dcc-docs__familybadge { background: var(--dcc-docs-family-actions); }
+.dcc-docs__pageheader[data-family="wizards"]    .dcc-docs__familybadge { background: var(--dcc-docs-family-wizards); }
+.dcc-docs__pageheader[data-family="blocks"]     .dcc-docs__familybadge { background: var(--dcc-docs-family-blocks); }
+.dcc-docs__pageheader h1 { margin: 0; }
+
+/* ---- prose (Getting started pages) ---------------------------------- */
+.dcc-docs__prose { max-width: 65ch; line-height: 1.65; }
+.dcc-docs__prose h2 {
+  margin-top: 2rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid var(--dcc-border);
+}
+.dcc-docs__prose pre,
+.dcc-docs__prose code { font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace; }
+.dcc-docs__prose pre {
+  background: var(--dcc-docs-code-bg);
+  color: var(--dcc-docs-code-fg);
+  border-radius: var(--dcc-radius);
+  padding: 0.9rem 1.1rem;
+  overflow-x: auto;
+  font-size: 0.85rem;
+  line-height: 1.55;
+}
+.dcc-docs__prose a { color: var(--dcc-docs-accent); }
+
+.dcc-docs__summary { color: var(--dcc-muted); margin: 0.25rem 0 0; max-width: 48rem; }
+
+/* ---- two-column body: content + a sticky on-page rail --------------
+ * A grid, not a float - a float only has room to "stick" for as long as
+ * its own (short) box scrolls past, since it never claims a full-height
+ * track next to the content. A grid row's height is set by its tallest
+ * cell (the content column), so the rail's `position: sticky` has the
+ * entire page's worth of scroll room to stay put in, and only the content
+ * on its left actually scrolls the page under it. */
+.dcc-docs__layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 12rem;
+  gap: 2.5rem;
+  align-items: start;
+  max-width: 76rem;
+}
+.dcc-docs__body { min-width: 0; }
+.dcc-docs__onpage {
+  width: 12rem;
+  font-size: 0.85rem;
+  position: sticky;
+  top: 1.5rem;
+}
+@media (max-width: 64rem) {
+  .dcc-docs__layout { grid-template-columns: 1fr; }
+  .dcc-docs__onpage { position: static; width: auto; margin-bottom: 1.5rem; }
+}
+.dcc-docs__onpage-title {
+  font-weight: 700;
+  text-transform: uppercase;
+  font-size: 0.7rem;
+  letter-spacing: 0.06em;
+  color: var(--dcc-docs-accent);
+  margin: 0 0 0.4rem;
+}
+.dcc-docs__onpage ul { list-style: none; padding: 0; margin: 0; border-left: 2px solid var(--dcc-border); }
+.dcc-docs__onpage li a {
+  display: block;
+  padding: 0.2rem 0.75rem;
+  color: var(--dcc-muted);
+  text-decoration: none;
+  border-left: 2px solid transparent;
+  margin-left: -2px;
+}
+.dcc-docs__onpage li a:hover { color: var(--dcc-docs-accent); border-left-color: var(--dcc-docs-accent); }
+
+/* ---- setters table ----------------------------------------------------- */
+.dcc-docs__props { margin-top: 2rem; }
+.dcc-docs__props h2 { margin-bottom: 0.5rem; }
+.dcc-docs__props table { width: 100%; border-collapse: collapse; }
+.dcc-docs__props th {
+  text-align: left;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--dcc-muted);
+  border-bottom: 2px solid var(--dcc-border);
+  padding: 0.4rem 0.6rem;
+}
+.dcc-docs__props td {
+  text-align: left;
+  border-bottom: 1px solid var(--dcc-border);
+  padding: 0.5rem 0.6rem;
+  font-size: 0.9rem;
+  vertical-align: top;
+}
+.dcc-docs__props td code { color: var(--dcc-docs-accent); }
+
+/* ---- the small filler chips used by the blocks/layout demos --------- */
+.dcc-docs__chip {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.4rem 0.9rem;
+  border-radius: var(--dcc-radius);
+  background: var(--dcc-docs-accent-soft);
+  color: var(--dcc-docs-accent);
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+/* ---- the demo card: title strip in the accent, clear preview/code split
+ * `overflow: hidden` on the card (to clip its own square corners into the
+ * rounded outline) also clipped anything inside `.dcc-democard__preview`
+ * that needs to escape the card's box - Menu's absolutely-positioned
+ * dropdown, Modal's overlay. Round only the first/last child instead, and
+ * leave the card itself `overflow: visible`. */
+.dcc-democard {
+  border: 1px solid var(--dcc-border);
+  border-radius: calc(var(--dcc-radius) + 0.25rem);
+  margin: 1.5rem 0;
+  clear: both;
+  box-shadow: 0 1px 2px rgb(0 0 0 / 0.04);
+}
+.dcc-democard > :first-child { border-radius: calc(var(--dcc-radius) + 0.25rem) calc(var(--dcc-radius) + 0.25rem) 0 0; }
+.dcc-democard > :last-child { border-radius: 0 0 calc(var(--dcc-radius) + 0.25rem) calc(var(--dcc-radius) + 0.25rem); }
+.dcc-democard__title {
+  margin: 0;
+  padding: 0.7rem 1.1rem;
+  font-size: 0.9rem;
+  font-weight: 700;
+  background: var(--dcc-docs-accent-soft);
+  color: var(--dcc-docs-accent);
+  border-bottom: 1px solid var(--dcc-border);
+}
+.dcc-democard__note { margin: 0; padding: 0.6rem 1.1rem 0; color: var(--dcc-muted); font-size: 0.85rem; }
+.dcc-democard__preview {
+  padding: 1.5rem;
+  border-bottom: 1px solid var(--dcc-border);
+  background: var(--dcc-bg);
+  position: relative;
+}
+.dcc-democard__code { position: relative; background: var(--dcc-docs-code-bg); overflow: hidden; }
+.dcc-democard__code pre {
+  margin: 0;
+  padding: 1rem 1.1rem;
+  overflow-x: auto;
+  font-size: 0.83rem;
+  line-height: 1.5;
+  color: var(--dcc-docs-code-fg);
+  font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+}
+.dcc-democard__copy {
+  position: absolute;
+  top: 0.6rem;
+  right: 0.6rem;
+  border: 1px solid color-mix(in srgb, var(--dcc-docs-code-fg) 25%, transparent);
+  background: color-mix(in srgb, var(--dcc-docs-code-fg) 10%, transparent);
+  color: var(--dcc-docs-code-fg);
+  border-radius: var(--dcc-radius);
+  padding: 0.2rem 0.6rem;
+  font-size: 0.75rem;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.dcc-democard__copy:hover { background: var(--dcc-docs-accent); color: var(--dcc-docs-accent-fg); border-color: var(--dcc-docs-accent); }
+
+/* ---- table zebra + hover, so the seeded Task rows read clearly ------ */
+.dcc-table tbody tr:nth-child(even) { background: color-mix(in srgb, var(--dcc-border) 25%, transparent); }
+.dcc-table tbody tr:hover { background: var(--dcc-docs-accent-soft); }

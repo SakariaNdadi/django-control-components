@@ -1,0 +1,12 @@
+<div class="dcc-democard" id="{{ title|slugify }}">
+  {% if title %}<h3 class="dcc-democard__title">{{ title }}</h3>{% endif %}
+  {% if note %}<p class="dcc-democard__note">{{ note }}</p>{% endif %}
+  <div class="dcc-democard__preview">{% if preview_html %}{{ preview_html }}{% else %}{{ slots.preview }}{% endif %}</div>
+  <div class="dcc-democard__code" x-data="{ copied: false }">
+    <button type="button" class="dcc-democard__copy"
+            x-on:click="navigator.clipboard.writeText($refs.src.textContent); copied = true; setTimeout(() => copied = false, 1200)">
+      <span x-show="!copied">Copy</span><span x-show="copied" x-cloak>Copied</span>
+    </button>
+    <pre><code x-ref="src">{{ code }}</code></pre>
+  </div>
+</div>
