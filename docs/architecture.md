@@ -195,7 +195,7 @@ endpoints turn a miss into `Http404`.
 | `{% dcc_render component %}` | Render a Python component instance; wires `request` and `form` from the template context into a fresh `RenderContext`. |
 | `{% dcc_form schema %}` / `{% dcc_form schema form=other_form %}` | Render a bound schema as a full `<form>` including CSRF and a submit button. |
 | `{% dcc_icon "rocket" css_class="text-lg" %}` | Render one icon through the active icon set. |
-| `{% dcc_studio_assets %}` | The no-code studio builder's CSS + JS. Emit inside a page that already ran `{% dcc_assets %}`. |
+| `{% dcc_studio_assets %}` | The dev-only studio builder's CSS + JS. Emit inside a page that already ran `{% dcc_assets %}`. |
 | `{% get_field_errors form "name" %}` | **Deprecated** — emits `DeprecationWarning`, removed next minor. The forms bridge renders field errors itself. |
 
 **Load order is load-bearing** (`dcc_tags.py:43-50`): `dcc.js` must load before

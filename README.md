@@ -22,7 +22,7 @@ wired to real `django.forms` validation.
 | Wizard (`dcc[wizard]`, django-formtools) — **htmx step swapping** | ✅ |
 | Panels / Resources (list · create · edit · view · **delete**), admin-independent | ✅ |
 | Infolists; dashboard **widgets** + `DashboardPage`; custom pages | ✅ |
-| No-code resources from stored JSON (`dcc[studio]`, `django_control_components.studio`) | ✅ |
+| Studio — dev-only rapid prototyping from stored JSON (`dcc[studio]`, `django_control_components.studio`) | ✅ |
 | Global search, relation managers, a visual dashboard builder | 🔜 |
 
 ## Docs
@@ -37,13 +37,13 @@ doc builds on. Then:
 [Actions](docs/actions.md) · [Infolists](docs/infolists.md) ·
 [Wizards](docs/wizards.md) · [UI primitives](docs/ui.md) · [Images](docs/images.md) ·
 [Panels & Resources](docs/panels.md) · [Widgets](docs/widgets.md) ·
-[No-code resources](docs/no-code.md) — index: [docs/](docs/README.md)
+[Studio (dev-only)](docs/no-code.md) — index: [docs/](docs/README.md)
 
 ## Install
 
 ```bash
 pip install "django-control-components[images]"
-pip install "django-control-components[studio]"   # + the no-code builder (separate distribution)
+pip install "django-control-components[studio]"   # + studio, a dev-only prototyping tool (separate distribution)
 ```
 
 ```python
@@ -57,8 +57,12 @@ INSTALLED_APPS = [
 Add `{% dcc_assets %}` to your base template `<head>` — it emits the stylesheet,
 the small Alpine helpers, htmx, Alpine and the icon-set stylesheet. Pass
 `htmx=False` / `alpine=False` / `icons=False` for anything the host page already
-loads. For the no-code seam, install the `studio` extra and also add
-`"django_control_components.studio"` to `INSTALLED_APPS`.
+loads. For rapid backend prototyping — wiring up a resource or dashboard
+against real models before you build its UI — install the `studio` extra and
+also add `"django_control_components.studio"` to `INSTALLED_APPS`. Studio is a
+development tool, like `django-debug-toolbar`: a system check warns
+(`dcc_studio.W003`) if it's still installed with `DEBUG=False`, and it should
+come out of `INSTALLED_APPS` before you deploy.
 
 ## Quick start
 

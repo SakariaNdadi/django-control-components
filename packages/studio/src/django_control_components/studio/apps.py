@@ -51,4 +51,18 @@ def _check_studio(app_configs: Any, **kwargs: Any) -> list[CheckMessage]:
         except ImproperlyConfigured:  # urlconf not loadable at check time
             pass
 
+    if not settings.DEBUG:
+        errors.append(
+            Warning(
+                "django_control_components.studio is installed with DEBUG=False.",
+                hint=(
+                    "Studio is a development tool for rapidly prototyping backend "
+                    "resources before building real UI — it is not meant to run in "
+                    "production. Remove it from INSTALLED_APPS (and its urls.py "
+                    "include) outside local/dev settings."
+                ),
+                id="dcc_studio.W003",
+            )
+        )
+
     return errors

@@ -5,7 +5,7 @@
 ```bash
 pip install "django-control-components[images]"        # + Pillow for image fields
 pip install "django-control-components[wizard]"        # + django-formtools for wizards
-pip install "django-control-components[studio]"        # + django-control-components-studio (no-code builder)
+pip install "django-control-components[studio]"        # + django-control-components-studio (dev-only prototyping tool)
 ```
 
 ```python
@@ -13,7 +13,7 @@ INSTALLED_APPS = [
     # ...
     "django_cotton",  # BEFORE django_control_components
     "django_control_components",
-    "django_control_components.studio",  # only for the no-code seam
+    "django_control_components.studio",  # dev-only prototyping, DEBUG=True only
 ]
 ```
 
@@ -42,8 +42,8 @@ ordering:
 {% dcc_assets focus=False %}                {# you load @alpinejs/focus yourself #}
 ```
 
-For the no-code studio builder page, also add `{% dcc_studio_assets %}` (after
-`{% dcc_assets %}`).
+For the studio builder page (dev-only), also add `{% dcc_studio_assets %}`
+(after `{% dcc_assets %}`).
 
 ### URLs
 
@@ -123,6 +123,7 @@ but a `setting_changed` receiver clears that cache, so
 | `django_control_components.W012` | Warning | a `DCC["STUDIO_CALLABLES"]` dotted path cannot be imported |
 | `dcc_studio.E001` | Error | `django_control_components.studio` is installed without `django_control_components` |
 | `dcc_studio.W002` | Warning | `DCC["STUDIO_ADMIN_ENTRY"]` is on but the studio URLs are not mounted (`include("django_control_components.studio.urls")`) |
+| `dcc_studio.W003` | Warning | `django_control_components.studio` is installed with `DEBUG=False` — studio is a dev-only tool, remove it before deploying |
 
 ## Styling
 

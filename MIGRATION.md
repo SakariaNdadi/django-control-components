@@ -9,7 +9,9 @@
 > ships in `django-control-components-studio`. Install it with
 > `pip install "django-control-components[studio]"` — the import path and
 > `INSTALLED_APPS` entry are unchanged. A `Panel.studio()` / `.dynamic()` mount
-> without the extra now raises `ImproperlyConfigured`.
+> without the extra now raises `ImproperlyConfigured`. Studio is documented as a
+> **dev-only** rapid-prototyping tool (like `django-debug-toolbar`), not a
+> production feature — see [docs/no-code.md](docs/no-code.md).
 
 1.0 is a hard break. The old templates were defective (unescaped JS
 interpolation, a table that shipped every row's full model dict to the browser)

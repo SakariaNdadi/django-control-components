@@ -1,9 +1,16 @@
-# No-code resources (studio)
+# Studio (dev-only prototyping)
 
 `django_control_components.studio` is an in-browser builder for panel
 navigation, resources and dashboards, defined as **stored JSON** instead of
 Python subclasses. It mounts at **its own URL**, entered from the Django admin,
 and is never part of the app it builds.
+
+It exists to let you wire up a resource, dashboard, or nav entry against real
+models and see it work immediately — before you write the Python (or the real
+UI) yourself. Treat it like `django-debug-toolbar`: a development aid, not a
+shipped feature. `manage.py check` warns (`dcc_studio.W003`) if it's installed
+with `DEBUG=False` — pull `django_control_components.studio` out of
+`INSTALLED_APPS` and its `urls.py` include before deploying.
 
 ## Enable it
 

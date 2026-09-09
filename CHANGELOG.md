@@ -21,6 +21,9 @@ Renamed and re-versioned release of the rebuild described under `1.0.0b1` below.
   `django_control_components.studio` and all `INSTALLED_APPS` / template / URL
   names are unchanged. `Panel.studio()` / `.dynamic()` without the extra raise
   `ImproperlyConfigured`.
+- **Studio repositioned as a dev-only prototyping tool** (not for production) —
+  added `dcc_studio.W003`, a system-check warning when studio is installed with
+  `DEBUG=False`.
 
 ## [1.0.0b1] — unreleased
 
