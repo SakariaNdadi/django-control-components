@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import glob
+
 import nox
 
 nox.options.default_venv_backend = "uv"
@@ -106,7 +108,9 @@ def css_check(session: nox.Session) -> None:
 @nox.session
 def packaging(session: nox.Session) -> None:
     _install(session)
+    session.install("twine")
     session.run("uv", "build", "--all-packages", external=True)
+    session.run("twine", "check", *glob.glob("dist/*"))
     session.run(
         "python",
         "-c",
