@@ -4,6 +4,7 @@ things a generic SAST scanner will not catch."""
 from __future__ import annotations
 
 import pytest
+from django.http import Http404
 
 from django_control_components.schemas import Schema, Select, Textarea, TextInput
 from tests.testapp.forms import ArticleForm
@@ -197,3 +198,63 @@ def test_table_id_cannot_break_out_of_the_alpine_expression(article):
 
     html = str(table.render(None))
     assert "alert(1)" not in html
+
+
+def test_action_scope_is_rebuilt_per_request_not_taken_from_the_last_render():
+    """A tenant-aware table registers one factory that scopes to the requesting
+    user. Tenant A rendering then tenant B rendering must not let tenant B's
+    POST reach tenant A's row - the endpoint rebuilds the owner from the POST
+    request, it does not trust the instance that rendered last."""
+    from django.test import RequestFactory
+
+    from django_control_components.actions import Action, registry
+    from django_control_components.actions.endpoints import ActionView
+    from django_control_components.tables import Table, TextColumn
+    from tests.testapp.models import Article, Author
+
+    registry.clear()
+    a1 = Author.objects.create(name="TenantA")
+    a2 = Author.objects.create(name="TenantB")
+    art_a = Article.objects.create(title="A-secret", slug="a1", status="draft", author=a1)
+    Article.objects.create(title="B-secret", slug="b1", status="draft", author=a2)
+    hit: list[str] = []
+
+    def user(author: Author) -> object:
+        return type(
+            "U",
+            (),
+            {"is_authenticated": True, "author_id": author.pk, "has_perm": lambda s, *a, **k: True},
+        )()
+
+    def table_for(request: object) -> Table:
+        # tenant scoping keyed off the request's user, exactly like a Resource
+        # whose get_queryset filters by request.user
+        qs = Article.objects.filter(author_id=request.user.author_id)
+        return (
+            Table.make(qs)
+            .columns([TextColumn.make("title")])
+            .id("orders")
+            .actions(
+                [
+                    Action.make("touch").action(
+                        lambda record: hit.append(record.title) if record else None
+                    )
+                ]
+            )
+            .set_owner_factory(table_for)
+        )
+
+    req_a = RequestFactory().get("/")
+    req_a.user = user(a1)
+    table_for(req_a).render(req_a)  # tenant A renders
+    req_b = RequestFactory().get("/")
+    req_b.user = user(a2)
+    table_for(req_b).render(req_b)  # tenant B renders, same owner key
+
+    # tenant B POSTs, naming tenant A's pk
+    post = RequestFactory().post("/x/", {"record": art_a.pk})
+    post.user = user(a2)
+    with pytest.raises(Http404):
+        ActionView.as_view()(post, owner_key="table-orders", action_name="touch")
+    assert hit == []  # tenant A's row never reached, it is outside tenant B's scope
+    registry.clear()

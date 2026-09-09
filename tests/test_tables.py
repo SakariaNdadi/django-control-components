@@ -376,5 +376,5 @@ def test_record_action_registers_and_marks_rows(articles, settings):
     html = str(table.render(RequestFactory().get("/")))
     assert "data-dcc-action=" in html
     assert 'id="dcc-modal-table-things"' in html  # modal mount rendered
-    assert registry.resolve("table-things", "peek") is not None
+    assert registry.resolve("table-things", "peek", RequestFactory().get("/")) is not None
     registry.clear()

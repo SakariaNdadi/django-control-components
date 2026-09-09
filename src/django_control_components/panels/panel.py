@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import logging
 from typing import TYPE_CHECKING, Any, Self
 
 from django.core.exceptions import PermissionDenied
@@ -7,6 +8,8 @@ from django.urls import include, path
 
 from . import pages
 from .resource import Resource
+
+logger = logging.getLogger("django_control_components")
 
 if TYPE_CHECKING:
     from collections.abc import Callable
@@ -295,8 +298,40 @@ class Panel:
             )
         ]
 
+    def _register_action_owners(self) -> None:
+        """Register a per-request table factory for every resource that has
+        actions, at mount time - so an action POST resolves on any worker,
+        not only one that has already rendered the list page.
+
+        A resource whose ``build_table`` needs the request to even construct
+        (``get_queryset(None)`` raises) is skipped here and registered lazily on
+        first render instead; such a resource should call
+        ``actions.registry.register`` itself if it needs multi-worker safety.
+        """
+        from ..actions.registry import registry
+
+        for resource in self._resources:
+
+            def factory(request: HttpRequest, _resource: type[Resource] = resource) -> Any:
+                table = _resource.build_table(request=request)
+                table.set_owner_factory(factory)
+                return table
+
+            try:
+                probe = resource.build_table(request=None)  # type: ignore[arg-type]
+            except Exception as exc:  # defer to render-time registration
+                logger.debug(
+                    "deferring action-owner registration for %s to render time: %s",
+                    resource.__name__,
+                    exc,
+                )
+                continue
+            if probe._all_actions:
+                registry.register(probe.key, factory)
+
     @property
     def urls(self) -> tuple[list[Any], str]:
+        self._register_action_owners()
         patterns: list[Any] = []
         patterns.extend(self._page_patterns())
         for resource in self._resources:

@@ -132,7 +132,12 @@ def _build_demo(
     demo = ComponentDemo(title=example.title, code=example.code, note=example.note)
     if isinstance(result, Block):
         return demo.fill("preview", [result])
-    if isinstance(result, (Table, Schema, Infolist)):
+    if isinstance(result, Table):
+        # example.build is itself a per-request factory - hand it to the action
+        # endpoint so a demo action rebuilds safely rather than 404ing.
+        result.set_owner_factory(example.build)
+        return demo.preview_html(result.render(request=request))
+    if isinstance(result, (Schema, Infolist)):
         return demo.preview_html(result.render(request=request))
     if isinstance(result, Widget):
         for asset in result.get_assets():

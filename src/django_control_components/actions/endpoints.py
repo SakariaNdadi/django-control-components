@@ -17,8 +17,10 @@ class ActionView(View):
     POST -> authorize (again), re-scope targets to the owner's queryset, execute.
     """
 
-    def _resolve(self, owner_key: str, action_name: str) -> tuple[Any, Any]:
-        found = registry.resolve(owner_key, action_name)
+    def _resolve(
+        self, request: HttpRequest, owner_key: str, action_name: str
+    ) -> tuple[Any, Any]:
+        found = registry.resolve(owner_key, action_name, request)
         if found is None:
             raise Http404("Unknown action")
         return found
@@ -56,10 +58,14 @@ class ActionView(View):
         if raw is None:
             return []
         obj = scope.filter(pk=raw).first()
-        return [obj] if obj is not None else []
+        if obj is None:
+            # a pk was named but it is not in this request's scope - stale page
+            # or a tampered id. Do not fall through to running the action.
+            raise Http404("Record not in scope")
+        return [obj]
 
     def get(self, request: HttpRequest, owner_key: str, action_name: str) -> HttpResponse:
-        owner, action = self._resolve(owner_key, action_name)
+        owner, action = self._resolve(request, owner_key, action_name)
         records = self._targets(request, owner, action)
         if self._baseline_denied(request, action) or not action.is_authorized(
             request, records[0] if records else None
@@ -88,7 +94,7 @@ class ActionView(View):
         )
 
     def post(self, request: HttpRequest, owner_key: str, action_name: str) -> HttpResponse:
-        owner, action = self._resolve(owner_key, action_name)
+        owner, action = self._resolve(request, owner_key, action_name)
         records = self._targets(request, owner, action)
         if self._baseline_denied(request, action) or not action.is_authorized(
             request, records[0] if records else None

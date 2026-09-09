@@ -46,7 +46,7 @@ def _table(qs, actions=None, bulk=None) -> Table:
 
 
 def test_unknown_owner_and_action_are_404():
-    assert registry.resolve("nope", "x") is None
+    assert registry.resolve("nope", "x", RequestFactory().get("/")) is None
 
 
 def test_table_registers_actions_on_render(data):
@@ -54,7 +54,7 @@ def test_table_registers_actions_on_render(data):
 
     action = Action.make("publish").action(lambda record: calls.append(record.pk))
     _table(Article.objects.all(), actions=[action]).render(RequestFactory().get("/"))
-    assert registry.resolve("table-art", "publish") is not None
+    assert registry.resolve("table-art", "publish", RequestFactory().get("/")) is not None
 
 
 def test_action_trigger_hidden_when_unauthorized(data):

@@ -144,6 +144,16 @@ class Action:
             self._config.get("confirm") or self._config.get("schema") or self._config.get("modal")
         )
 
+    def copy(self) -> Self:
+        """A shallow copy with its own ``_config`` and owner binding, so binding
+        an owner key onto one table's action never touches another's."""
+        import copy as _copy
+
+        clone = _copy.copy(self)
+        clone._config = dict(self._config)
+        clone._owner_key = None
+        return clone
+
     def bind_owner(self, owner_key: str) -> None:
         self._owner_key = owner_key
 

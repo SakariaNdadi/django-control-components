@@ -18,6 +18,7 @@ if TYPE_CHECKING:
     from django.http import HttpRequest
 
     from ..actions.action import Action
+    from ..actions.registry import OwnerFactory
     from .columns import Column
     from .filters import Filter
 
@@ -33,6 +34,10 @@ class Table:
         self._row_actions: list[Action] = []
         self._bulk_actions: list[Action] = []
         self._config: dict[str, Any] = {}
+        #: per-request owner factory - see actions.registry. When set, the action
+        #: endpoint rebuilds the table from this rather than trusting the
+        #: instance that happened to render last.
+        self._owner_factory: OwnerFactory | None = None
 
     @classmethod
     def make(cls, queryset: QuerySet[Any]) -> Self:
@@ -49,11 +54,13 @@ class Table:
         return self
 
     def actions(self, actions: list[Action]) -> Self:
-        self._row_actions = list(actions)
+        # copy: the owner key is bound onto these at render time, and a caller
+        # may share one Action instance across tables.
+        self._row_actions = [a.copy() for a in actions]
         return self
 
     def bulk_actions(self, actions: list[Action]) -> Self:
-        self._bulk_actions = list(actions)
+        self._bulk_actions = [a.copy() for a in actions]
         return self
 
     def record_url(self, value: str | Any) -> Self:
@@ -66,7 +73,7 @@ class Table:
         """Clicking a row fires this Action - typically ``.modal(...)`` for a
         detail dialog, or ``.to_url(...)`` to navigate. Registered like a row
         action but never shown as a column button."""
-        self._config["record_action"] = action
+        self._config["record_action"] = action.copy()
         return self
 
     def record_preview(self, value: Any) -> Self:
@@ -173,12 +180,25 @@ class Table:
         state = self._default_state(request)
         return query.apply_all(self._queryset, state, self._columns, self._filters)
 
-    def _register(self) -> None:
-        if self._all_actions:
-            from ..actions.registry import registry
+    def set_owner_factory(self, factory: OwnerFactory) -> Self:
+        """Give the action endpoint a way to rebuild this table for an arbitrary
+        request, so its action queryset is always this-request-scoped. Set for
+        you by ``Resource`` / ``TableMixin``; call it yourself for a hand-built
+        table wired to a plain view."""
+        self._owner_factory = factory
+        return self
 
-            self.get_actions()  # binds owner key onto each action
-            registry.register(self)
+    def _register(self) -> None:
+        if not self._all_actions:
+            return
+        from ..actions.registry import registry
+
+        for action in self._all_actions:
+            action.bind_owner(self.key)  # onto this table's own copies
+        if self._owner_factory is not None:
+            registry.register(self.key, self._owner_factory)
+        else:
+            registry.register_rendered(self)
 
     @property
     def per_page_choices(self) -> list[int]:

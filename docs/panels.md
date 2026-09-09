@@ -111,8 +111,10 @@ class TaskResource(Resource):
 
 Everything is a **classmethod that takes `request`** - never a class attribute -
 so per-request state (tenant scoping, the current user) cannot leak between
-requests. Override only what you need; the defaults build a five-column table
-and a full ModelForm schema.
+requests. The action endpoint rebuilds the table from `build_table(request=...)`
+for the action request itself, so a row/bulk action is always re-scoped to the
+user making it, not to whoever rendered the page last. Override only what you
+need; the defaults build a five-column table and a full ModelForm schema.
 
 Override points:
 

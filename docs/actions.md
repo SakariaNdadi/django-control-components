@@ -162,13 +162,15 @@ Confirm modal; the endpoint calls it.
 ## Being an action owner
 
 To expose actions from something other than a `Table`, implement the
-`ActionOwner` protocol (`actions/registry.py:24-31`) and call
-`registry.register(self)`:
+`ActionOwner` protocol (`actions/registry.py`) and register a **per-request
+factory**: `registry.register(key, lambda request: build_owner(request))`. The
+endpoint calls the factory with the action request, so the owner - and its
+queryset - is always rebuilt for the user making the action.
 
 | member | contract |
 |---|---|
 | `key` (property) | the opaque owner key the client will send |
-| `get_action_queryset(request)` | the rows these actions may touch - **already** scoped to the user's visibility and the current filters. This is the security boundary. |
+| `get_action_queryset(request)` | the rows these actions may touch, for *this* request - **already** scoped to the user's visibility and the current filters. This is the security boundary. |
 | `get_actions()` | `{name: Action}`; call `action.bind_owner(self.key)` on each |
 
 ## Constraints / do not combine
