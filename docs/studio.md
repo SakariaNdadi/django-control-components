@@ -75,7 +75,9 @@ The deserializer is a sandbox, not a parser. A stored spec:
 
 - names component types from a **registry**, never an import path. An unknown
   name is a validation error; no spec can instantiate an arbitrary class;
-- carries **JSON scalars only**, under a 64 KB ceiling and a nesting depth cap;
+- carries **JSON scalars only**, under a 64 KB ceiling and a 12-level nesting
+  cap (`deserialize._MAX_TREE_DEPTH`, enforced server-side and mirrored into the
+  builder's boot JSON so the editor stops you at the same depth);
 - cannot set a `CODE_ONLY_SETTERS` key (`action`, `callback`, `authorize`,
   `state`, `visible`, `hidden`, `html`, `extra_attributes`) - these take runtime
   callables or raw HTML;

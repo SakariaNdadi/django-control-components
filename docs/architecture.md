@@ -81,10 +81,16 @@ TextInput.make("email").label("Email").required()
 TextInput("email", label="Email", required=True)  # identical
 ```
 
-A method decorated `@setter` (`core/component.py:40-43`) is marked
-`__dcc_setter__ = True`. The constructor (`_apply_kwargs`, `core/component.py:67-77`)
+A method decorated `@setter` (`core/component.py`) is marked
+`__dcc_setter__ = True`. The constructor (`_apply_kwargs`, `core/component.py`)
 routes each kwarg to the matching `@setter` method; **a kwarg with no matching
 `@setter` raises `TypeError`** listing the valid setter names.
+
+`@setter` is generic (`def setter[F](method: F) -> F`), so it preserves each
+method's own signature - `mypy` sees `.label(x)` return `Self` and checks the
+argument type. A setter typo or a wrong argument type in a chained call is a
+type error, and the packages ship `py.typed`, so a consumer running `mypy` gets
+the same checking.
 
 Consequences you must know:
 

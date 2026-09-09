@@ -96,6 +96,11 @@ TABLE = ComponentPageSpec(
         (".default_sort(str)", "str", "- prefix = descending"),
         (".stream() / .page_numbers()", "-", "keyset cursor vs classic COUNT(*) pages"),
         (".client_side() / .server_side()", "-", "force the render mode"),
+        (
+            ".with_related(bool=True)",
+            "bool",
+            "auto select_related / prefetch_related from dotted column names (on by default)",
+        ),
     ],
 )
 
@@ -104,13 +109,18 @@ TEXT_COLUMN = ComponentPageSpec(
     title="Text Column",
     family="tables",
     icon="font",
-    summary="The value, escaped.",
+    summary="The value, escaped. `name` may be dotted (`\"author.name\"`).",
     examples=[
         ComponentExample(
             title="Basic",
             code='TextColumn.make("title").sortable().searchable().limit(64)',
             build=lambda request: _demo_table(
                 request, [TextColumn.make("title").sortable().searchable().limit(64)]
+            ),
+            note=(
+                "A dotted name walks a relation - `TextColumn.make(\"author.name\")`. "
+                "The table adds `author` to `select_related` automatically so it "
+                "stays one query; `.with_related(False)` opts out."
             ),
         ),
     ],

@@ -35,10 +35,33 @@ Renamed and re-versioned release of the rebuild described under `1.0.0b1` below.
   because a `TYPE_CHECKING`-only import made signature introspection fail, and
   the builder hides `code_only` setters. Spec-safety is now decided by setter
   name alone.
+- **The studio builders' boot payload is a real JSON object again.** They
+  passed `json.dumps(boot)` into `{{ boot_json|json_script }}`, which re-encodes
+  it - the JS `readJson()` got a string, so the palette and current document
+  were empty in the nav / dashboard / page / resource builders.
+- The block-tree depth cap lived as a literal in the JS *and* in Python. It is
+  now shipped from `deserialize._MAX_TREE_DEPTH` in the builder boot; the JS
+  literal is a fallback only.
 - `packages/studio/LICENSE` names its copyright holder (it was `Copyright (c)
   2024` with no name).
 
 ### Security
+
+- **Table actions are re-scoped to the requesting user, not to the last
+  render.** The action registry held the rendered `Table` instance in a
+  process-global dict keyed by table id (default: model name), so
+  `get_action_queryset` scoped against whichever request rendered last - and a
+  second tenant's render could leave its queryset behind for the first tenant's
+  action POST. The registry now stores a per-request factory; the endpoint
+  rebuilds the owner from the action request. This also fixes actions 404ing
+  behind more than one worker. **API:** `registry.register(owner)` →
+  `registry.register(key, factory)`; `registry.resolve(key, name)` →
+  `registry.resolve(key, name, request)`. A `Resource` / `TableMixin` table
+  registers its factory automatically; a hand-built `Table` in a plain view
+  should call `Table.set_owner_factory(fn)` (it falls back to capturing the
+  rendered instance, single-process only, and warns).
+- **A row-action POST naming a pk outside the current scope is now a 404**
+  rather than falling through to running the action with no target.
 
 - **Component ids are sanitised to `[A-Za-z0-9_-]`.** `Widget.id(...)` and
   `Table.id(...)` reach an Alpine `x-data` expression, where HTML escaping does

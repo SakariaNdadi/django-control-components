@@ -140,6 +140,8 @@ All methods are **fluent-only** and return `self`. (They are not `@setter`s -
 | `.record_url(fn)` | whole-row click navigates to `fn(record)` (full page) |
 | `.record_action(action)` | whole-row click fires an `Action` instead |
 | `.record_preview(fn)` | hovering a row (~350 ms) pops a card with `fn(record)` HTML |
+| `.with_related(value=True)` | auto `select_related` / `prefetch_related` from the dotted column names (default on); pass `False` when the base queryset sets its own |
+| `.set_owner_factory(fn)` | for a hand-built table wired to a plain view - `fn(request)` rebuilds it so its actions resolve on any worker (a `Resource` / `TableMixin` table sets this for you) |
 
 ### Client vs server mode
 

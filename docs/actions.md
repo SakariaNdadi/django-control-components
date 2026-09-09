@@ -5,15 +5,20 @@
 An `Action` is a named, addressable operation on **one record**; a `BulkAction`
 is the same on **many**. Tables and panel resources expose them.
 
-The security model (`actions/registry.py:1-11`):
+The security model (`actions/registry.py`):
 
 - The client only ever sends an **owner key** (`"table-tasks"`) and an
-  **action name** (`"publish"`) - both opaque strings registered at render time.
-  Never an import path, a model label, or a callable. An unknown key is a **404**.
-- The owner knows how to produce the queryset its actions may touch
+  **action name** (`"publish"`). Never an import path, a model label, or a
+  callable. An unknown key is a **404**.
+- The owner key resolves to a **per-request factory**. On every GET/POST the
+  endpoint calls `factory(request)` to rebuild the owner (a `Table`) and its
+  queryset from the *current* request - so the scope is always the requesting
+  user's, never a stale one left by whoever rendered the page last, and the
+  action resolves on any worker process.
+- The rebuilt owner produces the queryset its actions may touch
   (`get_action_queryset(request)` - already filtered/scoped). On POST the
-  endpoint **re-scopes** the target pks against that queryset, so a tampered pk
-  cannot reach a row the user was never shown.
+  endpoint **re-scopes** the target pks against that queryset; a pk outside it
+  is a **404**, not a silent no-op.
 - Authorization is checked **twice** - when the trigger renders (a denied action
   renders `""`) **and** again on the POST (a hand-crafted POST gets `403`).
 
