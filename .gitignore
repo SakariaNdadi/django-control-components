@@ -26,10 +26,10 @@ coverage.xml
 # Build output that is regenerated from source
 src/django_control_components/static/dcc/dcc.css.map
 
-# Example project local state
-example/db.sqlite3
-example/media/
-example/.env
+# Website project local state
+web/db.sqlite3
+web/media/
+web/.env
 
 # Editors / OS
 .idea/

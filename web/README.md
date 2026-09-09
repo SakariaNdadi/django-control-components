@@ -1,15 +1,16 @@
-# Demo project
+# Website
 
-A complete app that exercises every builder — schema forms, an auto client/server
-data table, row & bulk actions, a htmx wizard, panels with widgets and a custom
-page, and a **no-code** resource defined entirely from stored JSON.
+The package's live site and documentation demo. A complete app that exercises
+every builder — schema forms, an auto client/server data table, row & bulk
+actions, a htmx wizard, panels with widgets and a custom page, and a **no-code**
+resource defined entirely from stored JSON.
 
 ```bash
 # from the repo root
 uv sync
-uv run --project example python example/manage.py migrate
-uv run --project example python example/manage.py seed --fresh
-uv run --project example python example/manage.py runserver
+uv run --project web python web/manage.py migrate
+uv run --project web python web/manage.py seed --fresh
+uv run --project web python web/manage.py runserver
 ```
 
 Open <http://127.0.0.1:8000/>. The dashboard links every feature. Sign in for the
@@ -38,6 +39,6 @@ panel — seeded superuser is **demo / demo**.
 ## Large-dataset mode
 
 `--big 60000` (or lowering `DCC["TABLE_CLIENT_SIDE_MAX_ROWS"]` in
-`example/config/settings.py`) switches `/articles/` to server mode: the first page
+`web/config/settings.py`) switches `/articles/` to server mode: the first page
 renders, then a sentinel row appends the next batch as you scroll. Watch the query
 log — there is no `SELECT COUNT(*)`.

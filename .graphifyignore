@@ -13,5 +13,5 @@ htmlcov/
 coverage.xml
 .coverage
 graphify-out/
-example/db.sqlite3
-example/media/
+web/db.sqlite3
+web/media/

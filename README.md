@@ -149,9 +149,9 @@ with Tailwind 4, point a build at [`css/dcc.css`](css/dcc.css) instead.
 uv sync
 uv run pytest -q
 uv run nox -s lint typecheck coverage
-uv run --project example python example/manage.py migrate
-uv run --project example python example/manage.py seed
-uv run --project example python example/manage.py runserver
+uv run --project web python web/manage.py migrate
+uv run --project web python web/manage.py seed
+uv run --project web python web/manage.py runserver
 ```
 
 ## License
