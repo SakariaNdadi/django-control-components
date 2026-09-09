@@ -1,0 +1,7 @@
+<li class="dcc-nav__item">
+  <a class="dcc-nav__link dcc-nav__action" href="{{ url|default:'#' }}"
+     {% if external %}target="_blank" rel="noopener"{% endif %}>
+    {% if icon_html %}<span class="dcc-nav__icon" aria-hidden="true">{{ icon_html }}</span>{% endif %}
+    <span class="dcc-nav__text">{{ label }}</span>
+  </a>
+</li>

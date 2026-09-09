@@ -200,3 +200,66 @@ def _group(nodes: list[NavNode]) -> list[NavNode]:
         node.group = ""
         heading.children.append(node)
     return ordered
+
+
+# -- rendering the tree through the shipped nav blocks --------------------
+
+
+def _nav_link(node: NavNode) -> Any:
+    from ..blocks.nav import NavLink
+
+    link = NavLink().label(node.label).to(node.url).active(node.active)
+    if node.icon:
+        link.icon(node.icon)
+    if node.external:
+        link.external()
+    return link
+
+
+def nav_blocks(nodes: list[NavNode]) -> list[Any]:
+    """Turn a :func:`build_nav` tree into ``NavGroup`` / ``NavLink`` blocks.
+    Every heading with children becomes a collapsible ``NavGroup`` (open when it
+    holds the active link)."""
+    from ..blocks.nav import NavGroup
+
+    out: list[Any] = []
+    for node in nodes:
+        if node.is_heading:
+            children = [_nav_link(child) for child in node.children]
+            group = NavGroup().label(node.label)
+            group.fill("default", children)
+            if any(child.active for child in node.children):
+                group.open()
+            out.append(group)
+        else:
+            out.append(_nav_link(node))
+    return out
+
+
+def sidebar_from_tree(
+    panel: Panel, tree: list[NavNode], request: HttpRequest, *, footer: bool = True
+) -> Any:
+    """Build a :class:`~django_control_components.blocks.chrome.Sidebar` from an
+    already-computed nav tree: brand, collapsible groups, and (when ``footer``)
+    a pinned theme toggle + account card."""
+    from ..blocks.chrome import Sidebar
+    from ..blocks.nav import NavUser, ThemeToggle
+
+    sidebar = Sidebar().brand(panel.brand_label or panel.name.title())
+    if panel.brand_icon:
+        sidebar.brand_icon(panel.brand_icon)
+    sidebar.brand_url(f"{panel.namespace}:index")
+    sidebar.fill("default", nav_blocks(tree))
+
+    if footer:
+        pinned: list[Any] = [ThemeToggle()]
+        user = getattr(request, "user", None)
+        if user is not None and getattr(user, "is_authenticated", False):
+            pinned.append(NavUser().label(user.get_username()))
+        sidebar.fill("footer", pinned)
+    return sidebar
+
+
+def panel_sidebar(panel: Panel, request: HttpRequest) -> Any:
+    """The full sidebar for a panel page - rendered by ``panels/_nav.html``."""
+    return sidebar_from_tree(panel, build_nav(panel, request), request)

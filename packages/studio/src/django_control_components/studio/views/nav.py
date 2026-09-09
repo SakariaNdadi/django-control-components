@@ -88,11 +88,14 @@ class NavPreview(StudioView):
     def post(self, request: HttpRequest, panel: str, *args: Any, **kwargs: Any) -> HttpResponse:
         panel_obj = _require_panel(panel)
         doc = self.read_doc()
+        from ...panels.nav import sidebar_from_tree
+
         tree = _preview_tree(doc.get("items", []))
+        sidebar = sidebar_from_tree(panel_obj, tree, request, footer=False)
         return render(
             request,
             "django_control_components/panels/_nav.html",
-            {"panel": panel_obj, "nav_tree": tree, "request": request},
+            {"panel": panel_obj, "sidebar": sidebar, "request": request},
         )
 
 

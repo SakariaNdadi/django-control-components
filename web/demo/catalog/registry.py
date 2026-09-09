@@ -7,10 +7,10 @@ contiguous instead of interleaving into one flat alphabetical dump.
 
 from __future__ import annotations
 
-from .examples import actions, blocks, infolists, schemas, tables, ui, widgets
+from .examples import actions, blocks, infolists, nav, schemas, tables, ui, widgets
 from .page import FAMILY_ORDER, ComponentPageSpec, component_page
 
-_FAMILY_MODULES = (ui, schemas, tables, infolists, widgets, actions, blocks)
+_FAMILY_MODULES = (ui, schemas, tables, infolists, widgets, actions, nav, blocks)
 
 ALL_SPECS: list[ComponentPageSpec] = sorted(
     (spec for module in _FAMILY_MODULES for spec in module.PAGES),

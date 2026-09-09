@@ -426,5 +426,6 @@ Every component accepts either fluent chaining `.make().foo()` or explicit `kwar
 | [no-code.md](no-code.md) | Studio JSON schema definitions *(dev-only, `[studio]` extra)* |
 | [deployment.md](deployment.md) | Static files, WhiteNoise, CSP, air-gapped assets, `DEBUG=False` checklist |
 | [testing.md](testing.md) | Testing schemas, tables, mixin views, actions; `@override_settings(DCC=...)` |
+| [navigation.md](navigation.md) | Sidebar + nav blocks (`NavLink`, collapsible `NavGroup`, `NavUser`), the `dccNav` collapse contract, a11y |
 | [../CHANGELOG.md](../CHANGELOG.md) | Release notes; `0.x` breaking-change policy |
 

@@ -457,6 +457,35 @@
 
     // Panel shell: mobile nav drawer + a persisted colour-theme toggle that
     // writes data-theme onto <html> (dcc.css keys its dark palette off it).
+    // One collapsible sidebar group. `x-data="dccNav('<group-id>')"` on the
+    // <li>; the initial state is `data-default-open` unless the viewer has
+    // toggled this group before (persisted under `dcc-nav-open`).
+    window.Alpine.data("dccNav", (id) => ({
+      _open: false,
+      init() {
+        let stored = null;
+        try {
+          stored = JSON.parse(localStorage.getItem("dcc-nav-open") || "{}")[id];
+        } catch (e) {
+          /* no storage */
+        }
+        this._open = stored != null ? !!stored : this.$el.dataset.defaultOpen === "1";
+      },
+      isOpen() {
+        return this._open;
+      },
+      toggle() {
+        this._open = !this._open;
+        try {
+          const m = JSON.parse(localStorage.getItem("dcc-nav-open") || "{}");
+          m[id] = this._open;
+          localStorage.setItem("dcc-nav-open", JSON.stringify(m));
+        } catch (e) {
+          /* no storage */
+        }
+      },
+    }));
+
     window.Alpine.data("dccShell", () => ({
       navOpen: false,
       theme: "auto",

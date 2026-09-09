@@ -92,10 +92,22 @@ def test_appshell_default_shell_matches_panels_base_html(soup):
     from django_control_components.panels import Panel
 
     panel = Panel("parity").path("parity")
+    from django.test import RequestFactory
+
+    from django_control_components.panels.nav import sidebar_from_tree
+
+    request = RequestFactory().get("/parity/")
+    request.user = None
     base = soup(
         render_to_string(
             "django_control_components/panels/base.html",
-            {"panel": panel, "nav_tree": [], "resource_label": "X", "nav": []},
+            {
+                "panel": panel,
+                "nav_tree": [],
+                "sidebar": sidebar_from_tree(panel, [], request, footer=False),
+                "resource_label": "X",
+                "nav": [],
+            },
         )
     )
     base_panel = base.select_one(".dcc-panel")

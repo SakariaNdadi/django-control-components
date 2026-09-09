@@ -72,6 +72,7 @@ FAMILY_LABELS: dict[str, str] = {
     "widgets": "Widgets",
     "actions": "Actions",
     "wizards": "Wizards",
+    "nav": "Navigation",
     "blocks": "Blocks",
 }
 FAMILY_ORDER: list[str] = list(FAMILY_LABELS)

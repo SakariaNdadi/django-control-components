@@ -484,6 +484,18 @@
 }
 .dcc-home__card a { align-self: flex-start; }
 
+/* ---- nav-block catalog previews: unpin the Sidebar so it sits in the card */
+.dcc-democard__preview .dcc-panel__nav {
+  position: static;
+  width: 17rem;
+  max-width: 100%;
+  min-height: 0;
+  border: 1px solid var(--dcc-border);
+  border-inline-end: 1px solid var(--dcc-border);
+  border-radius: var(--dcc-radius);
+  background: var(--dcc-bg);
+}
+
 /* ======================================================== reduced motion */
 
 @media (prefers-reduced-motion: reduce) {

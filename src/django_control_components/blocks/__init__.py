@@ -12,25 +12,41 @@ from ..core.type_registry import TypeRegistry
 from .base import Block
 from .chrome import AppShell, Footer, Navbar, NotificationBell, Sidebar
 from .layout import Card, Column, Divider, Grid, Row, Spacer, Stack
+from .nav import (
+    NavAction,
+    NavDivider,
+    NavGroup,
+    NavHeading,
+    NavLink,
+    NavUser,
+    ThemeToggle,
+)
 
 BLOCK_TYPES: TypeRegistry[Block] = TypeRegistry("block")
 
-for _cls, _label, _icon, _slots in (
-    (Stack, "Stack", "bars-staggered", ("default",)),
-    (Row, "Row", "grip-lines-vertical", ("default",)),
-    (Grid, "Grid", "table-cells", ("default",)),
-    (Column, "Column", "table-columns", ("default",)),
-    (Card, "Card", "square", ("header", "body", "footer")),
-    (Divider, "Divider", "minus", ()),
-    (Spacer, "Spacer", "up-down", ()),
-    (AppShell, "App shell", "window-maximize", ("topbar", "sidebar", "content", "footer")),
-    (Navbar, "Navbar", "window-minimize", ("start", "end")),
-    (Sidebar, "Sidebar", "table-columns", ("default",)),
-    (Footer, "Footer", "window-minimize", ("default",)),
-    (NotificationBell, "Notification bell", "bell", ()),
+for _cls, _label, _icon, _cat, _slots in (
+    (Stack, "Stack", "bars-staggered", "block", ("default",)),
+    (Row, "Row", "grip-lines-vertical", "block", ("default",)),
+    (Grid, "Grid", "table-cells", "block", ("default",)),
+    (Column, "Column", "table-columns", "block", ("default",)),
+    (Card, "Card", "square", "block", ("header", "body", "footer")),
+    (Divider, "Divider", "minus", "block", ()),
+    (Spacer, "Spacer", "up-down", "block", ()),
+    (AppShell, "App shell", "window-maximize", "block", ("topbar", "sidebar", "content", "footer")),
+    (Navbar, "Navbar", "window-minimize", "block", ("start", "end")),
+    (Sidebar, "Sidebar", "table-columns", "block", ("default", "footer")),
+    (Footer, "Footer", "window-minimize", "block", ("default",)),
+    (NotificationBell, "Notification bell", "bell", "block", ()),
+    (NavLink, "Nav link", "link", "nav", ()),
+    (NavGroup, "Nav group", "folder-tree", "nav", ("default",)),
+    (NavHeading, "Nav heading", "heading", "nav", ()),
+    (NavDivider, "Nav divider", "minus", "nav", ()),
+    (NavAction, "Nav action", "plus", "nav", ()),
+    (NavUser, "Nav user", "user", "nav", ()),
+    (ThemeToggle, "Theme toggle", "circle-half-stroke", "nav", ()),
 ):
     BLOCK_TYPES.register(
-        _cls, label=_label, icon=_icon, category="block", accepts_children=bool(_slots)
+        _cls, label=_label, icon=_icon, category=_cat, accepts_children=bool(_slots)
     )
 
 
@@ -73,11 +89,18 @@ __all__ = [
     "Divider",
     "Footer",
     "Grid",
+    "NavAction",
+    "NavDivider",
+    "NavGroup",
+    "NavHeading",
+    "NavLink",
+    "NavUser",
     "Navbar",
     "NotificationBell",
     "Row",
     "Sidebar",
     "Spacer",
     "Stack",
+    "ThemeToggle",
     "block",
 ]

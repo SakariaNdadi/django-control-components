@@ -1,5 +1,10 @@
 {% load dcc_tags %}
 <nav class="dcc-panel__nav" id="dcc-nav" aria-label="Sidebar">
-  {% if brand %}<div class="dcc-panel__brand">{% if brand_icon %}{% dcc_icon brand_icon %}{% endif %}<strong>{{ brand }}</strong></div>{% endif %}
+  {% if brand %}
+    {% if brand_url %}<a class="dcc-panel__brand" href="{{ brand_url }}">{% else %}<div class="dcc-panel__brand">{% endif %}
+      {% if brand_icon %}{% dcc_icon brand_icon %}{% endif %}<strong>{{ brand }}</strong>
+    {% if brand_url %}</a>{% else %}</div>{% endif %}
+  {% endif %}
   <ul class="dcc-nav">{{ slots.default }}</ul>
+  {% if slots.footer %}<div class="dcc-panel__navfoot">{{ slots.footer }}</div>{% endif %}
 </nav>

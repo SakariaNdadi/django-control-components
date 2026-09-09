@@ -1,0 +1,16 @@
+{% load dcc_tags %}
+<li class="dcc-nav__group"
+    data-default-open="{{ default_open|yesno:'1,0' }}"
+    x-data="dccNav('{{ group_id }}')">
+  <button type="button" class="dcc-nav__grouptoggle"
+          @click="toggle()" x-bind:aria-expanded="isOpen() ? 'true' : 'false'"
+          aria-controls="{{ group_id }}-list">
+    {% if icon_html %}<span class="dcc-nav__icon" aria-hidden="true">{{ icon_html }}</span>{% endif %}
+    <span class="dcc-nav__text">{{ label }}</span>
+    <span class="dcc-nav__chevron" aria-hidden="true">{% dcc_icon "chevron-down" %}</span>
+  </button>
+  <ul class="dcc-nav__sublist" id="{{ group_id }}-list" role="group"
+      x-show="isOpen()" x-cloak x-transition.opacity>
+    {{ slots.default }}
+  </ul>
+</li>

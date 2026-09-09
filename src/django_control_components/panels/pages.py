@@ -49,12 +49,13 @@ class PanelPage(TemplateView):
         return super().dispatch(request, *args, **kwargs)
 
     def get_context_data(self, **kwargs: Any) -> dict[str, Any]:
-        from .nav import build_nav
+        from .nav import build_nav, panel_sidebar
 
         ctx = super().get_context_data(**kwargs)
         ctx["panel"] = self.panel
         ctx["nav"] = self.panel.navigation(self.request)
         ctx["nav_tree"] = build_nav(self.panel, self.request)
+        ctx["sidebar"] = panel_sidebar(self.panel, self.request)
         ctx["resource_label"] = self.nav_label or self.slug.title() or "Dashboard"
         return ctx
 
@@ -127,13 +128,14 @@ class _ResourcePage(TemplateView):
         return reverse(f"{self.panel.namespace}:{self.resource.slug()}-{name}", kwargs=kwargs)
 
     def get_context_data(self, **kwargs: Any) -> dict[str, Any]:
-        from .nav import build_nav
+        from .nav import build_nav, panel_sidebar
 
         ctx = super().get_context_data(**kwargs)
         ctx["panel"] = self.panel
         ctx["resource_label"] = self.resource.label()
         ctx["nav"] = self.panel.navigation(self.request)
         ctx["nav_tree"] = build_nav(self.panel, self.request)
+        ctx["sidebar"] = panel_sidebar(self.panel, self.request)
         return ctx
 
 

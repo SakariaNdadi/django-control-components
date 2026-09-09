@@ -1,0 +1,19 @@
+{% load dcc_tags %}
+<div class="dcc-nav__user" x-data="{ open: false }" @keydown.escape="open = false" @click.outside="open = false">
+  <button type="button" class="dcc-nav__usercard" @click="open = !open"
+          x-bind:aria-expanded="open ? 'true' : 'false'">
+    {% if avatar %}<img class="dcc-nav__useravatar" src="{{ avatar }}" alt="">{% else %}<span class="dcc-nav__useravatar dcc-nav__useravatar--blank" aria-hidden="true">{% dcc_icon "user" %}</span>{% endif %}
+    <span class="dcc-nav__userinfo">
+      <strong>{{ label }}</strong>
+      {% if email %}<span class="dcc-nav__useremail">{{ email }}</span>{% endif %}
+    </span>
+    {% if menu %}<span class="dcc-nav__chevron" aria-hidden="true">{% dcc_icon "chevron-up" %}</span>{% endif %}
+  </button>
+  {% if menu %}
+  <ul class="dcc-nav__usermenu" role="menu" x-show="open" x-cloak x-trap="open" x-transition.opacity>
+    {% for item in menu %}
+    <li role="none"><a class="dcc-nav__usermenuitem" role="menuitem" href="{{ item.url|default:'#' }}">{{ item.label }}</a></li>
+    {% endfor %}
+  </ul>
+  {% endif %}
+</div>

@@ -53,10 +53,12 @@ class Navbar(Block):
 
 
 class Sidebar(Block):
-    """A vertical nav column. Holds nav-link blocks (or anything) in ``default``;
-    a full nav-tree data source arrives with the ``Page`` model."""
+    """A vertical nav column. ``default`` holds the scrolling nav list (nav
+    blocks - ``NavLink`` / ``NavGroup`` / ``NavHeading`` / ``NavDivider`` /
+    ``NavAction``); ``footer`` is pinned to the bottom (a ``ThemeToggle``, a
+    ``NavUser`` card, help links)."""
 
-    slots = ("default",)
+    slots = ("default", "footer")
     template_name = "django_control_components/blocks/sidebar.html"
 
     @setter
@@ -67,10 +69,24 @@ class Sidebar(Block):
     def brand_icon(self, value: str) -> Self:
         return self._set("brand_icon", value)
 
+    @setter
+    def brand_url(self, value: str) -> Self:
+        """A URL path or URL name - the brand becomes a link."""
+        return self._set("brand_url", value)
+
     def get_view_data(self, ctx: RenderContext) -> dict[str, Any]:
+        from django.urls import NoReverseMatch, reverse
+
         data = super().get_view_data(ctx)
         data["brand"] = self._config.get("brand", "")
         data["brand_icon"] = self._config.get("brand_icon", "")
+        raw = str(self._config.get("brand_url", "") or "")
+        if raw and not raw.startswith(("/", "#", "http://", "https://")):
+            try:
+                raw = reverse(raw)
+            except NoReverseMatch:
+                raw = ""
+        data["brand_url"] = raw
         return data
 
 
