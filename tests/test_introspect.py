@@ -96,6 +96,6 @@ def test_validate_spec_accepts_a_clean_spec():
 
 def test_group_model_is_never_pickable(rf, django_user_model):
     root = django_user_model.objects.create_superuser("root2", "r2@x.io", "x")
-    assert Group  # imported for clarity
+    assert Group is not None  # imported for clarity
     labels = {row["label"] for row in installed_models(_request(root))}
     assert "auth.group" not in labels

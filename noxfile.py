@@ -119,10 +119,12 @@ def packaging(session: nox.Session) -> None:
         "studio=[w for w in glob.glob('dist/*.whl') if 'studio' in w][-1];"
         "cn=zipfile.ZipFile(core).namelist();"
         "sn=zipfile.ZipFile(studio).namelist();"
-        "want=['django_control_components/templates/','django_control_components/static/dcc/dcc.css'];"
+        "want=['django_control_components/templates/','django_control_components/static/dcc/dcc.css',"
+        "'django_control_components/py.typed'];"
         "missing=[x for x in want if not any(e.startswith(x) or e==x for e in cn)];"
         "missing+=['studio/ leaked into core wheel'] if any('/studio/' in e for e in cn) else [];"
         "missing+=['studio wheel missing templates'] if not any('studio/templates/' in e for e in sn) else [];"
+        "missing+=['studio wheel missing py.typed'] if 'django_control_components/studio/py.typed' not in sn else [];"
         "missing+=['studio wheel ships __init__.py'] if 'django_control_components/__init__.py' in sn else [];"
         "sys.exit('packaging check failed: '+str(missing) if missing else 0)",
     )

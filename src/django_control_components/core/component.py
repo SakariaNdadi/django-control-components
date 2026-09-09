@@ -37,8 +37,12 @@ class Unset:
 UNSET = Unset()
 
 
-def setter(method: Callable[..., Any]) -> Callable[..., Any]:
-    """Mark a method as a fluent setter usable as a constructor kwarg."""
+def setter[F: Callable[..., Any]](method: F) -> F:
+    """Mark a method as a fluent setter usable as a constructor kwarg.
+
+    Preserves the method's own signature (``-> Self``, argument types), so
+    ``TextInput.make("e").label("x")`` type-checks and a typo or a wrong
+    argument type is caught."""
     method.__dcc_setter__ = True  # type: ignore[attr-defined]
     return method
 

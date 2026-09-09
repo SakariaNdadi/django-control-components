@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from collections.abc import Sequence
 from typing import Any, Self
 
 from django.utils.safestring import SafeString
@@ -27,7 +28,7 @@ class Menu(Component):
         return self._set("icon", value)
 
     @setter
-    def items(self, value: list[SafeString | str]) -> Self:
+    def items(self, value: Sequence[SafeString | str]) -> Self:
         return self._set("items", list(value))
 
     @setter

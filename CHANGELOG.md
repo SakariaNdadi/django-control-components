@@ -8,6 +8,26 @@ All notable changes to this project are documented here. Format loosely follows
 
 Renamed and re-versioned release of the rebuild described under `1.0.0b1` below.
 
+### Fixed
+
+- **The fluent API is now type-checked.** `@setter` preserved the method's own
+  signature instead of collapsing it to `Any`, so `.label(x)` and everything
+  after the first chained call had no autocomplete and no argument checking.
+  `TextInput.make("e").label(123)` and a setter-name typo are now `mypy` errors.
+- **`py.typed` ships in both distributions** - consumers get the type
+  information the packages carry; the `Typing :: Typed` classifier is no longer
+  a false claim.
+- **`clone()` no longer aliases `Block` slots.** Cloning a `Card`, `AppShell`
+  or any block and mutating the copy's slots left the original changed. A
+  `_clone_state()` hook deep-copies the slot tree.
+- **The no-code studio shows the config inputs for every form field again.**
+  `describe()` marked `label` / `placeholder` / `required` / ... `code_only`
+  because a `TYPE_CHECKING`-only import made signature introspection fail, and
+  the builder hides `code_only` setters. Spec-safety is now decided by setter
+  name alone.
+- `packages/studio/LICENSE` names its copyright holder (it was `Copyright (c)
+  2024` with no name).
+
 ### Security
 
 - **Component ids are sanitised to `[A-Za-z0-9_-]`.** `Widget.id(...)` and

@@ -3,6 +3,8 @@ things a generic SAST scanner will not catch."""
 
 from __future__ import annotations
 
+from typing import Any
+
 import pytest
 from django.http import Http404
 
@@ -219,14 +221,14 @@ def test_action_scope_is_rebuilt_per_request_not_taken_from_the_last_render():
     Article.objects.create(title="B-secret", slug="b1", status="draft", author=a2)
     hit: list[str] = []
 
-    def user(author: Author) -> object:
-        return type(
-            "U",
-            (),
-            {"is_authenticated": True, "author_id": author.pk, "has_perm": lambda s, *a, **k: True},
-        )()
+    from types import SimpleNamespace
 
-    def table_for(request: object) -> Table:
+    def user(author: Author) -> Any:
+        return SimpleNamespace(
+            is_authenticated=True, author_id=author.pk, has_perm=lambda *a, **k: True
+        )
+
+    def table_for(request: Any) -> Table:
         # tenant scoping keyed off the request's user, exactly like a Resource
         # whose get_queryset filters by request.user
         qs = Article.objects.filter(author_id=request.user.author_id)
