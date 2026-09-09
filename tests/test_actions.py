@@ -59,10 +59,9 @@ def test_registered_factory_wins_over_a_later_bare_render(data, recwarn):
     seen: list = []
 
     def factory(request):
-        return (
-            _table(Article.objects.all(), actions=[Action.make("t").action(seen.append)])
-            .set_owner_factory(factory)
-        )
+        return _table(
+            Article.objects.all(), actions=[Action.make("t").action(seen.append)]
+        ).set_owner_factory(factory)
 
     registry.register("table-art", factory)
     recwarn.clear()
@@ -135,9 +134,7 @@ def test_anonymous_post_runs_when_the_action_authorizes_it(data):
     the baseline only refuses anonymous on an *unruled* action."""
     ran = []
     action = (
-        Action.make("touch")
-        .authorize(lambda: True)
-        .action(lambda record: ran.append(record.pk))
+        Action.make("touch").authorize(lambda: True).action(lambda record: ran.append(record.pk))
     )
     _table(Article.objects.all(), actions=[action]).render(RequestFactory().get("/"))
 

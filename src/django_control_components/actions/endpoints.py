@@ -17,9 +17,7 @@ class ActionView(View):
     POST -> authorize (again), re-scope targets to the owner's queryset, execute.
     """
 
-    def _resolve(
-        self, request: HttpRequest, owner_key: str, action_name: str
-    ) -> tuple[Any, Any]:
+    def _resolve(self, request: HttpRequest, owner_key: str, action_name: str) -> tuple[Any, Any]:
         found = registry.resolve(owner_key, action_name, request)
         if found is None:
             raise Http404("Unknown action")

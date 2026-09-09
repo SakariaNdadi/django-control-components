@@ -40,8 +40,7 @@ class Block(Component):
         # alias the slot dict and its lists, so mutating a clone's slot would
         # mutate the original's.
         self._slots = {
-            slot: [child.clone() for child in children]
-            for slot, children in self._slots.items()
+            slot: [child.clone() for child in children] for slot, children in self._slots.items()
         }
 
     def fill(self, slot: str, children: list[Block]) -> Self:

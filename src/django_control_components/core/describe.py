@@ -142,11 +142,7 @@ def _classify(annotation: Any) -> tuple[SetterKind, tuple[tuple[str, str], ...] 
 
     origin = get_origin(annotation)
     if origin in _UNION_TYPES:
-        arms = [
-            a
-            for a in get_args(annotation)
-            if a is not type(None) and not _is_callable_arg(a)
-        ]
+        arms = [a for a in get_args(annotation) if a is not type(None) and not _is_callable_arg(a)]
         if not arms:  # the setter only takes a closure - no widget to render
             return "unknown", None
         kinds = {_classify(a)[0] for a in arms}
