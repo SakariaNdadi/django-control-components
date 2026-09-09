@@ -10,6 +10,7 @@ from .pages.home import HomePage
 from .pages.installation import InstallationPage
 from .pages.panels_resources import PanelsResourcesPage
 from .pages.quickstart import QuickstartPage
+from .pages.reference import reference_pages
 from .pages.wizards import WizardsPage
 
 docs_panel = (
@@ -27,6 +28,7 @@ docs_panel = (
             *PAGES_BEFORE_BLOCKS,
             WizardsPage,
             *PAGES_BLOCKS,
+            *reference_pages(),
         ]
     )
 )

@@ -16,7 +16,7 @@ from django_control_components.tables import (
 )
 
 from ...models import Task
-from ..page import ComponentExample, ComponentPageSpec
+from ..page import ComponentExample, ComponentPageSpec, demo_authorize
 
 
 def _mark_done(record):
@@ -73,7 +73,14 @@ TABLE = ComponentPageSpec(
                     ]
                 )
                 .filters([SelectFilter.make("priority").options(Task.Priority.choices)])
-                .actions([Action.make("mark_done").icon("check").action(_mark_done)])
+                .actions(
+                    [
+                        Action.make("mark_done")
+                        .icon("check")
+                        .action(_mark_done)
+                        .authorize(demo_authorize)
+                    ]
+                )
                 .default_sort("-due_date")
                 .searchable()
             ),

@@ -57,6 +57,16 @@ def _setters_prose(rows: list[tuple[str, str, str]]) -> Prose:
     return Prose().html(str(body))
 
 
+def demo_authorize() -> bool:
+    """Every runnable action in this catalog is deliberately open - the demo has
+    no login, the same reason ``TaskResource.can()`` returns ``True``.
+    ``ActionView`` refuses anonymous requests unless the action authorizes them,
+    so without this the catalog's action buttons would 403 for every visitor. A
+    real app passes a permission string or a real predicate; see
+    ``docs/permissions.md``."""
+    return True
+
+
 @dataclass(frozen=True)
 class ComponentExample:
     """One runnable snippet for a component page.

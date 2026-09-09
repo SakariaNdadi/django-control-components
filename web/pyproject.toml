@@ -5,6 +5,7 @@ description = "The django-control-components website and live documentation demo
 requires-python = ">=3.12"
 dependencies = [
     "django-control-components[wizard,images]",
+    "markdown>=3.7",
 ]
 
 [tool.uv]
