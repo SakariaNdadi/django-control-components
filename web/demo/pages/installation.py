@@ -4,6 +4,7 @@ from ._base import ProsePage
 
 
 class InstallationPage(ProsePage):
+    template_name = "demo/pages/installation.html"
     slug = "installation"
     nav_label = "Installation"
     nav_icon = "download"

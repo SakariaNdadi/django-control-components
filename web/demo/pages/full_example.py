@@ -115,6 +115,7 @@ class TaskResource(Resource):
 
 
 class FullExamplePage(ProsePage):
+    template_name = "demo/pages/full_example.html"
     slug = "full-example"
     nav_label = "Full example"
     nav_icon = "diagram-project"

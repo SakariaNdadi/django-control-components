@@ -5,6 +5,7 @@ from .wizard_demo import LiveWizardDemoView
 
 
 class WizardsPage(ProsePage):
+    template_name = "demo/pages/wizards.html"
     slug = "wizards"
     nav_label = "Wizard View"
     nav_icon = "list-ol"

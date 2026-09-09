@@ -8,9 +8,10 @@ from django_control_components.panels import PanelPage
 
 class ProsePage(PanelPage):
     """A demo page whose frame is a :class:`PageShell` block and whose body is
-    authored HTML in a ``{% block prose %}`` (``demo/pages/_prose.html``)."""
+    authored HTML in a ``{% block prose %}`` template that extends
+    ``demo/pages/_prose.html``. Subclasses **must** set ``template_name`` to
+    that child template."""
 
-    template_name = "demo/pages/_prose.html"
     page_header: bool = True
     page_eyebrow: str = ""
     page_title: str = ""

@@ -176,3 +176,41 @@ def test_prose_html_is_code_only():
     from django_control_components.core.describe import CODE_ONLY_SETTERS
 
     assert "html" in CODE_ONLY_SETTERS
+
+
+def test_nav_group_sublist_has_no_x_cloak(soup):
+    # progressive enhancement: the sublist renders visible; Alpine collapses
+    # closed groups. x-cloak would hide it forever if Alpine never loads.
+    html = str(
+        NavGroup().label("G").fill("default", [NavLink().label("a").to("/a/")]).render(_ctx())
+    )
+    assert "dcc-nav__sublist" in html
+    assert "x-cloak" not in html.split("dcc-nav__sublist", 1)[1].split(">", 1)[0]
+
+
+def test_panel_sidebar_starts_every_group_open(soup, django_user_model):
+    from django_control_components.panels import Panel
+    from django_control_components.panels.nav import panel_sidebar
+    from django_control_components.panels.resource import Resource
+    from tests.testapp.models import Article
+
+    class R(Resource):
+        model = Article
+        navigation_group = "Content"
+
+    panel = Panel("navo").path("navo").resources([R])
+
+    class _C:
+        urlpatterns = [panel.mount()]
+
+    import sys
+
+    sys.modules[__name__ + "_o"] = _C
+    req = RequestFactory().get("/navo/article/")
+    req.user = django_user_model.objects.create_superuser("no", "no@x.io", "x")
+    from django.test import override_settings
+
+    with override_settings(ROOT_URLCONF=__name__ + "_o"):
+        doc = soup(str(panel_sidebar(panel, req).render(RenderContext(request=req))))
+    groups = doc.select("li.dcc-nav__group")
+    assert groups and all(g["data-default-open"] == "1" for g in groups)

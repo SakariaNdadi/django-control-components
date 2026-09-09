@@ -4,6 +4,7 @@ from ._base import ProsePage
 
 
 class QuickstartPage(ProsePage):
+    template_name = "demo/pages/quickstart.html"
     slug = "quickstart"
     nav_label = "Quickstart"
     nav_icon = "bolt"

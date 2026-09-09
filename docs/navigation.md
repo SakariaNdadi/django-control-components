@@ -60,8 +60,45 @@ No `@alpinejs/collapse` plugin is used - the sublist toggles with `x-show` +
 
 ## The panel sidebar
 
-A panel author changes nothing - `Resource.navigation_group` /
-`PanelPage.nav_group` / `navigation_icon` still declare the tree. `panels/nav.py`
-turns that tree into `NavGroup` / `NavLink` blocks (every section collapsible),
-adds a footer with the theme toggle and - when signed in - a `NavUser` card, and
-`panels/_nav.html` renders it with `{% dcc_render sidebar %}`.
+### How it is on every page
+
+`panels/base.html` (the shell every panel page extends) does
+`{% include "django_control_components/panels/_nav.html" %}`, and that partial is
+just `{% dcc_render sidebar %}`. Both context-data hooks -
+`PanelPage.get_context_data` (dashboards, custom pages) and `_ResourcePage`'s
+(list / create / edit / view / delete) - set
+`ctx["sidebar"] = panel_sidebar(self.panel, self.request)`
+(`panels/nav.py`). So a resource page, a dashboard, a custom `PanelPage` and the
+studio nav preview all render the identical sidebar with no per-page code.
+
+If you shadow `panels/base.html` in your own project, keep the
+`{% include ".../_nav.html" %}` (or call `{% dcc_render sidebar %}` yourself) and
+nothing else changes.
+
+### Where the tree comes from - and permissions
+
+`panel_sidebar` calls `build_nav(panel, request)`, which is **already
+access-filtered** before any block is built:
+
+- a code `Resource` entry is included only if `resource.can(request, "view")`
+  is true (`panels/nav.py::_can_view_resource`);
+- a stored `NavItem` is included only if `row.is_visible_to(user)` - the
+  three-state `Visibility` (`public` / `auth` / `restricted`) plus
+  `required_permission` and the `users` / groups grants;
+- a studio spec / dashboard entry checks `DynamicResource.for_spec(spec).can(...)`.
+
+`NavLink` and `NavGroup` themselves carry **no** authorization logic - by the
+time the tree reaches them every hidden item is already gone. A blocked resource
+still 403s if its URL is hit directly; the sidebar just doesn't advertise it.
+
+### What the author declares
+
+Unchanged: `Resource.navigation_group` / `navigation_icon`,
+`PanelPage.nav_group` / `nav_icon` / `nav_label`. `panels/nav.py::nav_blocks`
+turns each heading-with-children into a `NavGroup` (all start expanded; `dccNav`
+persists any the viewer collapses), each bare item into a `NavLink`, and adds a
+footer with a `ThemeToggle` and - when signed in - a `NavUser` card.
+
+The sidebar can be collapsed to an icon rail (the `«` button, desktop) -
+`dccShell.railed`, persisted to `localStorage`. It scrolls within itself
+(`position: sticky; height: 100vh` on desktop, drawer on mobile).

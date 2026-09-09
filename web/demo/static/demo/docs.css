@@ -80,16 +80,6 @@
   --dcc-docs-family-blocks: #a78bfa;
 }
 
-/* ============================================================ layout === */
-
-/* Sidebar: pin to the viewport so it scrolls itself. `.dcc-panel` is a row
- * flex with default stretch; once the main column is taller than the
- * viewport the nav stretches to match and its own overflow never engages.
- * A sticky, viewport-tall nav fixes that without touching dcc.css. */
-@media (min-width: 48.0625rem) {
-  .dcc-panel__nav { position: sticky; top: 0; height: 100vh; }
-}
-
 /* ===================================================== sidebar chrome === */
 
 .dcc-panel__brand { color: var(--dcc-docs-accent); font-weight: 700; }

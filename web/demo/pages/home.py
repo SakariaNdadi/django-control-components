@@ -4,6 +4,7 @@ from ._base import ProsePage
 
 
 class HomePage(ProsePage):
+    template_name = "demo/pages/home.html"
     slug = ""
     nav_label = "Home"
     nav_icon = "house"

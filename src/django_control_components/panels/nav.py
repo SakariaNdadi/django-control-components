@@ -226,10 +226,9 @@ def nav_blocks(nodes: list[NavNode]) -> list[Any]:
     for node in nodes:
         if node.is_heading:
             children = [_nav_link(child) for child in node.children]
-            group = NavGroup().label(node.label)
-            group.fill("default", children)
-            if any(child.active for child in node.children):
-                group.open()
+            # every section starts expanded (so the nav is fully usable with no
+            # JS); dccNav persists any group the viewer collapses
+            group = NavGroup().label(node.label).open().fill("default", children)
             out.append(group)
         else:
             out.append(_nav_link(node))

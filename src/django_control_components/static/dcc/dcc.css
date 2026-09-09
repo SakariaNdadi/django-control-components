@@ -467,12 +467,47 @@
   background: var(--dcc-surface);
   display: flex;
   flex-direction: column;
-  gap: 0.75rem;
+  gap: 0.5rem;
+  transition: width 0.15s ease;
+}
+/* Pin the nav to the viewport so it scrolls itself (`.dcc-nav` has
+   `overflow-y:auto`); without this the flex row stretches the nav to the
+   content's height and its own scrollbar never engages. Desktop only - on
+   mobile the nav is a fixed drawer. */
+@media (min-width: 48.0625rem) {
+  .dcc-panel__nav { position: sticky; top: 0; height: 100vh; }
 }
 .dcc-panel__brand {
   display: flex; align-items: center; gap: 0.5rem;
   color: var(--dcc-fg); text-decoration: none;
   padding: 0.25rem 0.5rem; font-size: 1.0625rem;
+  white-space: nowrap; overflow: hidden;
+}
+.dcc-panel__railtoggle {
+  align-self: flex-end;
+  border: 1px solid var(--dcc-border); background: var(--dcc-bg); color: var(--dcc-muted);
+  border-radius: var(--dcc-radius); width: 1.6rem; height: 1.6rem; cursor: pointer;
+  display: none; line-height: 1;
+}
+@media (min-width: 48.0625rem) { .dcc-panel__railtoggle { display: inline-flex; align-items: center; justify-content: center; } }
+.dcc-panel__railtoggle:focus-visible { outline: 2px solid var(--dcc-focus); }
+
+/* railed (collapsed) sidebar - icons only, desktop only */
+@media (min-width: 48.0625rem) {
+  .dcc-panel.is-railed .dcc-panel__nav { width: 3.75rem; padding-inline: 0.4rem; }
+  .dcc-panel.is-railed .dcc-nav__text,
+  .dcc-panel.is-railed .dcc-nav__chevron,
+  .dcc-panel.is-railed .dcc-nav__badge,
+  .dcc-panel.is-railed .dcc-nav__heading,
+  .dcc-panel.is-railed .dcc-panel__brand strong,
+  .dcc-panel.is-railed .dcc-nav__userinfo,
+  .dcc-panel.is-railed .dcc-nav__theme,
+  .dcc-panel.is-railed .dcc-nav__useremail { display: none; }
+  .dcc-panel.is-railed .dcc-nav__sublist { padding-inline-start: 0; }
+  .dcc-panel.is-railed .dcc-nav__link,
+  .dcc-panel.is-railed .dcc-nav__grouptoggle,
+  .dcc-panel.is-railed .dcc-nav__usercard { justify-content: center; }
+  .dcc-panel.is-railed .dcc-panel__railtoggle { align-self: center; }
 }
 .dcc-nav, .dcc-nav__sublist {
   list-style: none; margin: 0; padding: 0;

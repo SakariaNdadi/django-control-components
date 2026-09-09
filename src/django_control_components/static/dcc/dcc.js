@@ -488,10 +488,12 @@
 
     window.Alpine.data("dccShell", () => ({
       navOpen: false,
+      railed: false,
       theme: "auto",
       init() {
         try {
           this.theme = localStorage.getItem("dcc-theme") || "auto";
+          this.railed = localStorage.getItem("dcc-nav-railed") === "1";
         } catch (e) {
           this.theme = "auto";
         }
@@ -499,6 +501,14 @@
         this.$watch("navOpen", (open) => {
           document.body.classList.toggle("dcc-no-scroll", open);
         });
+      },
+      toggleRail() {
+        this.railed = !this.railed;
+        try {
+          localStorage.setItem("dcc-nav-railed", this.railed ? "1" : "0");
+        } catch (e) {
+          /* no storage */
+        }
       },
       applyTheme() {
         const root = document.documentElement;

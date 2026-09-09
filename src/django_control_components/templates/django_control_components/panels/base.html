@@ -8,7 +8,7 @@
   {% dcc_assets %}
 </head>
 <body class="dcc-body">
-  <div class="dcc-panel" x-data="dccShell()" :class="{ 'is-nav-open': navOpen }">
+  <div class="dcc-panel" x-data="dccShell()" :class="{ 'is-nav-open': navOpen, 'is-railed': railed }">
     <button type="button" class="dcc-panel__navtoggle" aria-label="Toggle navigation" @click="navOpen = !navOpen">
       {% dcc_icon "bars" %}
     </button>

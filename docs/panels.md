@@ -175,8 +175,11 @@ panel pages into your own chrome:
 ```
 
 The list/create/edit/view templates fill `{% block content %}`; context gives you
-`panel`, `resource_label`, `nav` (a list of `{label, url, icon, group}`), and -
-per page - `table_html`, `schema_html`, or `infolist_html`.
+`panel`, `resource_label`, `sidebar` (a rendered `Sidebar` block - the collapsible
+nav, access-filtered; see [navigation.md](navigation.md)), `nav_tree` /
+`nav` (the same data pre-blocks), and - per page - `table_html`, `schema_html`,
+or `infolist_html`. Keep `{% include ".../panels/_nav.html" %}` (which is just
+`{% dcc_render sidebar %}`) in your shadowed base, or render the sidebar yourself.
 
 A dashboard page is a grid of widgets - see [widgets.md](widgets.md) for
 `StatWidget`, `ChartWidget` (Chart.js), `BarListWidget`, `TableWidget`, custom

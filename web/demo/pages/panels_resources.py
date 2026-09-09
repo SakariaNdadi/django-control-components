@@ -4,6 +4,7 @@ from ._base import ProsePage
 
 
 class PanelsResourcesPage(ProsePage):
+    template_name = "demo/pages/panels_resources.html"
     slug = "panels-and-resources"
     nav_label = "Panels & Resources"
     nav_icon = "table-columns"
