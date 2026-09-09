@@ -1,0 +1,8 @@
+{% extends "django_control_components/panels/base.html" %}
+{% load dcc_tags static %}
+{% block head_extra %}<link rel="stylesheet" href="{% static 'demo/docs.css' %}">{% block prose_head %}{% endblock %}{% endblock %}
+{% block content %}
+{% if page_block %}{% dcc_render page_block %}{% endif %}
+{% block prebody %}{% endblock %}
+<div class="dcc-prose">{% block prose %}{% endblock %}</div>
+{% endblock %}

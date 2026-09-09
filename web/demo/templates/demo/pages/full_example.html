@@ -1,23 +1,14 @@
-{% extends "django_control_components/panels/base.html" %}
-{% load static dcc_tags %}
-{% block head_extra %}<link rel="stylesheet" href="{% static 'demo/docs.css' %}">{% endblock %}
-{% block content %}
-  <header class="dcc-panel__header dcc-docs__pageheader" data-family="panels">
-    <div>
-      <span class="dcc-docs__familybadge" style="background: var(--dcc-docs-family-tables);">panels & resources</span>
-      <h1>Full End-to-End Example: Panels & Resources</h1>
-      <p class="dcc-docs__summary">How entire admin-independent CRUD surfaces and dashboard pages are constructed directly in pure Python using <code>Panel</code>, <code>Resource</code>, and <code>Widget</code> builders - without needing Studio.</p>
-    </div>
-  </header>
-
-  <div class="dcc-docs__prose" style="max-width: 54rem;">
-    <div style="background: var(--dcc-surface); border: 1px solid var(--dcc-border); border-radius: var(--dcc-radius); padding: 1.25rem; margin: 1.5rem 0;">
-      <h3 style="margin-top: 0;">Try the Live Resource</h3>
-      <p style="margin-bottom: 1rem; color: var(--dcc-muted);">The demo app runs this live <code>TaskResource</code> wired to a real SQLite database:</p>
-      <a class="dcc-btn dcc-btn--primary" href="{{ tasks_url }}">{% dcc_icon "list-check" %} Open Live Tasks Resource</a>
-    </div>
-
-    <h2>1. Architecture: Panels & Resources</h2>
+{% extends "demo/pages/_prose.html" %}
+{% load dcc_tags %}
+{% block prebody %}
+  <div class="dcc-democard" style="padding: 1.25rem; margin: 0 0 1.5rem;">
+    <h3 style="margin-top: 0;">Try the live resource</h3>
+    <p style="color: var(--dcc-muted);">The demo runs this <code>TaskResource</code> against a real SQLite db:</p>
+    <a class="dcc-btn dcc-btn--primary" href="{{ tasks_url }}">{% dcc_icon "list-check" %} Open the live Tasks resource</a>
+  </div>
+{% endblock %}
+{% block prose %}
+    <h2>1. Architecture: panels &amp; resources</h2>
     <p>The entire catalog and demo app are defined in Python source code:</p>
     <ul>
       <li><code>Panel</code>: The root routing container and sidebar navigation manager.</li>
@@ -155,6 +146,5 @@ app_panel = (
 urlpatterns = [
     app_panel.mount(),  # Serves /admin-panel/, /admin-panel/tasks/, etc.
 ]</code></pre>
-  </div>
 {% endblock %}
 

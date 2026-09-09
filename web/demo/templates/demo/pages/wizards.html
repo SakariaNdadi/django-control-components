@@ -1,25 +1,16 @@
-{% extends "django_control_components/panels/base.html" %}
-{% load static %}
-{% block head_extra %}<link rel="stylesheet" href="{% static 'demo/docs.css' %}">{% endblock %}
-{% block content %}
-  <header class="dcc-panel__header dcc-docs__pageheader" data-family="wizards">
-    <div>
-      <span class="dcc-docs__familybadge">wizards</span>
-      <h1>Wizard Views & Multi-Step Flows</h1>
-      <p class="dcc-docs__summary">Multi-step forms over <code>django-formtools</code>, with seamless htmx step swapping, back/forward navigation, per-step validation, and review steps.</p>
-    </div>
-  </header>
-  <div class="dcc-docs__prose" style="max-width: 52rem;">
-    {% if live_wizard_html %}
-    <div style="background: var(--dcc-surface); border: 1px solid var(--dcc-border); border-radius: var(--dcc-radius); padding: 1.5rem; margin: 1.5rem 0;">
-      <h3 style="margin-top: 0; margin-bottom: 0.5rem;">Interactive Live Wizard Demo</h3>
-      <p style="color: var(--dcc-muted); font-size: 0.9rem; margin-bottom: 1.25rem;">
-        This is a live, session-backed 3-step wizard with real Django form validation, htmx step swapping, and a review infolist:
-      </p>
-      {{ live_wizard_html|safe }}
-    </div>
-    {% endif %}
-
+{% extends "demo/pages/_prose.html" %}
+{% block prebody %}
+  {% if live_wizard_html %}
+  <div class="dcc-democard" style="padding: 1.5rem; margin: 0 0 1.5rem;">
+    <h3 style="margin-top: 0;">Live 3-step wizard</h3>
+    <p style="color: var(--dcc-muted); font-size: 0.9rem;">
+      Session-backed, real Django validation, htmx step swapping, review infolist:
+    </p>
+    {{ live_wizard_html|safe }}
+  </div>
+  {% endif %}
+{% endblock %}
+{% block prose %}
     <h2>Installation</h2>
     <p>Wizards rely on <code>django-formtools</code> for secure session storage and state handling:</p>
     <pre><code>uv add "django-control-components[wizard]"</code></pre>
@@ -106,5 +97,4 @@ class ProjectCreateWizard(WizardView):
     wizard_attrs = {
         "style": "--dcc-wizard-accent: #4f46e5; --dcc-wizard-radius: 0.75rem;"
     }</code></pre>
-  </div>
 {% endblock %}

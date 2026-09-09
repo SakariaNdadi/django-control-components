@@ -143,3 +143,36 @@ def test_panel_sidebar_groups_the_tree(soup, django_user_model):
     # the active article link sits inside the (auto-opened) group
     assert group["data-default-open"] == "1"
     assert doc.select_one(".dcc-panel__navfoot .dcc-nav__theme") is not None
+
+
+def test_page_shell_generates_header_and_body(soup):
+    from django_control_components.blocks import PageShell, Prose
+
+    shell = (
+        PageShell()
+        .eyebrow("Tables")
+        .title("Badge Column")
+        .summary("A pill.")
+        .accent("#b45309")
+        .fill("content", [Prose().html("<p>hi</p>")])
+    )
+    doc = soup(str(shell.render(_ctx())))
+    assert doc.select_one(".dcc-page__eyebrow").text == "Tables"
+    assert doc.select_one("h1.dcc-page__title").text == "Badge Column"
+    assert "--dcc-page-accent:#b45309" in doc.select_one(".dcc-page__header")["style"]
+    assert doc.select_one(".dcc-page__body .dcc-prose p").text == "hi"
+
+
+def test_page_shell_header_slot_overrides_generated(soup):
+    from django_control_components.blocks import Divider, PageShell
+
+    shell = PageShell().title("X").fill("header", [Divider()]).fill("content", [Divider()])
+    doc = soup(str(shell.render(_ctx())))
+    assert doc.select_one("h1.dcc-page__title") is None
+    assert doc.select_one(".dcc-page__body") is not None
+
+
+def test_prose_html_is_code_only():
+    from django_control_components.core.describe import CODE_ONLY_SETTERS
+
+    assert "html" in CODE_ONLY_SETTERS

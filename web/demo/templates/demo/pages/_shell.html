@@ -1,0 +1,21 @@
+{% extends "django_control_components/panels/base.html" %}
+{% load dcc_tags static %}
+{% block head_extra %}
+  <link rel="stylesheet" href="{% static 'demo/docs.css' %}">
+  {% for asset in widget_assets %}
+  {% if asset.kind == "style" %}<link rel="stylesheet" href="{{ asset.url }}">{% else %}<script defer src="{{ asset.url }}"></script>{% endif %}
+  {% endfor %}
+{% endblock %}
+{% block content %}
+  {% if demos and demos|length > 1 %}
+  <div class="dcc-docs__layout">
+    <div class="dcc-docs__body">{% dcc_render page_block %}</div>
+    <nav class="dcc-docs__onpage" aria-label="On this page">
+      <p class="dcc-docs__onpage-title">On this page</p>
+      <ul>{% for demo in spec.examples %}<li><a href="#{{ demo.title|slugify }}">{{ demo.title }}</a></li>{% endfor %}</ul>
+    </nav>
+  </div>
+  {% else %}
+  {% dcc_render page_block %}
+  {% endif %}
+{% endblock %}

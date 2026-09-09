@@ -605,6 +605,35 @@
   }
   .dcc-panel__main { padding: 3.5rem 1.25rem 2rem; }
 }
+/* ---- page shell + prose (PageShell / Prose blocks) --------------------- */
+.dcc-page__header { border-bottom: 1px solid var(--dcc-border); padding-bottom: 1.25rem; margin-bottom: 2rem; }
+.dcc-page__header { --dcc-page-accent: var(--dcc-primary); }
+.dcc-page__eyebrow {
+  display: inline-block; margin-bottom: 0.6rem;
+  font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em;
+  color: var(--dcc-page-accent);
+}
+.dcc-page__title { margin: 0; font-size: 2rem; font-weight: 800; letter-spacing: -0.02em; }
+.dcc-page__summary { margin: 0.5rem 0 0; max-width: 60ch; color: var(--dcc-muted); font-size: 1.1rem; line-height: 1.5; }
+.dcc-page__body { display: flow-root; }
+
+.dcc-prose { max-width: 70ch; line-height: 1.7; }
+.dcc-prose > * + * { margin-top: 1.1rem; }
+.dcc-prose h2 { margin-top: 2.5rem; padding-top: 0.75rem; border-top: 1px solid var(--dcc-border); font-size: 1.4rem; font-weight: 700; }
+.dcc-prose h3 { margin-top: 1.75rem; font-size: 1.15rem; font-weight: 700; }
+.dcc-prose ul, .dcc-prose ol { padding-left: 1.25rem; }
+.dcc-prose li + li { margin-top: 0.35rem; }
+.dcc-prose a { color: var(--dcc-primary); }
+.dcc-prose code {
+  font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace; font-size: 0.9em;
+  background: var(--dcc-surface); padding: 0.1em 0.35em; border-radius: 0.35rem;
+}
+.dcc-prose pre {
+  background: #0f1117; color: #e7e9ee; border-radius: calc(var(--dcc-radius) + 0.15rem);
+  padding: 1rem 1.15rem; overflow-x: auto; font-size: 0.875rem; line-height: 1.6;
+}
+.dcc-prose pre code { background: none; padding: 0; color: inherit; font-size: inherit; }
+
 .dcc-infolist { display: flex; flex-direction: column; gap: 0.5rem; }
 .dcc-infolist > div { display: grid; grid-template-columns: 12rem 1fr; gap: 1rem; padding: 0.5rem 0; border-bottom: 1px solid var(--dcc-border); }
 .dcc-infolist dt { font-weight: 600; margin: 0; }

@@ -89,9 +89,7 @@ DATE_ENTRY = ComponentPageSpec(
         ComponentExample(
             title="Relative",
             code='DateEntry.make("due_date").since()',
-            build=lambda request: _infolist(
-                request, [DateEntry.make("due_date").since()]
-            ),
+            build=lambda request: _infolist(request, [DateEntry.make("due_date").since()]),
         ),
     ],
 )

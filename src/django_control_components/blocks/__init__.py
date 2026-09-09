@@ -21,6 +21,7 @@ from .nav import (
     NavUser,
     ThemeToggle,
 )
+from .page import PageShell, Prose
 
 BLOCK_TYPES: TypeRegistry[Block] = TypeRegistry("block")
 
@@ -32,6 +33,8 @@ for _cls, _label, _icon, _cat, _slots in (
     (Card, "Card", "square", "block", ("header", "body", "footer")),
     (Divider, "Divider", "minus", "block", ()),
     (Spacer, "Spacer", "up-down", "block", ()),
+    (PageShell, "Page shell", "window-maximize", "block", ("header", "content")),
+    (Prose, "Prose", "align-left", "block", ()),
     (AppShell, "App shell", "window-maximize", "block", ("topbar", "sidebar", "content", "footer")),
     (Navbar, "Navbar", "window-minimize", "block", ("start", "end")),
     (Sidebar, "Sidebar", "table-columns", "block", ("default", "footer")),
@@ -97,6 +100,8 @@ __all__ = [
     "NavUser",
     "Navbar",
     "NotificationBell",
+    "PageShell",
+    "Prose",
     "Row",
     "Sidebar",
     "Spacer",

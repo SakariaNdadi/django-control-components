@@ -22,7 +22,7 @@ from typing import Any, Literal, Union, get_args, get_origin
 #: stored JSON spec. This module owns the canonical set; ``studio.deserialize``
 #: re-exports it under its old private name for one release.
 CODE_ONLY_SETTERS = frozenset(
-    {"state", "state_fn", "action", "callback", "authorize", "visible", "hidden"}
+    {"state", "state_fn", "action", "callback", "authorize", "visible", "hidden", "html"}
 )
 
 SetterKind = Literal[

@@ -14,7 +14,11 @@ class ProjectDetailsForm(forms.Form):
 
 class ProjectSettingsForm(forms.Form):
     tier = forms.ChoiceField(
-        choices=[("starter", "Starter Plan"), ("pro", "Professional Plan"), ("enterprise", "Enterprise")],
+        choices=[
+            ("starter", "Starter Plan"),
+            ("pro", "Professional Plan"),
+            ("enterprise", "Enterprise"),
+        ],
         initial="pro",
         label="Subscription Tier",
     )
@@ -31,14 +35,18 @@ class LiveWizardDemoView(WizardView):
             Schema.make()
             .form(ProjectDetailsForm)
             .strict()
-            .schema([
-                Section.make("Project Information")
-                .description("Basic project identifiers")
-                .schema([
-                    TextInput.make("name").required(),
-                    TextInput.make("description"),
-                ]),
-            ]),
+            .schema(
+                [
+                    Section.make("Project Information")
+                    .description("Basic project identifiers")
+                    .schema(
+                        [
+                            TextInput.make("name").required(),
+                            TextInput.make("description"),
+                        ]
+                    ),
+                ]
+            ),
             title="Details",
             heading="Project Basics",
             description="Enter the core parameters for the new project.",
@@ -48,29 +56,39 @@ class LiveWizardDemoView(WizardView):
             Schema.make()
             .form(ProjectSettingsForm)
             .strict()
-            .schema([
-                Section.make("Configuration")
-                .columns(2)
-                .schema([
-                    Select.make("tier").searchable(),
-                    Toggle.make("is_public"),
-                ]),
-            ]),
+            .schema(
+                [
+                    Section.make("Configuration")
+                    .columns(2)
+                    .schema(
+                        [
+                            Select.make("tier").searchable(),
+                            Toggle.make("is_public"),
+                        ]
+                    ),
+                ]
+            ),
             title="Plan & Privacy",
             heading="Settings",
             description="Select subscription level and public visibility.",
         ),
         WizardStep(
             "review",
-            Infolist.make().schema([
-                TextEntry.make("name").label("Project Name"),
-                BadgeEntry.make("tier").label("Selected Tier").colors({
-                    "starter": "muted",
-                    "pro": "primary",
-                    "enterprise": "success",
-                }),
-                TextEntry.make("is_public").label("Public Access"),
-            ]),
+            Infolist.make().schema(
+                [
+                    TextEntry.make("name").label("Project Name"),
+                    BadgeEntry.make("tier")
+                    .label("Selected Tier")
+                    .colors(
+                        {
+                            "starter": "muted",
+                            "pro": "primary",
+                            "enterprise": "success",
+                        }
+                    ),
+                    TextEntry.make("is_public").label("Public Access"),
+                ]
+            ),
             title="Review",
             heading="Review & Confirm",
             description="Review the entered data before submission.",

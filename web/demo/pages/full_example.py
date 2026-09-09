@@ -9,7 +9,7 @@ from django_control_components.infolists import (
     Infolist,
     TextEntry,
 )
-from django_control_components.panels import PanelPage, Resource
+from django_control_components.panels import Resource
 from django_control_components.schemas import (
     FileUpload,
     Schema,
@@ -29,6 +29,7 @@ from django_control_components.tables import (
 )
 
 from ..models import Task
+from ._base import ProsePage
 
 
 class TaskForm(forms.ModelForm):
@@ -113,12 +114,18 @@ class TaskResource(Resource):
         )
 
 
-class FullExamplePage(PanelPage):
-    template_name = "demo/pages/full_example.html"
+class FullExamplePage(ProsePage):
     slug = "full-example"
     nav_label = "Full example"
     nav_icon = "diagram-project"
     nav_group = "Getting started"
+    page_eyebrow = "Getting started"
+    page_accent = "#b45309"
+    page_title = "Full end-to-end example"
+    page_summary = (
+        "How a whole admin-independent CRUD surface is built in pure Python with "
+        "Panel, Resource and the Table / Schema / Infolist builders."
+    )
 
     def get_context_data(self, **kwargs):
         from django.urls import reverse

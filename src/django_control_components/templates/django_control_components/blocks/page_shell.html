@@ -1,0 +1,10 @@
+{% if has_header %}
+{{ slots.header }}
+{% elif title or eyebrow or summary %}
+<header class="dcc-page__header"{% if accent %} style="--dcc-page-accent:{{ accent }}"{% endif %}>
+  {% if eyebrow %}<span class="dcc-page__eyebrow">{{ eyebrow }}</span>{% endif %}
+  {% if title %}<h1 class="dcc-page__title">{{ title }}</h1>{% endif %}
+  {% if summary %}<p class="dcc-page__summary">{{ summary }}</p>{% endif %}
+</header>
+{% endif %}
+{% if has_content %}<div class="dcc-page__body">{{ slots.content }}</div>{% endif %}

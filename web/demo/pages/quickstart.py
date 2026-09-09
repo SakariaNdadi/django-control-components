@@ -1,11 +1,16 @@
 from __future__ import annotations
 
-from django_control_components.panels import PanelPage
+from ._base import ProsePage
 
 
-class QuickstartPage(PanelPage):
-    template_name = "demo/pages/quickstart.html"
+class QuickstartPage(ProsePage):
     slug = "quickstart"
     nav_label = "Quickstart"
     nav_icon = "bolt"
     nav_group = "Getting started"
+    page_eyebrow = "Schemas"
+    page_accent = "#0891b2"
+    page_title = "Quickstart"
+    page_summary = (
+        "Build responsive form layouts in Python that decorate a standard Django Form / ModelForm."
+    )

@@ -1,10 +1,7 @@
-{% extends "django_control_components/panels/base.html" %}
-{% load static dcc_tags %}
-{% block head_extra %}
-  <link rel="stylesheet" href="{% static 'demo/docs.css' %}">
-{% endblock %}
+{% extends "demo/pages/_prose.html" %}
+{% load dcc_tags %}
 
-{% block content %}
+{% block prebody %}
   <div class="dcc-home__hero">
     <div class="dcc-home__badges">
       <span class="dcc-docs__familybadge" style="background: var(--dcc-docs-accent);">v0.0.1 alpha</span>
@@ -20,13 +17,13 @@
     </p>
 
     <div class="dcc-home__cta">
-      <a href="{% url 'dcc-panel-docs:page-installation' %}" class="dcc-btn dcc-btn--primary">
+      <a href="/installation/" class="dcc-btn dcc-btn--primary">
         {% dcc_icon "download" %} Installation
       </a>
-      <a href="{% url 'dcc-panel-docs:page-quickstart' %}" class="dcc-btn dcc-btn--secondary">
+      <a href="/quickstart/" class="dcc-btn dcc-btn--secondary">
         {% dcc_icon "bolt" %} Quickstart
       </a>
-      <a href="{% url 'dcc-panel-docs:page-full-example' %}" class="dcc-btn dcc-btn--secondary">
+      <a href="/full-example/" class="dcc-btn dcc-btn--secondary">
         {% dcc_icon "diagram-project" %} Full example
       </a>
     </div>
@@ -41,7 +38,7 @@
         Sections, grids, tabs and fieldsets decorating real Django <code>ModelForm</code>s — reactive
         selects, live validation, zero-request conditional visibility.
       </p>
-      <a href="{% url 'dcc-panel-docs:page-schema' %}" class="dcc-btn dcc-btn--secondary dcc-btn--sm">Schemas &rarr;</a>
+      <a href="/schema/" class="dcc-btn dcc-btn--secondary dcc-btn--sm">Schemas &rarr;</a>
     </div>
 
     <div class="dcc-home__card">
@@ -51,7 +48,7 @@
         Adaptive client-side render under ~1,000 rows; keyset-streamed server mode over millions with
         no <code>COUNT(*)</code>. Search, filters, row and bulk actions.
       </p>
-      <a href="{% url 'dcc-panel-docs:page-table' %}" class="dcc-btn dcc-btn--secondary dcc-btn--sm">Tables &rarr;</a>
+      <a href="/table/" class="dcc-btn dcc-btn--secondary dcc-btn--sm">Tables &rarr;</a>
     </div>
 
     <div class="dcc-home__card">
@@ -61,7 +58,7 @@
         Multi-step flows on <code>django-formtools</code> with htmx step swapping, back/forward
         navigation, per-step validation and review infolists.
       </p>
-      <a href="{% url 'dcc-panel-docs:page-wizards' %}" class="dcc-btn dcc-btn--secondary dcc-btn--sm">Wizards &rarr;</a>
+      <a href="/wizards/" class="dcc-btn dcc-btn--secondary dcc-btn--sm">Wizards &rarr;</a>
     </div>
 
     <div class="dcc-home__card">
@@ -71,7 +68,7 @@
         Key-addressed operations, authorized twice, with confirm and schema modals, select-all-matching
         bulk actions, and toast triggers.
       </p>
-      <a href="{% url 'dcc-panel-docs:page-action' %}" class="dcc-btn dcc-btn--secondary dcc-btn--sm">Actions &rarr;</a>
+      <a href="/action/" class="dcc-btn dcc-btn--secondary dcc-btn--sm">Actions &rarr;</a>
     </div>
 
     <div class="dcc-home__card">
@@ -81,7 +78,7 @@
         Admin-independent CRUD surfaces, dashboard widgets (stat, chart, bar-list, table) and custom
         pages — all pure Python.
       </p>
-      <a href="{% url 'dcc-panel-docs:page-panels-and-resources' %}" class="dcc-btn dcc-btn--secondary dcc-btn--sm">Panels &rarr;</a>
+      <a href="/panels-and-resources/" class="dcc-btn dcc-btn--secondary dcc-btn--sm">Panels &rarr;</a>
     </div>
 
     <div class="dcc-home__card">
@@ -91,13 +88,16 @@
         <code>&lt;c-dcc.*&gt;</code> components for template authors — buttons, badges, focus-trapped
         modals, headings, standalone inputs.
       </p>
-      <a href="{% url 'dcc-panel-docs:page-button' %}" class="dcc-btn dcc-btn--secondary dcc-btn--sm">Components &rarr;</a>
+      <a href="/button/" class="dcc-btn dcc-btn--secondary dcc-btn--sm">Components &rarr;</a>
     </div>
   </div>
 
-  <h2 class="dcc-home__sectiontitle">Quick install</h2>
+{% endblock %}
+
+{% block prose %}
+  <h2>Quick install</h2>
   <pre><code>uv add "django-control-components[wizard,images]"</code></pre>
-  <p><small style="color: var(--dcc-muted);">Then follow the
-    <a href="{% url 'dcc-panel-docs:page-installation' %}">installation page</a> to wire
-    <code>INSTALLED_APPS</code> and <code>{% templatetag openblock %} dcc_assets {% templatetag closeblock %}</code>.</small></p>
+  <p><small>Then follow the <a href="/installation/">installation page</a> to wire
+    <code>INSTALLED_APPS</code> and
+    <code>{% templatetag openblock %} dcc_assets {% templatetag closeblock %}</code>.</small></p>
 {% endblock %}

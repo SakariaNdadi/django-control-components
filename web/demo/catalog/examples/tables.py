@@ -26,10 +26,7 @@ def _mark_done(record):
 
 def _demo_table(request, columns, filters=None):
     table = (
-        Table.make(Task.objects.all())
-        .id(f"demo-{columns[0].name}")
-        .columns(columns)
-        .client_side()
+        Table.make(Task.objects.all()).id(f"demo-{columns[0].name}").columns(columns).client_side()
     )
     if filters:
         table.filters(filters)

@@ -13,8 +13,10 @@ from dataclasses import dataclass, field
 from typing import TYPE_CHECKING, Any
 
 from django.http import HttpResponse
+from django.utils.html import format_html, format_html_join
 
 from django_control_components import htmx
+from django_control_components.blocks import PageShell, Prose
 from django_control_components.blocks.base import Block
 from django_control_components.core.component import Component
 from django_control_components.core.context import RenderContext
@@ -30,6 +32,29 @@ if TYPE_CHECKING:
     from collections.abc import Callable
 
     from django.http import HttpRequest
+
+
+#: Per-family accent for the PageShell eyebrow (mirrors the sidebar grouping).
+_FAMILY_ACCENT = {
+    "ui": "#4f46e5",
+    "schemas": "#0891b2",
+    "tables": "#b45309",
+    "infolists": "#15803d",
+    "widgets": "#be185d",
+    "actions": "#dc2626",
+    "wizards": "#0d9488",
+    "nav": "#4338ca",
+    "blocks": "#6d28d9",
+}
+
+
+def _setters_prose(rows: list[tuple[str, str, str]]) -> Prose:
+    body = format_html(
+        '<h2>Setters</h2><table class="dcc-table"><thead><tr>'
+        "<th>Setter</th><th>Type</th><th>Description</th></tr></thead><tbody>{}</tbody></table>",
+        format_html_join("", "<tr><td><code>{}</code></td><td>{}</td><td>{}</td></tr>", rows),
+    )
+    return Prose().html(str(body))
 
 
 @dataclass(frozen=True)
@@ -112,7 +137,7 @@ def component_page(spec: ComponentPageSpec) -> type[PanelPage]:
     """Turn a ``ComponentPageSpec`` into a mountable ``PanelPage`` subclass."""
 
     class _Page(PanelPage):
-        template_name = "demo/catalog/component_page.html"
+        template_name = "demo/pages/_shell.html"
         slug = spec.slug
         nav_label = spec.title
         nav_icon = spec.icon
@@ -138,7 +163,19 @@ def component_page(spec: ComponentPageSpec) -> type[PanelPage]:
             ctx = super().get_context_data(**kwargs)
             ctx["spec"] = spec
             assets: dict[str, Any] = {}
-            ctx["demos"] = [_build_demo(example, self.request, assets) for example in spec.examples]
+            demos = [_build_demo(example, self.request, assets) for example in spec.examples]
+            content: list[Any] = list(demos)
+            if spec.props_table:
+                content.append(_setters_prose(spec.props_table))
+            ctx["page_block"] = (
+                PageShell()
+                .eyebrow(spec.family)
+                .title(spec.title)
+                .summary(spec.summary or "")
+                .accent(_FAMILY_ACCENT.get(spec.family, "#4f46e5"))
+                .fill("content", content)
+            )
+            ctx["demos"] = demos
             ctx["widget_assets"] = list(assets.values())
             return ctx
 
