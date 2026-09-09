@@ -62,6 +62,10 @@
   color: var(--dcc-fg);
   font-family: var(--dcc-font);
   margin: 0;
+  /* the panel shell is a flex row; a wide child (a table, a card grid) must
+     never widen the page. The flex chain below carries `min-width: 0` so it
+     reflows; this is the backstop. */
+  overflow-x: hidden;
 }
 
 .dcc-container { max-width: 48rem; margin: 0 auto; padding: 2rem 1rem; }
@@ -101,6 +105,7 @@
 
 .dcc-input,
 .dcc-textarea {
+  box-sizing: border-box; /* width:100% + padding must fit the container */
   width: 100%;
   border: 1px solid var(--dcc-border);
   background: var(--dcc-surface);
@@ -323,7 +328,21 @@
 .dcc-navbar__brand { font-weight: 600; }
 .dcc-footer { padding: 1.25rem; border-top: 1px solid var(--dcc-border); color: var(--dcc-muted); font-size: 0.8125rem; }
 .dcc-panel__body { flex: 1; display: flex; flex-direction: column; min-width: 0; }
-.dcc-panel__body .dcc-panel__main { max-width: none; }
+.dcc-panel__body > .dcc-navbar { position: sticky; top: 0; z-index: 20; }
+
+/* ---- global search (topbar) -------------------------- */
+.dcc-globalsearch { position: relative; display: flex; align-items: center; flex: 1; max-width: 26rem; }
+.dcc-globalsearch__icon {
+  position: absolute; inset-inline-start: 0.6rem; display: inline-flex;
+  color: var(--dcc-muted); pointer-events: none; font-size: 0.85em;
+}
+.dcc-globalsearch__input { padding-inline-start: 2rem; }
+.dcc-globalsearch__results {
+  position: absolute; inset-inline: 0; top: calc(100% + 0.3rem); z-index: 40;
+  background: var(--dcc-surface); border: 1px solid var(--dcc-border);
+  border-radius: var(--dcc-radius); box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+  max-height: 22rem; overflow-y: auto;
+}
 
 /* ---- layout containers --------------------------------------- */
 
@@ -458,7 +477,14 @@
 .dcc-wizard__nav { display: flex; gap: 0.5rem; justify-content: flex-end; }
 
 /* ---- panels ------------------------------------------- */
-.dcc-panel { display: flex; min-height: 100vh; }
+.dcc-panel { display: flex; min-height: 100vh; max-width: 100%; }
+/* the shell containers are border-box so their padding is inside the flex
+   allocation - otherwise `.dcc-panel__main`'s padding is added on top of its
+   width and the column overflows the viewport. Scoped to the four frame
+   elements; the components inside them stay content-box. */
+.dcc-panel__nav, .dcc-panel__body, .dcc-panel__main, .dcc-panel__navfoot {
+  box-sizing: border-box;
+}
 .dcc-panel__nav {
   width: 15rem;
   flex-shrink: 0;
@@ -484,13 +510,21 @@
   white-space: nowrap; overflow: hidden;
 }
 .dcc-panel__brandimg { height: 1.5rem; width: auto; flex-shrink: 0; object-fit: contain; }
+.dcc-nav__filter { padding: 0.25rem 0.25rem 0.5rem; border-bottom: 1px solid var(--dcc-border); }
+.dcc-nav__filter .dcc-input { font-size: 0.875rem; padding-block: 0.35rem; }
+/* while a filter query is active, force every group open so matches inside a
+   collapsed section are visible; `dccNav` state is restored when it clears */
+.dcc-panel__nav.is-filtering .dcc-nav__sublist { display: block !important; }
+.dcc-nav__item[hidden], .dcc-nav__group[hidden] { display: none; }
 .dcc-panel__railtoggle {
-  align-self: flex-end;
+  position: absolute; right: -0.8rem; top: 1.4rem; z-index: 10;
   border: 1px solid var(--dcc-border); background: var(--dcc-bg); color: var(--dcc-muted);
-  border-radius: var(--dcc-radius); width: 1.6rem; height: 1.6rem; cursor: pointer;
-  display: none; line-height: 1;
+  border-radius: 50%; width: 1.6rem; height: 1.6rem; cursor: pointer;
+  display: none; line-height: 1; box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+  transition: color 0.15s ease;
 }
 @media (min-width: 48.0625rem) { .dcc-panel__railtoggle { display: inline-flex; align-items: center; justify-content: center; } }
+.dcc-panel__railtoggle:hover { color: var(--dcc-primary); }
 .dcc-panel__railtoggle:focus-visible { outline: 2px solid var(--dcc-focus); }
 
 /* railed (collapsed) sidebar - icons only, desktop only */
@@ -508,13 +542,12 @@
   .dcc-panel.is-railed .dcc-nav__link,
   .dcc-panel.is-railed .dcc-nav__grouptoggle,
   .dcc-panel.is-railed .dcc-nav__usercard { justify-content: center; }
-  .dcc-panel.is-railed .dcc-panel__railtoggle { align-self: center; }
 }
 .dcc-nav, .dcc-nav__sublist {
   list-style: none; margin: 0; padding: 0;
   display: flex; flex-direction: column; gap: 0.125rem;
 }
-.dcc-nav { flex: 1; overflow-y: auto; }
+.dcc-nav { flex: 1; overflow-y: auto; overflow-x: hidden; }
 .dcc-nav__group { margin-top: 0.75rem; }
 .dcc-nav__grouplabel {
   display: block; padding: 0.25rem 0.5rem;
@@ -547,7 +580,11 @@
   width: 2.25rem; height: 2.25rem; cursor: pointer;
 }
 .dcc-panel__scrim { display: none; }
-.dcc-panel__main { flex: 1; padding: 2rem; max-width: 64rem; }
+/* `min-width: 0` lets the main column shrink below its content's intrinsic
+   width (the flexbox default is `auto`), so a wide table or card grid wraps /
+   scrolls inside its own container instead of pushing the layout wider. It
+   also means the column reflows the instant the sidebar rails or un-rails. */
+.dcc-panel__main { flex: 1; min-width: 0; padding: 2rem; max-width: 64rem; }
 .dcc-panel__header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; }
 .dcc-panel__actions { margin-top: 1.5rem; }
 .dcc-no-scroll { overflow: hidden; }

@@ -156,6 +156,15 @@ staff-gated panel; the demo panel is open. `.auth(*guards)` runs before every
 page - each guard is `HttpRequest -> bool`, a falsy result raises
 `PermissionDenied`. Per-resource `can()` runs after the panel guard.
 
+Sidebar / topbar chrome:
+
+- `.sidebar_searchable()` - a client-side filter box at the top of the sidebar
+  ([navigation.md](navigation.md#sidebar)).
+- `.global_search_url("/search/")` - renders a top bar with a search input that
+  `GET`s the URL with `?q=` and drops the returned HTML fragment into a results
+  panel (the endpoint owns escaping, like any htmx partial). When set, panel
+  pages wrap `<main>` in `.dcc-panel__body`.
+
 `.auth(*guards)` runs before every page; each guard is `HttpRequest -> bool` and
 a falsy result raises `PermissionDenied`. Add more with repeated `.auth()` calls.
 Per-resource `can()` runs after the panel guard.

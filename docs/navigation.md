@@ -22,6 +22,11 @@ from django_control_components.blocks import Sidebar, NavLink, NavGroup, ThemeTo
 `.dcc-panel__nav` markup the panel shell already styles, so the responsive drawer
 (`dccShell`: hamburger + scrim at ≤48rem) works with no extra wiring.
 
+`.searchable()` adds a client-side filter box above the list: typing narrows the
+links (and auto-opens the groups that match); it hides when the sidebar is
+railed. Purely presentational - it shows/hides `<li>`s, it never touches the nav
+data. On a panel, turn it on with `Panel(...).sidebar_searchable()`.
+
 ## Nav blocks
 
 | block | slots | setters |

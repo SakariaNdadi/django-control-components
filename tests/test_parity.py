@@ -80,11 +80,11 @@ def test_block_tree_parity_python_vs_spec():
 
 
 def test_appshell_default_shell_matches_panels_base_html(soup):
-    """Phase 3b groundwork: an ``AppShell`` with no topbar/footer must produce
-    the same frame as the hand-coded ``panels/base.html`` - ``<main
-    class="dcc-panel__main">`` as a *direct* child of ``.dcc-panel``, with no
-    ``.dcc-panel__body`` wrapper (that wrapper drops ``.dcc-panel__main``'s
-    max-width). This is the parity check that gates swapping base.html over.
+    """An ``AppShell`` must produce the same frame as the hand-coded
+    ``panels/base.html``: ``.dcc-panel > .dcc-panel__body > main.dcc-panel__main``.
+    The ``.dcc-panel__body`` flex column carries the topbar (when present) above
+    ``<main>`` and the ``min-width: 0`` that lets the content column reflow when
+    the sidebar rails.
     """
     from django.template.loader import render_to_string
 
@@ -110,26 +110,32 @@ def test_appshell_default_shell_matches_panels_base_html(soup):
             },
         )
     )
-    base_panel = base.select_one(".dcc-panel")
-    base_main = base_panel.select_one(":scope > main.dcc-panel__main")
+    base_main = base.select_one(".dcc-panel > .dcc-panel__body > main.dcc-panel__main")
     assert base_main is not None
-    assert base.select_one(".dcc-panel__body") is None
 
     shell = soup(_render(AppShell.make().fill("content", [Divider.make()])))
-    shell_panel = shell.select_one(".dcc-panel")
-    assert shell_panel.select_one(":scope > main.dcc-panel__main") is not None
-    assert shell.select_one(".dcc-panel__body") is None
+    assert shell.select_one(".dcc-panel > .dcc-panel__body > main.dcc-panel__main") is not None
 
 
-def test_appshell_wraps_body_only_when_topbar_or_footer_present(soup):
-    from django_control_components.blocks import AppShell, Footer
+def test_appshell_body_holds_topbar_above_main_and_footer_below(soup):
+    from django_control_components.blocks import AppShell, Footer, Navbar
 
-    with_footer = soup(
-        _render(AppShell.make().fill("content", [Divider.make()]).fill("footer", [Footer.make()]))
+    dom = soup(
+        _render(
+            AppShell.make()
+            .fill("topbar", [Navbar.make()])
+            .fill("content", [Divider.make()])
+            .fill("footer", [Footer.make()])
+        )
     )
-    body = with_footer.select_one(".dcc-panel > .dcc-panel__body")
+    body = dom.select_one(".dcc-panel > .dcc-panel__body")
     assert body is not None
-    assert body.select_one("main.dcc-panel__main") is not None
+    order = [set(c.get("class", [])) | {c.name} for c in body.find_all(recursive=False)]
+
+    def pos(marker):
+        return next(i for i, s in enumerate(order) if marker in s)
+
+    assert pos("dcc-navbar") < pos("dcc-panel__main") < pos("dcc-footer")
 
 
 def test_widget_parity_python_vs_spec():

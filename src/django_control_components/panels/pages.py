@@ -19,6 +19,15 @@ if TYPE_CHECKING:
     from .resource import Resource
 
 
+def _topbar(panel: Panel) -> Any:
+    """The panel's topbar block, or ``None``. Only a global-search box for now."""
+    if not panel._global_search_url:
+        return None
+    from ..blocks.chrome import GlobalSearch, Navbar
+
+    return Navbar().fill("start", [GlobalSearch().endpoint(panel._global_search_url)])
+
+
 def _guarded(panel: Panel, request: HttpRequest) -> HttpResponseBase | None:
     """Run the panel guards; return a login redirect if a guard raised
     ``LoginRequired``, else ``None`` (``PermissionDenied`` propagates)."""
@@ -56,6 +65,7 @@ class PanelPage(TemplateView):
         ctx["nav"] = self.panel.navigation(self.request)
         ctx["nav_tree"] = build_nav(self.panel, self.request)
         ctx["sidebar"] = panel_sidebar(self.panel, self.request)
+        ctx["topbar"] = _topbar(self.panel)
         ctx["content_style"] = self.panel.content_style
         ctx["resource_label"] = self.nav_label or self.slug.title() or "Dashboard"
         return ctx
@@ -137,6 +147,7 @@ class _ResourcePage(TemplateView):
         ctx["nav"] = self.panel.navigation(self.request)
         ctx["nav_tree"] = build_nav(self.panel, self.request)
         ctx["sidebar"] = panel_sidebar(self.panel, self.request)
+        ctx["topbar"] = _topbar(self.panel)
         ctx["content_style"] = self.panel.content_style
         return ctx
 

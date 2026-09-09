@@ -11,7 +11,7 @@ from typing import Any
 
 from ..core.type_registry import TypeRegistry
 from .base import Block
-from .chrome import AppShell, Footer, Navbar, NotificationBell, Sidebar
+from .chrome import AppShell, Footer, GlobalSearch, Navbar, NotificationBell, Sidebar
 from .layout import Card, Column, Divider, Grid, Row, Spacer, Stack
 from .nav import (
     NavAction,
@@ -41,6 +41,7 @@ for _cls, _label, _icon, _cat, _slots in (
     (Sidebar, "Sidebar", "table-columns", "block", ("default", "footer")),
     (Footer, "Footer", "window-minimize", "block", ("default",)),
     (NotificationBell, "Notification bell", "bell", "block", ()),
+    (GlobalSearch, "Global search", "magnifying-glass", "block", ()),
     (NavLink, "Nav link", "link", "nav", ()),
     (NavGroup, "Nav group", "folder-tree", "nav", ("default",)),
     (NavHeading, "Nav heading", "heading", "nav", ()),
@@ -109,6 +110,7 @@ __all__ = [
     "Column",
     "Divider",
     "Footer",
+    "GlobalSearch",
     "Grid",
     "NavAction",
     "NavDivider",

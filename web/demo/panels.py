@@ -17,6 +17,7 @@ docs_panel = (
     Panel("docs")
     .path("")
     .brand("DCC", "cubes", image=static("demo/logo.svg"))
+    .sidebar_searchable()
     .resources([TaskResource])
     .pages(
         [

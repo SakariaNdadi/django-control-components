@@ -98,11 +98,10 @@
 		padding: 2.25rem clamp(1.5rem, 4vw, 3.5rem) 4rem;
 	}
 }
+
+.dcc-page__summary,
 .dcc-prose {
-	max-width: 88ch;
-}
-.dcc-page__summary {
-	max-width: 80ch;
+	max-width: none !important;
 }
 
 /* ===================================================== sidebar chrome === */
@@ -522,11 +521,14 @@
 }
 .dcc-home__grid {
 	display: grid;
-	grid-template-columns: repeat(auto-fill, minmax(18rem, 1fr));
+	/* min(100%, 18rem) so a narrow column never demands 18rem and overflows */
+	grid-template-columns: repeat(auto-fill, minmax(min(100%, 18rem), 1fr));
 	gap: 1.25rem;
 	margin-bottom: 3rem;
 }
 .dcc-home__card {
+	min-width: 0; /* let the grid item shrink; long <code> tokens wrap */
+	overflow-wrap: anywhere;
 	background: var(--dcc-surface);
 	border: 1px solid var(--dcc-border);
 	border-radius: calc(var(--dcc-radius) + 0.35rem);

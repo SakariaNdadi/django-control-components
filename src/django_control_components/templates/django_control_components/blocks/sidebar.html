@@ -1,5 +1,5 @@
 {% load dcc_tags %}
-<nav class="dcc-panel__nav" id="dcc-nav" aria-label="Sidebar">
+<nav class="dcc-panel__nav" id="dcc-nav" aria-label="Sidebar"{% if searchable %} x-data="dccSidebarFilter()" x-effect="apply()"{% endif %}>
   <button type="button" class="dcc-panel__railtoggle" @click="toggleRail()"
           x-bind:aria-pressed="railed ? 'true' : 'false'" aria-label="Collapse sidebar">
     <span x-text="railed ? '»' : '«'">«</span>
@@ -8,6 +8,12 @@
     {% if brand_url %}<a class="dcc-panel__brand" href="{{ brand_url }}">{% else %}<div class="dcc-panel__brand">{% endif %}
       {% if brand_image %}<img class="dcc-panel__brandimg" src="{{ brand_image }}" alt="{{ brand_image_alt }}">{% elif brand_icon %}{% dcc_icon brand_icon %}{% endif %}<strong>{{ brand }}</strong>
     {% if brand_url %}</a>{% else %}</div>{% endif %}
+  {% endif %}
+  {% if searchable %}
+  <div class="dcc-nav__filter" x-show="!railed">
+    <input type="search" class="dcc-input" x-model.debounce.150ms="q"
+           placeholder="Filter links" aria-label="Filter navigation links">
+  </div>
   {% endif %}
   <ul class="dcc-nav">{{ slots.default }}</ul>
   {% if slots.footer %}<div class="dcc-panel__navfoot">{{ slots.footer }}</div>{% endif %}

@@ -85,7 +85,7 @@ def test_page_shell_padding_and_margin(soup):
 def test_page_shell_padding_rejects_unsafe_value(soup):
     from django_control_components.blocks import PageShell
 
-    shell = PageShell().title("X").padding('2rem;color:red}body{')
+    shell = PageShell().title("X").padding("2rem;color:red}body{")
     node = soup(str(shell.render(_ctx()))).select_one(".dcc-page")
     assert node.get("style") in (None, "")
 
@@ -159,6 +159,49 @@ def test_sidebar_two_slots(soup):
     assert doc.select_one("nav.dcc-panel__nav .dcc-panel__brand strong").text == "DCC"
     assert doc.select_one(".dcc-nav a")["href"] == "/"
     assert doc.select_one(".dcc-panel__navfoot .dcc-nav__theme") is not None
+
+
+def test_sidebar_searchable_renders_the_filter():
+    plain = str(Sidebar().fill("default", [NavLink().label("Home").to("/")]).render(_ctx()))
+    assert "dcc-nav__filter" not in plain
+    assert "dccSidebarFilter" not in plain
+
+    searchable = str(
+        Sidebar().searchable().fill("default", [NavLink().label("Home").to("/")]).render(_ctx())
+    )
+    assert 'x-data="dccSidebarFilter()"' in searchable
+    assert 'x-effect="apply()"' in searchable
+    assert "dcc-nav__filter" in searchable
+    assert 'aria-label="Filter navigation links"' in searchable
+
+
+def test_panel_sidebar_searchable_flows_to_the_block(soup, django_user_model):
+    from django.test import RequestFactory
+
+    from django_control_components.panels import Panel
+    from django_control_components.panels.nav import panel_sidebar
+
+    request = RequestFactory().get("/")
+    request.user = django_user_model.objects.create_user("u", "u@x.io", "x")
+
+    panel = Panel("s1").path("s1")
+    assert "dccSidebarFilter" not in str(panel_sidebar(panel, request).render(_ctx()))
+
+    panel2 = Panel("s2").path("s2").sidebar_searchable()
+    assert "dccSidebarFilter" in str(panel_sidebar(panel2, request).render(_ctx()))
+
+
+def test_panel_global_search_url_builds_a_topbar():
+    from django_control_components.panels import Panel
+    from django_control_components.panels.pages import _topbar
+
+    assert _topbar(Panel("g1")) is None
+
+    topbar = _topbar(Panel("g2").global_search_url("/search/"))
+    assert topbar is not None
+    html = str(topbar.render(_ctx()))
+    assert "dccGlobalSearch" in html
+    assert 'data-endpoint="/search/"' in html
 
 
 def test_panel_content_spacing_style():

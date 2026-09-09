@@ -255,6 +255,7 @@ def sidebar_from_tree(
     elif panel.brand_icon:
         sidebar.brand_icon(panel.brand_icon)
     sidebar.brand_url(f"{panel.namespace}:index")
+    sidebar.searchable(panel._sidebar_searchable)
     sidebar.fill("default", nav_blocks(tree))
 
     if footer:

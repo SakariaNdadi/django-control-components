@@ -57,6 +57,16 @@ class Panel:
         self.brand_icon: str = ""
         self.brand_image: str = ""
         self.content_style: str = ""
+        self._sidebar_searchable: bool = False
+        self._global_search_url: str = ""
+
+    def sidebar_searchable(self, value: bool = True) -> Self:
+        self._sidebar_searchable = value
+        return self
+
+    def global_search_url(self, url: str) -> Self:
+        self._global_search_url = url
+        return self
 
     def path(self, value: str) -> Self:
         self._path = value.strip("/")

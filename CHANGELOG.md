@@ -8,6 +8,23 @@ All notable changes to this project are documented here. Format loosely follows
 
 Renamed and re-versioned release of the rebuild described under `1.0.0b1` below.
 
+### Added
+
+- **`Sidebar.searchable()` / `Panel.sidebar_searchable()`** - a client-side
+  filter box above the nav; typing narrows the links and opens matching groups,
+  hidden when the sidebar is railed.
+- **`Panel.global_search_url(url)` and the `GlobalSearch` block** - a top bar
+  search input that `GET`s `?q=` and drops the returned HTML fragment into a
+  results panel.
+
+### Fixed
+
+- **The panel shell no longer scrolls horizontally.** `.dcc-panel__nav` /
+  `__body` / `__main` and `.dcc-input` are now `box-sizing: border-box`, so a
+  padded full-width element fits its flex allocation instead of overflowing the
+  viewport, and the content column reflows the moment the sidebar rails.
+  `panels/base.html` and `AppShell` both wrap `<main>` in `.dcc-panel__body`.
+
 ### Performance
 
 - **Tables no longer N+1 on dotted columns.** A column named `"author.name"`

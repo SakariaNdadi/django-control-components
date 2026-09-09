@@ -83,6 +83,10 @@ class Sidebar(Block):
         """A URL path or URL name - the brand becomes a link."""
         return self._set("brand_url", value)
 
+    @setter
+    def searchable(self, value: bool = True) -> Self:
+        return self._set("searchable", value)
+
     def get_view_data(self, ctx: RenderContext) -> dict[str, Any]:
         from django.urls import NoReverseMatch, reverse
 
@@ -91,6 +95,7 @@ class Sidebar(Block):
         data["brand_icon"] = self._config.get("brand_icon", "")
         data["brand_image"] = self._config.get("brand_image", "")
         data["brand_image_alt"] = self._config.get("brand_image_alt", "")
+        data["searchable"] = self._config.get("searchable", False)
         raw = str(self._config.get("brand_url", "") or "")
         if raw and not raw.startswith(("/", "#", "http://", "https://")):
             try:
@@ -136,4 +141,32 @@ class NotificationBell(Block):
                 endpoint = ""
         data["endpoint"] = endpoint
         data["interval"] = int(self._config.get("interval", 30))
+        return data
+
+
+class GlobalSearch(Block):
+    """A top-bar search input. On input it ``GET``s ``endpoint`` with ``?q=``
+    and drops the returned HTML fragment into a results panel - the endpoint
+    owns escaping, the same contract as any htmx partial. Rendered by a panel
+    when ``Panel.global_search_url(...)`` is set."""
+
+    slots = ()
+    template_name = "django_control_components/blocks/global_search.html"
+
+    @setter
+    def endpoint(self, value: str) -> Self:
+        """A URL path or URL name that returns an HTML results fragment."""
+        return self._set("endpoint", value)
+
+    def get_view_data(self, ctx: RenderContext) -> dict[str, Any]:
+        from django.urls import NoReverseMatch, reverse
+
+        data = super().get_view_data(ctx)
+        raw = str(self._config.get("endpoint", "") or "")
+        if raw and not raw.startswith(("/", "http://", "https://")):
+            try:
+                raw = reverse(raw)
+            except NoReverseMatch:
+                raw = ""
+        data["endpoint"] = raw
         return data

@@ -498,6 +498,40 @@
 			},
 		}));
 
+		// Client-side filter over the sidebar links. `x-data="dccSidebarFilter()"`
+		// on `.dcc-panel__nav`; the `<input x-model="q">` and an `x-effect`
+		// calling `apply()` drive it. Purely presentational - it hides `<li>`s,
+		// it does not touch the nav data.
+		window.Alpine.data("dccSidebarFilter", () => ({
+			q: "",
+			_matches(el) {
+				if (!this.q) return true;
+				return (el.textContent || "").toLowerCase().includes(this.q.toLowerCase());
+			},
+			apply() {
+				const root = this.$el;
+				const active = this.q.trim() !== "";
+				root.classList.toggle("is-filtering", active);
+				root.querySelectorAll(".dcc-nav__group").forEach((group) => {
+					const items = group.querySelectorAll(".dcc-nav__item");
+					let anyItem = false;
+					items.forEach((li) => {
+						const show = this._matches(li);
+						li.hidden = !show;
+						anyItem = anyItem || show;
+					});
+					const heading = group.querySelector(".dcc-nav__grouptoggle");
+					group.hidden = !(anyItem || (heading && this._matches(heading)));
+				});
+				// top-level items not inside a group
+				root
+					.querySelectorAll(":scope > .dcc-nav > .dcc-nav__item")
+					.forEach((li) => {
+						li.hidden = !this._matches(li);
+					});
+			},
+		}));
+
 		window.Alpine.data("dccShell", () => ({
 			navOpen: false,
 			railed: false,
@@ -556,6 +590,43 @@
 
 		// Notification bell: polls its endpoint (data-endpoint / data-interval on
 		// the root element) for the unread count and recent items. No websockets.
+		// Topbar global search. `x-data="dccGlobalSearch()"`, `data-endpoint` on
+		// the root. The endpoint is expected to return an HTML fragment (a list
+		// of results); it is dropped into `.dcc-globalsearch__results` verbatim,
+		// so the endpoint owns escaping - same contract as any htmx partial.
+		window.Alpine.data("dccGlobalSearch", () => ({
+			q: "",
+			html: "",
+			open: false,
+			_url: "",
+			_seq: 0,
+			init() {
+				this._url = this.$el.dataset.endpoint || "";
+			},
+			close() {
+				this.open = false;
+			},
+			run() {
+				if (!this._url || this.q.trim() === "") {
+					this.html = "";
+					this.open = false;
+					return;
+				}
+				const seq = ++this._seq;
+				const sep = this._url.indexOf("?") === -1 ? "?" : "&";
+				fetch(this._url + sep + "q=" + encodeURIComponent(this.q), {
+					headers: { "X-Requested-With": "XMLHttpRequest" },
+				})
+					.then((r) => (r.ok ? r.text() : ""))
+					.then((text) => {
+						if (seq !== this._seq) return; // a newer query already fired
+						this.html = text;
+						this.open = !!text.trim();
+					})
+					.catch(() => {});
+			},
+		}));
+
 		window.Alpine.data("dccBell", () => ({
 			open: false,
 			unread: 0,

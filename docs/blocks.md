@@ -59,7 +59,8 @@ the standard `Component` contract.
 |---|---|---|
 | `AppShell` | `topbar` `sidebar` `content` `footer` | `.sidebar_width(str)` - the page frame; reuses `.dcc-panel` + `dccShell()` |
 | `Navbar` | `start` `end` | `.brand(str)` |
-| `Sidebar` | `default` `footer` | `.brand(str)`, `.brand_icon(str)`, `.brand_image(url)`, `.brand_image_alt(str)`, `.brand_url(url \| url_name)` |
+| `Sidebar` | `default` `footer` | `.brand(str)`, `.brand_icon(str)`, `.brand_image(url)`, `.brand_image_alt(str)`, `.brand_url(url \| url_name)`, `.searchable(bool)` - client-side link filter |
+| `GlobalSearch` | - | `.endpoint(url)` - a topbar search input; `GET`s `?q=` and drops the HTML fragment into a results panel |
 | `Footer` | `default` | - |
 | `NotificationBell` | - | `.endpoint(url)`, `.interval(seconds)` - polls; defaults to the studio endpoint and 30s |
 | `PageShell` | `header` `content` | `.title(str)`, `.eyebrow(str)`, `.summary(str)`, `.accent(css_color)` - a titled page body |

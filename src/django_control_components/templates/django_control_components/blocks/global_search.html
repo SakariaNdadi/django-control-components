@@ -1,0 +1,12 @@
+{% load dcc_tags %}
+<div class="dcc-globalsearch"
+     x-data="dccGlobalSearch()"
+     data-endpoint="{{ endpoint }}"
+     @click.outside="close()">
+  <span class="dcc-globalsearch__icon" aria-hidden="true">{% dcc_icon "magnifying-glass" %}</span>
+  <input type="search" class="dcc-input dcc-globalsearch__input" name="q"
+         x-model="q" x-on:input.debounce.300ms="run()" x-on:focus="run()"
+         placeholder="Search" aria-label="Global search" autocomplete="off">
+  <div class="dcc-globalsearch__results" x-show="open && html" x-html="html"
+       role="listbox" style="display:none"></div>
+</div>
