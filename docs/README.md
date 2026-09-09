@@ -428,5 +428,8 @@ Every component accepts either fluent chaining `.make().foo()` or explicit `kwar
 | [testing.md](testing.md) | Testing schemas, tables, mixin views, actions; `@override_settings(DCC=...)` |
 | [navigation.md](navigation.md) | Sidebar + nav blocks (`NavLink`, collapsible `NavGroup`, `NavUser`), the `dccNav` collapse contract, a11y |
 | [blocks.md](blocks.md) | The `Block` tree: layout + chrome blocks, `BLOCK_TYPES`, the node codec, custom `@block` registration, spec migrations |
+| [permissions.md](permissions.md) | Panel guards, `Resource.can`, three-state visibility, studio access, action authorization - and which of them actually enforce |
+| [integration.md](integration.md) | Dropping DCC into a project that already has its own `base.html`: `{% dcc_render %}`, the mixins, `AppShell`, shadowing the panel base |
+| [studio.md](studio.md) | The no-code app: builders, spec sandbox, escape hatches, notifications, data sources |
 | [../CHANGELOG.md](../CHANGELOG.md) | Release notes; `0.x` breaking-change policy |
 

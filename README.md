@@ -33,13 +33,14 @@ doc builds on. Then:
 [Settings & install](docs/settings.md) · [Views & mixins](docs/views-and-mixins.md) ·
 [Callbacks](docs/callbacks.md) · [Errors](docs/errors.md) ·
 [Deployment](docs/deployment.md) · [Testing](docs/testing.md) · [Navigation](docs/navigation.md) ·
-[Blocks](docs/blocks.md)
+[Blocks](docs/blocks.md) · [Permissions](docs/permissions.md) ·
+[Integrating into an existing project](docs/integration.md)
 
 [Schemas / forms](docs/schemas.md) · [Tables](docs/tables.md) ·
 [Actions](docs/actions.md) · [Infolists](docs/infolists.md) ·
 [Wizards](docs/wizards.md) · [UI primitives](docs/ui.md) · [Images](docs/images.md) ·
 [Panels & Resources](docs/panels.md) · [Widgets](docs/widgets.md) ·
-[Studio (dev-only)](docs/no-code.md) - index: [docs/](docs/README.md)
+[Studio (dev-only)](docs/studio.md) / [spec format](docs/no-code.md) - index: [docs/](docs/README.md)
 
 A complete running project - every builder wired to a live SQLite database -
 lives in [`web/`](web/).

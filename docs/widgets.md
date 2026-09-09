@@ -89,6 +89,36 @@ library is overkill.
 `TableWidget.make(label, table)` - `table` is a `Table` or `table(request)`. The
 table keeps its own toolbar, pagination and refresh.
 
+### No-code: `data_source`
+
+In a stored spec there is no `Table` object to pass, so a `data_source` dict
+describes one instead:
+
+```json
+{"model": "demo.Task",
+ "fields": ["title", "priority", "due_on"],
+ "filter": {"status": "open"},
+ "order_by": ["-due_on"],
+ "limit": 50}
+```
+
+`resolve_table(spec, request)` turns that into a `Table` with a `TextColumn` per
+named field - or every concrete field when `fields` is omitted.
+
+Every key is allowlisted, and validation happens before any query runs:
+
+- `model` must be in `DCC["STUDIO_MODELS"]` (default `[]`, so this is opt-in);
+- every entry in `fields`, every `filter` key and every `order_by` term must be
+  an allowed path of that model, resolved one relation deep. Sensitive fields
+  (`password`, `is_superuser`, `is_staff`, `groups`, `user_permissions`,
+  `last_login`) and the auth / sessions / contenttypes models are never allowed;
+- `filter` keys may carry one lookup suffix from a fixed set;
+- `limit` must be a positive integer and is capped at 200 regardless.
+
+Nothing in the dict comes from a query parameter - it is authored in the studio
+and stored. A field a viewer cannot be shown is refused at validation time, not
+filtered out afterwards.
+
 ## Writing a custom widget
 
 A widget is a Python class + a content template. Override `context(request)` for

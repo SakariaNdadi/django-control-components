@@ -106,3 +106,94 @@ footer with a `ThemeToggle` and - when signed in - a `NavUser` card.
 The sidebar can be collapsed to an icon rail (the `«` button, desktop) -
 `dccShell.railed`, persisted to `localStorage`. It scrolls within itself
 (`position: sticky; height: 100vh` on desktop, drawer on mobile).
+
+### How the tree is built
+
+`build_nav(panel, request)` is four steps:
+
+1. **code nodes** - the resources and `PanelPage`s the panel was constructed
+   with, plus any studio specs and dashboards, from `Panel.navigation(request)`;
+2. **stored nodes** - `NavItem` rows for this panel, when the studio app is
+   installed. If it is not, this step is skipped entirely;
+3. **active marking** - the node whose URL is the longest prefix of
+   `request.path` is marked active. Exactly one node wins;
+4. **grouping** - flat `group=` strings are folded into heading nodes.
+
+Ordering: stored rows sort by `(order, pk)`; code groups appear in the order
+they are first seen. There is no global sort, so a code group and a stored group
+do not interleave - code nodes come first.
+
+Everything above produces `NavNode`s - a plain dataclass, not blocks. A node
+with no URL and no `external` flag *is* a heading. `nav_blocks(tree)` turns that
+into blocks, and `panel_sidebar(panel, request)` is just
+`sidebar_from_tree(panel, build_nav(panel, request), request)`.
+
+### Rendering the tree somewhere else
+
+`sidebar_from_tree(panel, tree, request, *, footer=True)` is the seam. Pass it a
+tree you built or filtered yourself:
+
+```python
+from django_control_components.panels.nav import build_nav, sidebar_from_tree
+
+tree = [n for n in build_nav(panel, request) if n.label != "Admin"]
+sidebar = sidebar_from_tree(panel, tree, request, footer=False)
+```
+
+`footer=False` drops the `ThemeToggle` / `NavUser` block - what the studio's nav
+preview uses, since it renders inside a page that already has both.
+
+If you have no `Panel` at all, skip this and build a `Sidebar` block directly -
+see [integration.md](integration.md).
+
+## Stored nav (`NavItem`)
+
+With the studio installed, nav can also come from the database, edited in the nav
+builder and merged into the tree after the code nodes.
+
+| `target_kind` | `target` is | permission-checked |
+|---|---|---|
+| `group` | – (a heading) | – |
+| `url` | a site-relative path or `http(s)://…` | – |
+| `url_name` | a URL name to reverse | – |
+| `resource` | a resource slug | yes - `view` |
+| `spec` | a studio spec slug | yes - `view` |
+| `page` | a stored `Page` | yes - visibility |
+| `dashboard` | a dashboard slug | **no** - visibility only |
+
+`dashboard` is the one target kind with no permission check beyond the row's own
+`is_visible_to`. Its own view still authorizes on dispatch, so this is a "do not
+treat the nav as the gate" caveat, not a hole.
+
+Two model invariants, enforced in `clean()` and applied on every save:
+
+- **nesting is capped at two levels**, with an ancestor cycle check;
+- a `url` target must be site-relative or `http(s)` - which is what rejects
+  `javascript:`.
+
+Unresolvable targets vanish rather than erroring: a `NoReverseMatch`, a failed
+permission check or a missing row yields an empty URL, and any non-group node
+without a URL is dropped from the tree.
+
+> `NavItem.visibility` defaults to `restricted`, so a row created in code with
+> no `visibility=` is invisible to everyone but superusers. See
+> [permissions.md](permissions.md).
+
+```python
+NavItem.objects.create(
+    panel="ops", label="Runbook", order=10,
+    target_kind=NavItem.Kind.URL, target="/runbook/",
+    visibility="auth",
+)
+```
+
+Concurrency: the sidebar is many rows, so a `NavDocument` row per panel carries a
+`revision` counter. The nav builder posts the revision it loaded; a mismatch is a
+409 carrying the server's copy, rather than a silent overwrite of someone else's
+edit.
+
+## Where to go next
+
+- [permissions.md](permissions.md) - the filters applied to the tree
+- [integration.md](integration.md) - a sidebar without a panel
+- [blocks.md](blocks.md) - the block tree these are part of
