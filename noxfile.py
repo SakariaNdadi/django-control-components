@@ -57,7 +57,9 @@ def e2e(session: nox.Session) -> None:
         env={"UV_PROJECT_ENVIRONMENT": session.virtualenv.location},
     )
     session.run("playwright", "install", "--with-deps", "chromium")
-    session.run("pytest", "-q", "-m", "e2e", "tests/e2e", *session.posargs)
+    session.run(
+        "pytest", "-q", "-m", "e2e", "--ds=tests.e2e.settings", "tests/e2e", *session.posargs
+    )
 
 
 @nox.session

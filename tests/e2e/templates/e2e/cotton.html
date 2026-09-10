@@ -1,0 +1,47 @@
+{% extends "e2e/base.html" %}
+{% block main %}
+<c-dcc.heading level="1" title="Cotton tags" />
+
+<section id="buttons">
+  <c-dcc.button variant="primary" label="Primary" />
+  <c-dcc.button variant="secondary" label="Secondary" />
+  <c-dcc.button variant="danger" label="Danger" />
+  <c-dcc.button variant="ghost" label="Ghost" size="sm" />
+  <c-dcc.button variant="primary" label="Icon" icon="check" />
+  <c-dcc.button variant="primary" label="Disabled" disabled />
+  <c-dcc.button variant="link" label="As link" href="/e2e/cotton/?x=1" />
+  <c-dcc.button variant="primary" type="submit" label="Submit type" />
+</section>
+
+<section id="badges">
+  <c-dcc.badge label="Live" variant="success" />
+  <c-dcc.badge label="Draft" variant="muted" />
+  <c-dcc.badge label="Error" variant="danger" />
+</section>
+
+<section id="headings">
+  <c-dcc.heading level="2" title="Level two" />
+  <c-dcc.heading level="3" title="Level three" />
+</section>
+
+<section id="modal">
+  <c-dcc.modal id="cotton-modal" header="Confirm" trigger_label="Open cotton modal" trigger_variant="primary">
+    <p id="cotton-modal-body">Modal body content.</p>
+    <button type="button" class="dcc-btn dcc-btn--secondary" x-on:click="open = false">Dismiss</button>
+  </c-dcc.modal>
+</section>
+
+<form id="cotton-form" method="post" onsubmit="return false">
+  <section id="fields">
+    <c-dcc.form.input name="email" id="f-email" label="Email" type="email" placeholder="you@example.com" required="True" />
+    <c-dcc.form.textarea name="bio" id="f-bio" label="Bio" rows="3" />
+    <c-dcc.form.password name="pw" id="f-pw" label="Password" />
+    <c-dcc.form.checkbox name="agree" id="f-agree" label="I agree" />
+    <c-dcc.form.toggle name="featured" id="f-featured" />
+    <c-dcc.form.radio name="plan" id="f-plan" label="Plan" :choices="choices" value="free" />
+    <c-dcc.form.select name="status" id="f-status" label="Status" :options="options" selected_values="draft" />
+    <c-dcc.form.select name="tags" id="f-tags" label="Tags" :options="options" multiple="1" searchable="1" />
+    <c-dcc.form.upload name="cover" id="f-cover" label="Cover" />
+  </section>
+</form>
+{% endblock %}

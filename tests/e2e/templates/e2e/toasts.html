@@ -1,0 +1,15 @@
+{% extends "e2e/base.html" %}
+{% block main %}
+<script>
+  function dccE2EFire(name, detail) {
+    document.body.dispatchEvent(new CustomEvent(name, { detail: detail, bubbles: true }));
+  }
+</script>
+<button type="button" id="toast-string" onclick="dccE2EFire('dcc:toast', 'Saved')">string</button>
+<button type="button" id="toast-object"
+  onclick="dccE2EFire('dcc:toast', { title: 'Object toast', level: 'success' })">object</button>
+<button type="button" id="toast-notify"
+  onclick="dccE2EFire('dcc:notify', { title: 'Notified', body: 'now', level: 'error' })">notify</button>
+<button type="button" id="toast-batch"
+  onclick="dccE2EFire('dcc:notify', [{ title: 'One' }, { title: 'Two' }])">batch</button>
+{% endblock %}

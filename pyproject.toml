@@ -74,6 +74,10 @@ dev = [
 e2e = [
     "pytest-playwright>=0.5",
     "pytest-django>=4.9",
+    "django-control-components-studio",
+    "pillow>=11",
+    "markdown>=3",
+    "pygments>=2",
 ]
 
 [tool.hatch.build.targets.wheel]
@@ -163,6 +167,12 @@ warn_unused_ignores = false
 
 [[tool.mypy.overrides]]
 module = "allauth.*"
+ignore_missing_imports = true
+
+[[tool.mypy.overrides]]
+# the e2e suite (tests/e2e) drives the `web/demo` project, which is not on the
+# type-check path
+module = "demo.*"
 ignore_missing_imports = true
 
 [tool.django-stubs]
