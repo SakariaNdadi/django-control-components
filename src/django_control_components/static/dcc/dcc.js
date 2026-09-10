@@ -481,13 +481,20 @@
 					/* no storage */
 				}
 				this._open =
-					stored != null ? !!stored : this.$el.dataset.defaultOpen === "1";
+					stored != null ? !!stored : this.$root.dataset.defaultOpen === "1";
+				// Keep the attribute on the group <li> in sync so the
+				// `[data-default-open="0"]` stylesheet rule (collapsed from first
+				// paint) tracks live state and never fights `x-show` after a
+				// toggle. `$root` is the <li>; `$el` inside `toggle()` is the
+				// button the @click sits on.
+				this.$root.dataset.defaultOpen = this._open ? "1" : "0";
 			},
 			isOpen() {
 				return this._open;
 			},
 			toggle() {
 				this._open = !this._open;
+				this.$root.dataset.defaultOpen = this._open ? "1" : "0";
 				let m = {};
 				try {
 					m = JSON.parse(localStorage.getItem("dcc-nav-open") || "{}");
