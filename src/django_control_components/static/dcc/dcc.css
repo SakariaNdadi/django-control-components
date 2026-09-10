@@ -527,9 +527,14 @@
 .dcc-panel__railtoggle:hover { color: var(--dcc-primary); }
 .dcc-panel__railtoggle:focus-visible { outline: 2px solid var(--dcc-focus); }
 
-/* railed (collapsed) sidebar - icons only, desktop only */
+/* railed (collapsed) sidebar - icons only, desktop only.
+   `html.dcc-pre-railed` is set by the boot script before first paint so the
+   collapsed width is right immediately; `.dcc-panel.is-railed` is the Alpine
+   state that follows. */
 @media (min-width: 48.0625rem) {
-  .dcc-panel.is-railed .dcc-panel__nav { width: 3.75rem; padding-inline: 0.4rem; }
+  .dcc-panel.is-railed .dcc-panel__nav,
+  html.dcc-pre-railed .dcc-panel__nav { width: 3.75rem; padding-inline: 0.4rem; }
+
   .dcc-panel.is-railed .dcc-nav__text,
   .dcc-panel.is-railed .dcc-nav__chevron,
   .dcc-panel.is-railed .dcc-nav__badge,
@@ -537,16 +542,38 @@
   .dcc-panel.is-railed .dcc-panel__brand strong,
   .dcc-panel.is-railed .dcc-nav__userinfo,
   .dcc-panel.is-railed .dcc-nav__theme,
-  .dcc-panel.is-railed .dcc-nav__useremail { display: none; }
-  .dcc-panel.is-railed .dcc-nav__sublist { padding-inline-start: 0; }
+  .dcc-panel.is-railed .dcc-nav__useremail,
+  html.dcc-pre-railed .dcc-nav__text,
+  html.dcc-pre-railed .dcc-nav__chevron,
+  html.dcc-pre-railed .dcc-nav__badge,
+  html.dcc-pre-railed .dcc-nav__heading,
+  html.dcc-pre-railed .dcc-panel__brand strong,
+  html.dcc-pre-railed .dcc-nav__filter,
+  html.dcc-pre-railed .dcc-nav__userinfo,
+  html.dcc-pre-railed .dcc-nav__theme,
+  html.dcc-pre-railed .dcc-nav__useremail { display: none; }
+
+  .dcc-panel.is-railed .dcc-nav__filter { display: none; }
+
+  .dcc-panel.is-railed .dcc-nav__sublist,
+  html.dcc-pre-railed .dcc-nav__sublist { padding-inline-start: 0; }
+
   .dcc-panel.is-railed .dcc-nav__link,
   .dcc-panel.is-railed .dcc-nav__grouptoggle,
-  .dcc-panel.is-railed .dcc-nav__usercard { justify-content: center; }
+  .dcc-panel.is-railed .dcc-nav__usercard,
+  html.dcc-pre-railed .dcc-nav__link,
+  html.dcc-pre-railed .dcc-nav__grouptoggle,
+  html.dcc-pre-railed .dcc-nav__usercard { justify-content: center; }
 }
 .dcc-nav, .dcc-nav__sublist {
   list-style: none; margin: 0; padding: 0;
   display: flex; flex-direction: column; gap: 0.125rem;
 }
+/* A group the server rendered closed (default, or the `dcc-nav-open` cookie)
+   is collapsed up front - so with JS there is nothing for Alpine to hide on
+   load (no menu flash), and without JS the group simply stays as the server
+   left it. Alpine's `x-show` takes over the moment it initialises. */
+.dcc-nav__group[data-default-open="0"] > .dcc-nav__sublist { display: none; }
 .dcc-nav { flex: 1; overflow-y: auto; overflow-x: hidden; }
 .dcc-nav__group { margin-top: 0.75rem; }
 .dcc-nav__grouplabel {

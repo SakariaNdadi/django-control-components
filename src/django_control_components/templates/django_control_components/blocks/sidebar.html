@@ -10,7 +10,7 @@
     {% if brand_url %}</a>{% else %}</div>{% endif %}
   {% endif %}
   {% if searchable %}
-  <div class="dcc-nav__filter" x-show="!railed">
+  <div class="dcc-nav__filter">
     <input type="search" class="dcc-input" x-model.debounce.150ms="q"
            placeholder="Filter links" aria-label="Filter navigation links">
   </div>

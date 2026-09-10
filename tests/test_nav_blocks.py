@@ -284,6 +284,30 @@ def test_prose_html_is_code_only():
     assert "html" in CODE_ONLY_SETTERS
 
 
+def test_nav_group_renders_collapsed_when_the_cookie_says_so():
+    """dccNav mirrors toggles into the `dcc-nav-open` cookie; the group then
+    renders already collapsed so Alpine has no menu-flash to cause on load."""
+    import base64
+    import json
+
+    from django_control_components.blocks.nav import _group_id
+
+    gid = _group_id("Reports")
+    grp = NavGroup().label("Reports").open().fill("default", [NavLink().label("x").to("/x/")])
+
+    def cookie(value: object) -> str:
+        return base64.b64encode(json.dumps(value).encode()).decode()
+
+    req = RequestFactory().get("/")
+    assert 'data-default-open="1"' in str(grp.render(RenderContext(request=req)))
+
+    req.COOKIES["dcc-nav-open"] = cookie({gid: False})
+    assert 'data-default-open="0"' in str(grp.render(RenderContext(request=req)))
+
+    req.COOKIES["dcc-nav-open"] = "@@@not base64@@@"  # malformed -> default
+    assert 'data-default-open="1"' in str(grp.render(RenderContext(request=req)))
+
+
 def test_nav_group_sublist_has_no_x_cloak(soup):
     # progressive enhancement: the sublist renders visible; Alpine collapses
     # closed groups. x-cloak would hide it forever if Alpine never loads.

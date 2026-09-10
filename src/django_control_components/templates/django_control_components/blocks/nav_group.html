@@ -9,7 +9,8 @@
     <span class="dcc-nav__text">{{ label }}</span>
     <span class="dcc-nav__chevron" aria-hidden="true">{% dcc_icon "chevron-down" %}</span>
   </button>
-  <ul class="dcc-nav__sublist" id="{{ group_id }}-list" role="group" x-show="isOpen()" x-transition.opacity>
+  <ul class="dcc-nav__sublist" id="{{ group_id }}-list" role="group"
+      x-show="isOpen()" x-transition.opacity>
     {{ slots.default }}
   </ul>
 </li>

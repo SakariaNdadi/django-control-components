@@ -9,7 +9,10 @@ navigation tree through these same blocks.
 
 from __future__ import annotations
 
+import base64
+import binascii
 import hashlib
+import json
 from typing import TYPE_CHECKING, Any, Self
 
 from django.urls import NoReverseMatch, reverse
@@ -40,6 +43,26 @@ def _resolve_url(value: str) -> tuple[str, bool]:
 
 def _group_id(text: str) -> str:
     return "navg-" + hashlib.md5(text.encode("utf-8")).hexdigest()[:8]  # noqa: S324
+
+
+def _group_open(ctx: Any, group_id: str, default: bool) -> bool:
+    """The server-rendered open state for a nav group.
+
+    ``dccNav`` mirrors each toggle into the ``dcc-nav-open`` cookie (as well as
+    ``localStorage``). Reading it here lets the group render already collapsed
+    for a returning viewer, so Alpine has nothing to hide on load - no flash of
+    the whole menu. A viewer with no cookie (or no JS) gets ``default``.
+    """
+    request = getattr(ctx, "request", None)
+    raw = getattr(request, "COOKIES", {}).get("dcc-nav-open") if request else None
+    if not raw:
+        return default
+    try:
+        state = json.loads(base64.b64decode(raw))
+    except (ValueError, TypeError, binascii.Error):
+        return default
+    value = state.get(group_id) if isinstance(state, dict) else None
+    return bool(value) if isinstance(value, bool) else default
 
 
 def _request_path(ctx: RenderContext) -> str:
@@ -165,8 +188,9 @@ class NavGroup(Block):
         data["icon_html"] = render_icon(self._config.get("icon"))
         data["image"] = self._config.get("image", "")
         data["image_alt"] = self._config.get("image_alt", "")
-        data["group_id"] = self._config.get("id") or _group_id(label)
-        data["default_open"] = bool(self._config.get("open"))
+        group_id = self._config.get("id") or _group_id(label)
+        data["group_id"] = group_id
+        data["default_open"] = _group_open(ctx, group_id, bool(self._config.get("open")))
         return data
 
 

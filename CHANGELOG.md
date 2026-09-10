@@ -24,6 +24,12 @@ Renamed and re-versioned release of the rebuild described under `1.0.0b1` below.
   padded full-width element fits its flex allocation instead of overflowing the
   viewport, and the content column reflows the moment the sidebar rails.
   `panels/base.html` and `AppShell` both wrap `<main>` in `.dcc-panel__body`.
+- **No more flash of the full menu (or the un-railed sidebar) on navigation.**
+  `dccNav` mirrors each group toggle into a `dcc-nav-open` cookie, so a group
+  renders already collapsed for a returning viewer and Alpine has nothing to
+  hide on load; `{% dcc_assets %}` emits a tiny synchronous boot script that
+  seeds the railed width and the theme from `localStorage` before first paint.
+  Neither change needs `x-cloak` - the nav still works with no JS.
 
 ### Performance
 

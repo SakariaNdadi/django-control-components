@@ -50,11 +50,17 @@ miss → `#`).
 
 `NavGroup` renders a `<button aria-expanded aria-controls>` over a
 `role="group"` sublist. The `dccNav` Alpine component holds the open state and
-persists it per group id to `localStorage` (`dcc-nav-open`), so a section the
-viewer collapses stays collapsed on the next visit. `.open()` sets the default
-for a first-time viewer. The panel builds every group `.open()`, so a
-first-time viewer sees the whole tree expanded and `localStorage` takes over
-from there.
+persists each toggle to **both** `localStorage` and a `dcc-nav-open` cookie
+(base64 JSON, one-year), so a section the viewer collapses stays collapsed on
+the next visit. `.open()` sets the default; the panel builds every group
+`.open()`, so a first-time viewer sees the whole tree expanded.
+
+The cookie is what keeps navigation flicker-free: `NavGroup.get_view_data`
+reads it and renders `data-default-open="0"` for a group the viewer collapsed,
+and `.dcc-nav__group[data-default-open="0"] > .dcc-nav__sublist { display: none }`
+in the shipped stylesheet collapses it from the first paint - Alpine has nothing
+to hide on load. No `x-cloak`: with JS disabled the nav still renders (every
+group open) and stays usable.
 
 No `@alpinejs/collapse` plugin is used - the sublist toggles with `x-show` +
 `x-transition`.

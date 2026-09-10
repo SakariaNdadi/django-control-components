@@ -29,6 +29,17 @@ VENDOR_NAMES = {
     _ALPINE_FOCUS_SRC: "alpine-focus.min.js",
 }
 
+# Runs synchronously in <head>, before first paint: seed the theme and the
+# railed-sidebar width from localStorage so Alpine's later init does not cause a
+# flash. dccShell reads `dcc-pre-railed` back; applyTheme() re-applies the theme
+# (idempotent).
+_BOOT_SCRIPT = (
+    "<script>(function(){try{var d=document.documentElement;"
+    "if(localStorage.getItem('dcc-nav-railed')==='1')d.classList.add('dcc-pre-railed');"
+    "var t=localStorage.getItem('dcc-theme');"
+    "if(t&&t!=='auto')d.setAttribute('data-theme',t);}catch(e){}})();</script>"
+)
+
 
 def _script(
     url: str, *, vendor: bool, vendor_dir: str, sri: dict[str, str], vendor_key: str | None = None
@@ -70,7 +81,7 @@ def dcc_assets(
     vendor_dir = dcc_settings.VENDOR_ASSET_DIR
     sri = dcc_settings.ASSET_SRI or {}
 
-    parts = [f'<link rel="stylesheet" href="{static("dcc/dcc.css")}">']
+    parts = [_BOOT_SCRIPT, f'<link rel="stylesheet" href="{static("dcc/dcc.css")}">']
     if icons:
         icon_html = str(icon_assets())
         if icon_html:

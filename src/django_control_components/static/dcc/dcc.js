@@ -488,12 +488,24 @@
 			},
 			toggle() {
 				this._open = !this._open;
+				let m = {};
 				try {
-					const m = JSON.parse(localStorage.getItem("dcc-nav-open") || "{}");
+					m = JSON.parse(localStorage.getItem("dcc-nav-open") || "{}");
 					m[id] = this._open;
 					localStorage.setItem("dcc-nav-open", JSON.stringify(m));
 				} catch (e) {
-					/* no storage */
+					m[id] = this._open; /* no storage - still write the cookie */
+				}
+				// mirror into a cookie (base64 - JSON's quotes are not valid in a
+				// raw cookie value) so the server renders this group in the right
+				// state next load and Alpine has no flash to cause
+				try {
+					document.cookie =
+						"dcc-nav-open=" +
+						btoa(JSON.stringify(m)) +
+						";path=/;max-age=31536000;samesite=lax";
+				} catch (e) {
+					/* ignore */
 				}
 			},
 		}));
@@ -534,12 +546,14 @@
 
 		window.Alpine.data("dccShell", () => ({
 			navOpen: false,
-			railed: false,
+			// seeded from <html class="dcc-pre-railed">, which the inline boot
+			// script in {% dcc_assets %} sets before first paint - so the rail
+			// width is right immediately, no load-time flash.
+			railed: document.documentElement.classList.contains("dcc-pre-railed"),
 			theme: "auto",
 			init() {
 				try {
 					this.theme = localStorage.getItem("dcc-theme") || "auto";
-					this.railed = localStorage.getItem("dcc-nav-railed") === "1";
 				} catch (e) {
 					this.theme = "auto";
 				}
@@ -550,6 +564,7 @@
 			},
 			toggleRail() {
 				this.railed = !this.railed;
+				document.documentElement.classList.toggle("dcc-pre-railed", this.railed);
 				try {
 					localStorage.setItem("dcc-nav-railed", this.railed ? "1" : "0");
 				} catch (e) {
