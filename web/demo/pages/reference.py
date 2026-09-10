@@ -44,6 +44,7 @@ _PAGES: list[tuple[str, str, str]] = [
     ("views-and-mixins", "Views & mixins", "code"),
     ("callbacks", "Callbacks", "link"),
     ("errors", "Errors", "triangle-exclamation"),
+    ("configuration-reference", "Configuration API", "sliders"),
     ("studio", "Studio", "wand-magic-sparkles"),
     ("no-code", "Studio spec format", "file-code"),
     ("testing", "Testing", "vial"),
