@@ -1,0 +1,17 @@
+{% load dcc_tags %}<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>e2e nav</title>
+  {% dcc_assets %}
+</head>
+<body class="dcc-body">
+  <div class="dcc-panel" x-data="dccShell()" :class="{ 'is-nav-open': navOpen, 'is-railed': railed }">
+    {{ sidebar }}
+    <div class="dcc-panel__body">
+      <main class="dcc-panel__main"><p id="page-marker">page {{ page }}</p></main>
+    </div>
+  </div>
+</body>
+</html>

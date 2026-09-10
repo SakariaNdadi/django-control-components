@@ -71,6 +71,10 @@ dev = [
     "nox>=2024.10",
     "diff-cover>=9",
 ]
+e2e = [
+    "pytest-playwright>=0.5",
+    "pytest-django>=4.9",
+]
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/django_control_components"]
@@ -84,7 +88,8 @@ DJANGO_SETTINGS_MODULE = "tests.settings"
 python_files = ["test_*.py"]
 testpaths = ["tests"]
 pythonpath = ["."]
-addopts = "--strict-markers --strict-config"
+addopts = "--strict-markers --strict-config -m 'not e2e'"
+markers = ["e2e: browser test driven by Playwright (needs a browser + network; deselected by default)"]
 
 [tool.coverage.run]
 branch = true

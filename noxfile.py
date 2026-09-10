@@ -44,6 +44,23 @@ def tests(session: nox.Session, django: str) -> None:
 
 
 @nox.session
+def e2e(session: nox.Session) -> None:
+    """Playwright browser tests (tests/e2e). Needs outbound network for CDN assets."""
+    session.run_install(
+        "uv",
+        "sync",
+        "--no-default-groups",
+        "--group",
+        "dev",
+        "--group",
+        "e2e",
+        env={"UV_PROJECT_ENVIRONMENT": session.virtualenv.location},
+    )
+    session.run("playwright", "install", "--with-deps", "chromium")
+    session.run("pytest", "-q", "-m", "e2e", "tests/e2e", *session.posargs)
+
+
+@nox.session
 def lint(session: nox.Session) -> None:
     _install(session)
     session.run("ruff", "check", ".")
