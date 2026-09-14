@@ -4,7 +4,7 @@ Filament-inspired schema, table, and action builders for Django. Declare UI in
 Python; it renders itself through [django-cotton](https://django-cotton.com/),
 wired to real `django.forms` validation.
 
-> **`0.0.1`** (alpha) - a full rebuild. The old prop-driven cotton templates are
+> **`0.0.1`** (alpha, unreleased) - a full rebuild. The old prop-driven cotton templates are
 > gone. See [MIGRATION.md](MIGRATION.md) and [CHANGELOG.md](CHANGELOG.md).
 
 ## Status
@@ -13,6 +13,7 @@ wired to real `django.forms` validation.
 |---|---|
 | UI primitives (`Button`, `Badge`, `Icon`, `Checkbox`, `Modal`, `Menu`) + icon-set registry | ✅ |
 | Form schemas (`Schema`, `Section`, `Grid`, `Fieldset`, `Tabs`, fields) | ✅ |
+| Django formsets + inline relation-manager foundation | 🧪 |
 | django.forms bridge (decorate a `Form`/`ModelForm`, real validation) | ✅ |
 | Reactive searchable `Select` / `MultiSelect`; conditional visibility (zero requests) | ✅ |
 | Image upload + Pillow validation + processing + thumbnails | ✅ |
@@ -23,7 +24,9 @@ wired to real `django.forms` validation.
 | Panels / Resources (list · create · edit · view · **delete**), admin-independent | ✅ |
 | Infolists; dashboard **widgets** + `DashboardPage`; custom pages | ✅ |
 | Studio - dev-only rapid prototyping from stored JSON (`dcc[studio]`, `django_control_components.studio`) | ✅ |
-| Global search, relation managers, a visual dashboard builder | 🔜 |
+| Global search | ✅ |
+| Visual dashboard builder (Studio, dev-only) | ✅ |
+| Relation managers | 🔜 |
 
 ## Docs
 
@@ -34,9 +37,10 @@ doc builds on. Then:
 [Callbacks](docs/callbacks.md) · [Errors](docs/errors.md) ·
 [Deployment](docs/deployment.md) · [Testing](docs/testing.md) · [Navigation](docs/navigation.md) ·
 [Blocks](docs/blocks.md) · [Permissions](docs/permissions.md) ·
-[Integrating into an existing project](docs/integration.md)
+[Integrating into an existing project](docs/integration.md) ·
+[HTMX compatibility](docs/htmx-compatibility.md) · [Release checklist](RELEASE_CHECKLIST.md)
 
-[Schemas / forms](docs/schemas.md) · [Tables](docs/tables.md) ·
+[Schemas / forms](docs/schemas.md) · [Formsets & relations](docs/formsets.md) · [Tables](docs/tables.md) ·
 [Actions](docs/actions.md) · [Infolists](docs/infolists.md) ·
 [Wizards](docs/wizards.md) · [UI primitives](docs/ui.md) · [Images](docs/images.md) ·
 [Panels & Resources](docs/panels.md) · [Widgets](docs/widgets.md) ·

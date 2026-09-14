@@ -85,6 +85,7 @@ block the same way: `BLOCK_TYPES.register(MyBlock, label=…, icon=…, category
 ```python
 from django_control_components.blocks import Block, block
 
+
 @block("Callout", icon="bullhorn")
 class Callout(Block):
     slots = ("default",)

@@ -4,6 +4,7 @@ from .fields.boolean import Checkbox, Toggle
 from .fields.choice import MultiSelect, Radio, Select
 from .fields.file import FileUpload
 from .fields.text import EmailInput, Hidden, PasswordInput, Textarea, TextInput
+from .formsets import FormSet, RelationManager
 from .layout import Fieldset, Grid, Section, Tab, Tabs
 from .schema import Schema
 
@@ -42,11 +43,13 @@ __all__ = [
     "EmailInput",
     "Fieldset",
     "FileUpload",
+    "FormSet",
     "Grid",
     "Hidden",
     "MultiSelect",
     "PasswordInput",
     "Radio",
+    "RelationManager",
     "Schema",
     "Section",
     "Select",

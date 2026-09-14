@@ -50,7 +50,10 @@ class ProjectWizard(WizardView):
     steps_config = [
         WizardStep(
             "details",
-            Schema.make().form(ProjectDetailsForm).strict().schema(
+            Schema.make()
+            .form(ProjectDetailsForm)
+            .strict()
+            .schema(
                 [
                     Section.make("Project information").schema(
                         [TextInput.make("name").required(), TextInput.make("description")]
@@ -62,11 +65,14 @@ class ProjectWizard(WizardView):
         ),
         WizardStep(
             "settings",
-            Schema.make().form(ProjectSettingsForm).strict().schema(
+            Schema.make()
+            .form(ProjectSettingsForm)
+            .strict()
+            .schema(
                 [
-                    Section.make("Configuration").columns(2).schema(
-                        [Select.make("tier").searchable(), Toggle.make("is_public")]
-                    ),
+                    Section.make("Configuration")
+                    .columns(2)
+                    .schema([Select.make("tier").searchable(), Toggle.make("is_public")]),
                 ]
             ),
             title="Plan & privacy",

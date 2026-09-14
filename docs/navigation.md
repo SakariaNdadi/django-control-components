@@ -192,8 +192,11 @@ without a URL is dropped from the tree.
 
 ```python
 NavItem.objects.create(
-    panel="ops", label="Runbook", order=10,
-    target_kind=NavItem.Kind.URL, target="/runbook/",
+    panel="ops",
+    label="Runbook",
+    order=10,
+    target_kind=NavItem.Kind.URL,
+    target="/runbook/",
     visibility="auth",
 )
 ```

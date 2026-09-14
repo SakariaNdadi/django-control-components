@@ -152,7 +152,9 @@ class TaskCreateView(SchemaFormMixin, CreateView):
             .form(TaskForm)  # your standard Django ModelForm does the validation
             .schema(
                 [
-                    Section.make("Task").columns(2).schema(
+                    Section.make("Task")
+                    .columns(2)
+                    .schema(
                         [
                             TextInput.make("title").required().column_span_full(),
                             Select.make("priority"),
@@ -191,7 +193,13 @@ class TaskCreateView(SchemaFormMixin, CreateView):
 from django.views.generic import TemplateView
 from django_control_components.actions import Action
 from django_control_components.tables import (
-    BadgeColumn, BooleanColumn, DateColumn, SelectFilter, Table, TableMixin, TextColumn,
+    BadgeColumn,
+    BooleanColumn,
+    DateColumn,
+    SelectFilter,
+    Table,
+    TableMixin,
+    TextColumn,
 )
 from myapp.models import Task
 
@@ -272,20 +280,30 @@ class ProjectWizard(WizardView):
     steps_config = [
         WizardStep(
             "details",
-            Schema.make().form(ProjectDetailsForm).strict().schema(
-                [Section.make("Project").schema(
-                    [TextInput.make("name").required(), TextInput.make("description")]
-                )]
+            Schema.make()
+            .form(ProjectDetailsForm)
+            .strict()
+            .schema(
+                [
+                    Section.make("Project").schema(
+                        [TextInput.make("name").required(), TextInput.make("description")]
+                    )
+                ]
             ),
             title="Details",
             heading="Project basics",
         ),
         WizardStep(
             "settings",
-            Schema.make().form(ProjectSettingsForm).strict().schema(
-                [Section.make("Configuration").columns(2).schema(
-                    [Select.make("tier").searchable(), Toggle.make("is_public")]
-                )]
+            Schema.make()
+            .form(ProjectSettingsForm)
+            .strict()
+            .schema(
+                [
+                    Section.make("Configuration")
+                    .columns(2)
+                    .schema([Select.make("tier").searchable(), Toggle.make("is_public")])
+                ]
             ),
             title="Plan & privacy",
         ),
@@ -432,4 +450,3 @@ Every component accepts either fluent chaining `.make().foo()` or explicit `kwar
 | [integration.md](integration.md) | Dropping DCC into a project that already has its own `base.html`: `{% dcc_render %}`, the mixins, `AppShell`, shadowing the panel base |
 | [studio.md](studio.md) | The no-code app: builders, spec sandbox, escape hatches, notifications, data sources |
 | [../CHANGELOG.md](../CHANGELOG.md) | Release notes; `0.x` breaking-change policy |
-

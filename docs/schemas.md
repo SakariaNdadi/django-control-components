@@ -34,7 +34,7 @@ from django_control_components.schemas import (
     TextInput,
     Toggle,
 )
-from myapp.models import Task   # web/demo/models.py in the bundled project
+from myapp.models import Task  # web/demo/models.py in the bundled project
 
 
 class TaskForm(forms.ModelForm):
@@ -47,13 +47,15 @@ class TaskForm(forms.ModelForm):
 def task_schema():
     return (
         Schema.make()
-        .form(TaskForm)                     # or .model(Task, fields=[...]) to skip the ModelForm
+        .form(TaskForm)  # or .model(Task, fields=[...]) to skip the ModelForm
         .schema(
             [
                 Section.make("Task").schema(
                     [
                         TextInput.make("title").required().column_span_full(),
-                        Grid.make().columns(2).schema(
+                        Grid.make()
+                        .columns(2)
+                        .schema(
                             [
                                 Select.make("priority"),
                                 Toggle.make("done"),

@@ -90,6 +90,8 @@ class Sidebar(Block):
     def get_view_data(self, ctx: RenderContext) -> dict[str, Any]:
         from django.urls import NoReverseMatch, reverse
 
+        from ..core.urls import safe_navigation_url
+
         data = super().get_view_data(ctx)
         data["brand"] = self._config.get("brand", "")
         data["brand_icon"] = self._config.get("brand_icon", "")
@@ -102,7 +104,7 @@ class Sidebar(Block):
                 raw = reverse(raw)
             except NoReverseMatch:
                 raw = ""
-        data["brand_url"] = raw
+        data["brand_url"] = safe_navigation_url(raw)
         return data
 
 

@@ -36,12 +36,18 @@ def data():
     return ada, arts
 
 
-def _table(qs, actions=None, bulk=None) -> Table:
+def _table(qs, actions=None, bulk=None, *, with_factory=True) -> Table:
     t = Table.make(qs).columns([TextColumn.make("title")]).id("art")
     if actions:
         t = t.actions(actions)
     if bulk:
         t = t.bulk_actions(bulk)
+    if with_factory and (actions or bulk):
+
+        def factory(_request):
+            return _table(qs, actions, bulk, with_factory=False).set_owner_factory(factory)
+
+        t.set_owner_factory(factory)
     return t
 
 
@@ -52,9 +58,14 @@ def test_unknown_owner_and_action_are_404(data):
     assert registry.resolve("table-art", "not-an-action", rf) is None  # known owner, unknown action
 
 
-def test_registered_factory_wins_over_a_later_bare_render(data, recwarn):
-    """A real per-request factory registered for a key is not clobbered when a
-    bare Table with the same key renders afterwards (and no second warning)."""
+def test_unbound_action_url_raises_configuration_error():
+    from django_control_components.core import ActionOwnerConfigurationError
+
+    with pytest.raises(ActionOwnerConfigurationError, match="not bound"):
+        Action.make("orphan").url()
+
+
+def test_registered_factory_is_refreshed_by_a_later_safe_render(data):
     _, arts = data
     seen: list = []
 
@@ -64,24 +75,23 @@ def test_registered_factory_wins_over_a_later_bare_render(data, recwarn):
         ).set_owner_factory(factory)
 
     registry.register("table-art", factory)
-    recwarn.clear()
     _table(Article.objects.all(), actions=[Action.make("t").action(seen.append)]).render(
         RequestFactory().get("/")
     )
-    assert not recwarn.list  # the real factory is kept, no register_rendered warning
     owner, _action = registry.resolve("table-art", "t", RequestFactory().get("/"))
     assert owner.get_action_queryset(RequestFactory().get("/")).count() == len(arts)
 
 
-def test_clear_forgets_the_rendered_owner_warning(data):
-    table = _table(Article.objects.all(), actions=[Action.make("t").action(lambda r: None)])
-    with pytest.warns(UserWarning, match="rendering a Table"):
+def test_bare_action_table_refuses_unsafe_process_local_registration(data):
+    from django_control_components.core.exceptions import ActionOwnerConfigurationError
+
+    table = _table(
+        Article.objects.all(),
+        actions=[Action.make("t").action(lambda r: None)],
+        with_factory=False,
+    )
+    with pytest.raises(ActionOwnerConfigurationError, match="per-request owner factory"):
         table.render(RequestFactory().get("/"))
-    registry.clear()
-    with pytest.warns(UserWarning, match="rendering a Table"):  # warns again after clear
-        _table(Article.objects.all(), actions=[Action.make("t").action(lambda r: None)]).render(
-            RequestFactory().get("/")
-        )
 
 
 def test_table_registers_actions_on_render(data):
@@ -168,6 +178,7 @@ def test_bulk_action_rescopes_to_filtered_queryset(data, signed_in):
         .filters([SelectFilter.make("status").options(Article.Status.choices)])
         .bulk_actions([bulk])
     )
+    table.set_owner_factory(lambda _request: table)
     table.render(RequestFactory().get("/", {"t_art_f_status": "live"}))
 
     # attacker submits ALL pks, but table is scoped to status=live
@@ -197,6 +208,7 @@ def test_bulk_select_all_matching_uses_the_filtered_queryset(data, signed_in):
         .filters([SelectFilter.make("status").options(Article.Status.choices)])
         .bulk_actions([bulk])
     )
+    table.set_owner_factory(lambda _request: table)
     table.render(RequestFactory().get("/", {"t_art_f_status": "live"}))
 
     req = RequestFactory().post("/x/?t_art_f_status=live&select_all=1", {"select_all": "1"})

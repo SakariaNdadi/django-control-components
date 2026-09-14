@@ -40,7 +40,7 @@ from django_control_components.tables import (
     TableMixin,
     TextColumn,
 )
-from myapp.models import Task   # web/demo/models.py in the bundled project
+from myapp.models import Task  # web/demo/models.py in the bundled project
 
 
 def _mark_done(record):
@@ -317,11 +317,11 @@ A `Table` mounted through a `Resource` or a `TableMixin` view registers a
 **per-request factory**, so the action endpoint rebuilds the table (and its
 queryset) for the request making the action - not the request that rendered the
 page. This is what makes actions safe under tenant scoping and behind more than
-one worker process. A bare `Table` built in a plain view and rendered directly
-falls back to registering the rendered instance: that path is single-process
-only and is not re-scoped per request - call `table.set_owner_factory(fn)` with
-your table-building function, or expose it through a `Resource`. Rendering a bare
-owner-less table emits a warning.
+one worker process. A bare action-bearing `Table` built in a plain view must call
+`table.set_owner_factory(fn)` with its table-building function, or be exposed
+through a `Resource` / `TableMixin`. Rendering without that factory raises
+`ActionOwnerConfigurationError`; DCC never retains a rendered, request-scoped
+table in process-global state.
 
 ## Callbacks
 
@@ -340,10 +340,9 @@ owner-less table emits a warning.
 - A column `.state(fn)` returning HTML needs `.allow_html()` or it renders
   escaped.
 - Reaching the action endpoint requires a registered owner. A `Resource` /
-  `TableMixin` table registers a per-request factory (rebuilds safely, works
-  behind multiple workers); a bare `Table` only registers once it has rendered
-  in the process, so its actions 404 on a worker that has not rendered it - give
-  it `table.set_owner_factory(fn)` or wrap it in a `Resource`.
+  `TableMixin` table registers a per-request factory (rebuilds safely and works
+  behind multiple workers). A bare action-bearing `Table` must call
+  `table.set_owner_factory(fn)` or rendering fails with a configuration error.
 
 ## Settings
 

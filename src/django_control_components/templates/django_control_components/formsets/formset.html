@@ -1,0 +1,9 @@
+<div class="dcc-formset">
+  {{ management_form }}
+  {% if non_form_errors %}<div class="dcc-formset__errors">{{ non_form_errors }}</div>{% endif %}
+  {% for row in rows %}<section class="dcc-formset__row">
+    {{ row.schema_html }}
+    {% if row.order_field %}<div class="dcc-formset__order">{{ row.order_field }}</div>{% endif %}
+    {% if row.delete_field %}<div class="dcc-formset__delete">{{ row.delete_field }}</div>{% endif %}
+  </section>{% endfor %}
+</div>

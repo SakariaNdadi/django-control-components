@@ -346,6 +346,7 @@ def test_bulk_toolbar_lives_inside_content(articles, settings):
 
     settings.DCC = {"TABLE_CLIENT_SIDE_MAX_ROWS": 100}
     table = _table(articles).bulk_actions([BulkAction.make("archive").action(lambda records: None)])
+    table.set_owner_factory(lambda _request: table)
     html = str(table.render(RequestFactory().get("/")))
     content_at = html.index('id="article-content"')
     assert html.index("dcc-table__bulk") > content_at
@@ -417,6 +418,7 @@ def test_record_action_registers_and_marks_rows(articles, settings):
     settings.DCC = {"TABLE_CLIENT_SIDE_MAX_ROWS": 100}
     view = Action.make("peek").modal(lambda record: "<p>hi</p>")
     table = _table(articles).id("things").record_action(view)
+    table.set_owner_factory(lambda _request: table)
     html = str(table.render(RequestFactory().get("/")))
     assert "data-dcc-action=" in html
     assert 'id="dcc-modal-table-things"' in html  # modal mount rendered

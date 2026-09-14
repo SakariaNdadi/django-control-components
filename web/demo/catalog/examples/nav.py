@@ -57,17 +57,19 @@ NAV_LINK = ComponentPageSpec(
                 'Sidebar().brand("DCC").brand_image("/static/demo/logo.svg")\n'
                 'NavLink().label("Acme Corp").image("/static/demo/logo.svg").to("/o/acme/")'
             ),
-            build=lambda request: Sidebar()
-            .brand("DCC")
-            .brand_image(_LOGO)
-            .fill(
-                "default",
-                [
-                    NavLink().label("Dashboard").icon("gauge").to("/").active(True),
-                    NavHeading().label("Organisations"),
-                    NavLink().label("Acme Corp").image(_LOGO).image_alt("Acme").to("/o/acme/"),
-                    NavLink().label("Globex").image(_LOGO).image_alt("Globex").to("/o/globex/"),
-                ],
+            build=lambda request: (
+                Sidebar()
+                .brand("DCC")
+                .brand_image(_LOGO)
+                .fill(
+                    "default",
+                    [
+                        NavLink().label("Dashboard").icon("gauge").to("/").active(True),
+                        NavHeading().label("Organisations"),
+                        NavLink().label("Acme Corp").image(_LOGO).image_alt("Acme").to("/o/acme/"),
+                        NavLink().label("Globex").image(_LOGO).image_alt("Globex").to("/o/globex/"),
+                    ],
+                )
             ),
         ),
     ],

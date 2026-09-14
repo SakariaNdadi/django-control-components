@@ -12,16 +12,18 @@ Any test settings that already run Django templates work. The minimum:
 INSTALLED_APPS = [
     "django.contrib.contenttypes",
     "django.contrib.auth",
-    "django_cotton",              # must precede django_control_components
+    "django_cotton",  # must precede django_control_components
     "django_control_components",
     "myapp",
 ]
 
-TEMPLATES = [{
-    "BACKEND": "django.template.backends.django.DjangoTemplates",
-    "APP_DIRS": True,
-    "OPTIONS": {"builtins": ["django_cotton.templatetags.cotton"]},
-}]
+TEMPLATES = [
+    {
+        "BACKEND": "django.template.backends.django.DjangoTemplates",
+        "APP_DIRS": True,
+        "OPTIONS": {"builtins": ["django_cotton.templatetags.cotton"]},
+    }
+]
 ```
 
 `APP_DIRS` (or an explicit loader) is required - components call
@@ -40,7 +42,7 @@ from myapp.schemas import TaskForm, task_schema  # see schemas.md
 def test_due_date_is_conditional():
     html = str(task_schema().render(form=TaskForm()))
     # visible_when compiles to an Alpine expression, not a server round-trip
-    assert 'x-show' in html
+    assert "x-show" in html
     assert 'name="due_date"' in html
 
 

@@ -196,20 +196,23 @@ def table_page(request: HttpRequest) -> HttpResponse:
     def _noop(records):
         return None
 
-    table = (
-        Table.make(Task.objects.all())
-        .id("e2e-bulk")
-        .columns(
-            [
-                TextColumn.make("title").sortable().searchable(),
-                BooleanColumn.make("done"),
-            ]
+    def build_table(_request):
+        return (
+            Table.make(Task.objects.all())
+            .id("e2e-bulk")
+            .columns(
+                [
+                    TextColumn.make("title").sortable().searchable(),
+                    BooleanColumn.make("done"),
+                ]
+            )
+            .client_side()
+            .bulk_actions([BulkAction.make("archive").label("Archive").action(_noop)])
+            .searchable()
+            .set_owner_factory(build_table)
         )
-        .client_side()
-        .bulk_actions([BulkAction.make("archive").label("Archive").action(_noop)])
-        .searchable()
-        .render(request)
-    )
+
+    table = build_table(request).render(request)
     return _doc(request, str(table), title="table")
 
 

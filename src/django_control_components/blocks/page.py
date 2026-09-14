@@ -114,9 +114,7 @@ class PageShell(Block):
         data["eyebrow"] = self.resolve("eyebrow", ctx, "")
         data["summary"] = self.resolve("summary", ctx, "")
         data["accent"] = self._config.get("accent", "")
-        data["style"] = spacing_style(
-            self._config.get("padding"), self._config.get("margin")
-        )
+        data["style"] = spacing_style(self._config.get("padding"), self._config.get("margin"))
         data["has_header"] = bool(self._slots.get("header"))
         data["has_content"] = bool(self._slots.get("content"))
         return data

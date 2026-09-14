@@ -212,7 +212,13 @@ class Table:
         if self._owner_factory is not None:
             registry.register(self.key, self._owner_factory)
         else:
-            registry.register_rendered(self)
+            from ..core.exceptions import ActionOwnerConfigurationError
+
+            raise ActionOwnerConfigurationError(
+                f"Action-bearing table {self.key!r} needs a per-request owner factory. "
+                "Expose it through a Resource or TableMixin, or call "
+                "table.set_owner_factory(factory) before rendering."
+            )
 
     @property
     def per_page_choices(self) -> list[int]:
@@ -268,13 +274,16 @@ class Table:
         from django.forms.utils import flatatt
 
         from ..core.evaluate import evaluate
+        from ..core.urls import safe_navigation_url
 
         data: dict[str, str] = {}
         url_fn = self._config.get("record_url")
         if url_fn is not None:
             resolved = evaluate(url_fn, RenderContext(request=request, record=record))
             if resolved:
-                data["data-dcc-href"] = str(resolved)
+                url = safe_navigation_url(resolved)
+                if url:
+                    data["data-dcc-href"] = url
         action = self._config.get("record_action")
         if action is not None and not data:
             data.update(action.row_click_attrs(record=record, request=request))

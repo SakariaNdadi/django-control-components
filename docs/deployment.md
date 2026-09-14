@@ -23,7 +23,7 @@ INSTALLED_APPS = [
 ]
 
 STATIC_URL = "/static/"
-STATIC_ROOT = BASE_DIR / "staticfiles"   # collectstatic target
+STATIC_ROOT = BASE_DIR / "staticfiles"  # collectstatic target
 ```
 
 ```bash
@@ -38,7 +38,7 @@ web server (or WhiteNoise) serves them from there.
 ```python
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
-    "whitenoise.middleware.WhiteNoiseMiddleware",   # right after SecurityMiddleware
+    "whitenoise.middleware.WhiteNoiseMiddleware",  # right after SecurityMiddleware
     # ...
 ]
 STORAGES = {
@@ -58,10 +58,10 @@ To serve them from your own static files instead:
 ```python
 STATIC_URL = "/static/"
 DCC = {
-    "VENDOR_ASSETS": True,             # emit local <script> for htmx + Alpine + focus
-    "VENDOR_ASSET_DIR": "dcc/vendor/", # static path prefix for the copies
-    "ICON_ASSET_URL": STATIC_URL + "fa/css/all.min.css",       # your bundled Font Awesome
-    "CHARTJS_URL": STATIC_URL + "dcc/vendor/chart.umd.min.js", # your bundled Chart.js
+    "VENDOR_ASSETS": True,  # emit local <script> for htmx + Alpine + focus
+    "VENDOR_ASSET_DIR": "dcc/vendor/",  # static path prefix for the copies
+    "ICON_ASSET_URL": STATIC_URL + "fa/css/all.min.css",  # your bundled Font Awesome
+    "CHARTJS_URL": STATIC_URL + "dcc/vendor/chart.umd.min.js",  # your bundled Chart.js
 }
 ```
 

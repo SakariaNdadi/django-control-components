@@ -11,3 +11,7 @@ class SchemaError(DCCError):
 
 class ThumbnailBackendError(DCCError):
     """The dotted path in ``DCC["THUMBNAIL_BACKEND"]`` could not be imported."""
+
+
+class ActionOwnerConfigurationError(DCCError):
+    """An action-bearing component cannot be rebuilt safely for each request."""

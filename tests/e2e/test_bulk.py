@@ -5,11 +5,7 @@ from __future__ import annotations
 
 import pytest
 
-pytestmark = [
-    pytest.mark.e2e,
-    # the isolated bulk table is rendered directly (not via a Resource) on purpose
-    pytest.mark.filterwarnings("ignore:Action owner .* was registered by rendering"),
-]
+pytestmark = pytest.mark.e2e
 
 
 def _ready(page):

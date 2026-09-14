@@ -21,7 +21,7 @@ class TaskUpdateView(SchemaFormMixin, UpdateView):
     template_name = "tasks/form.html"
 
     def get_schema(self):
-        return task_schema()   # see schemas.md
+        return task_schema()  # see schemas.md
 ```
 
 | aspect | detail |
@@ -43,7 +43,7 @@ class TaskListView(TableMixin, TemplateView):
     template_name = "tasks/list.html"
 
     def get_table(self):
-        return task_table(self.request)   # see tables.md
+        return task_table(self.request)  # see tables.md
 ```
 
 | aspect | detail |
@@ -64,7 +64,7 @@ from django.views.generic import TemplateView
 from django_control_components.core.context import RenderContext
 from django_control_components.panels import ChartWidget, StatWidget
 from django_control_components.tables import BadgeColumn, Table, TextColumn
-from myapp.models import Task   # web/demo/models.py in the bundled project
+from myapp.models import Task  # web/demo/models.py in the bundled project
 
 
 class TaskHubView(TemplateView):
@@ -78,12 +78,14 @@ class TaskHubView(TemplateView):
         table = (
             Table.make(Task.objects.all())
             .id("hub-tasks")
-            .columns([
-                TextColumn.make("title").sortable().searchable(),
-                BadgeColumn.make("priority").colors(
-                    {"low": "muted", "medium": "secondary", "high": "danger"}
-                ),
-            ])
+            .columns(
+                [
+                    TextColumn.make("title").sortable().searchable(),
+                    BadgeColumn.make("priority").colors(
+                        {"low": "muted", "medium": "secondary", "high": "danger"}
+                    ),
+                ]
+            )
             .client_side()
         )
         ctx["tasks_table"] = table.render(self.request)

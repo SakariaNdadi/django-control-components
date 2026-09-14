@@ -26,14 +26,29 @@ The demo `Task` model (`web/demo/models.py`) is deliberately small - `title`,
 from django import forms
 
 from django_control_components.infolists import (
-    BadgeEntry, BooleanEntry, DateEntry, Infolist, TextEntry,
+    BadgeEntry,
+    BooleanEntry,
+    DateEntry,
+    Infolist,
+    TextEntry,
 )
 from django_control_components.panels import Resource
 from django_control_components.schemas import (
-    FileUpload, Schema, Section, Select, TextInput, Toggle,
+    FileUpload,
+    Schema,
+    Section,
+    Select,
+    TextInput,
+    Toggle,
 )
 from django_control_components.tables import (
-    BadgeColumn, BooleanColumn, DateColumn, ImageColumn, SelectFilter, Table, TextColumn,
+    BadgeColumn,
+    BooleanColumn,
+    DateColumn,
+    ImageColumn,
+    SelectFilter,
+    Table,
+    TextColumn,
 )
 
 from ..models import Task
@@ -48,12 +63,12 @@ class TaskForm(forms.ModelForm):
 
 class TaskResource(Resource):
     model = Task
-    navigation_icon = "list-check"      # any active-icon-set name
+    navigation_icon = "list-check"  # any active-icon-set name
     create_redirect = "list"
 
     @classmethod
     def can(cls, request, action, obj=None):
-        return True                     # this demo is open; drop for Django model perms
+        return True  # this demo is open; drop for Django model perms
 
     @classmethod
     def build_table(cls, *, request):
@@ -138,16 +153,16 @@ from .pages.full_example import TaskResource
 
 docs_panel = (
     Panel("docs")
-    .path("")                       # mounted at the site root
+    .path("")  # mounted at the site root
     .brand("DCC", "cubes")
     .resources([TaskResource])
-    .pages([...])                   # non-resource PanelPage classes
+    .pages([...])  # non-resource PanelPage classes
 )
 
 # web/config/urls.py
 urlpatterns = [
     path("dcc/", include("django_control_components.urls")),
-    docs_panel.mount(),             # /task/, /task/new/, /task/<pk>/, ...
+    docs_panel.mount(),  # /task/, /task/new/, /task/<pk>/, ...
 ]
 ```
 

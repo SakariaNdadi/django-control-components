@@ -58,3 +58,30 @@ jobs:
       - uses: actions/checkout@v4
       - uses: astral-sh/setup-uv@v5
       - run: uv run nox -s packaging
+
+  security:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+      - run: uv run nox -s security
+
+  browser:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        browser: [chromium, firefox]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+      - run: uv sync --group dev --group e2e
+      - run: uv run playwright install --with-deps ${{ matrix.browser }}
+      - name: browser tests
+        run: >
+          uv run pytest -q -m e2e --ds=tests.e2e.settings
+          --browser ${{ matrix.browser }} tests/e2e

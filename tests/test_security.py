@@ -23,6 +23,28 @@ PAYLOADS = [
 ]
 
 
+@pytest.mark.parametrize(
+    "url",
+    ["javascript:alert(1)", "data:text/html,<script>alert(1)</script>", "java\nscript:alert(1)"],
+)
+def test_navigation_urls_reject_executable_schemes(url):
+    from django_control_components.core.context import RenderContext
+    from django_control_components.core.urls import safe_navigation_url
+    from django_control_components.ui import Button
+
+    assert safe_navigation_url(url) == ""
+    assert "href=" not in str(Button.make("Unsafe").href(url).render(RenderContext()))
+
+
+@pytest.mark.parametrize(
+    "url", ["/tasks/", "#details", "?page=2", "https://example.com", "mailto:a@b.c"]
+)
+def test_navigation_urls_keep_supported_destinations(url):
+    from django_control_components.core.urls import safe_navigation_url
+
+    assert safe_navigation_url(url) == url
+
+
 def _schema() -> Schema:
     return (
         Schema.make()

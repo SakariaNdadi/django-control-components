@@ -9,6 +9,8 @@ from django.utils.safestring import SafeString
 from .. import htmx as htmx_adapter
 from ..core.component import UNSET, setter
 from ..core.evaluate import evaluate
+from ..core.exceptions import ActionOwnerConfigurationError
+from ..core.urls import safe_navigation_url
 
 if TYPE_CHECKING:
     from collections.abc import Callable
@@ -185,7 +187,10 @@ class Action:
     # -- urls --------------------------------------------------
 
     def url(self, record: Any = None) -> str:
-        assert self._owner_key is not None, "Action not bound to an owner"
+        if self._owner_key is None:
+            raise ActionOwnerConfigurationError(
+                f"Action {self.name!r} is not bound to an action owner"
+            )
         base = reverse(
             "dcc:action",
             kwargs={"owner_key": self._owner_key, "action_name": self.name},
@@ -262,7 +267,8 @@ class Action:
         ctx = RenderContext(request=request, record=record)
         link = self._config.get("link")
         if link is not None:
-            return {"data-dcc-href": str(evaluate(link, ctx))}
+            url = safe_navigation_url(evaluate(link, ctx))
+            return {"data-dcc-href": url} if url else {}
         if self.needs_modal:
             return {
                 "data-dcc-action": self.url(record),

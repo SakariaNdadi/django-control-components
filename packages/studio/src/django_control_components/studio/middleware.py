@@ -19,6 +19,8 @@ from typing import Any
 
 from django.http import HttpRequest, HttpResponse
 
+from django_control_components import htmx
+
 from .notifications import pending_toasts
 
 
@@ -28,7 +30,7 @@ class ToastMiddleware:
 
     def __call__(self, request: HttpRequest) -> HttpResponse:
         response = self.get_response(request)
-        if request.headers.get("HX-Request") != "true":
+        if not htmx.is_htmx(request):
             return response
         toasts = pending_toasts(request)
         if not toasts:

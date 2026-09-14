@@ -18,6 +18,7 @@ from typing import TYPE_CHECKING, Any, Self
 from django.urls import NoReverseMatch, reverse
 
 from ..core.component import setter
+from ..core.urls import safe_navigation_url
 from ..icons import render_icon
 from .base import Block
 
@@ -31,6 +32,7 @@ def _resolve_url(value: str) -> tuple[str, bool]:
     """``(url, is_external)``. A value that looks like a path/anchor/URL is used
     verbatim; anything else is treated as a URL name and reversed (a miss →
     ``""``, never an exception)."""
+    value = safe_navigation_url(value)
     if not value:
         return "", False
     if value.startswith(("/", "#", "?", "http://", "https://", "mailto:")):

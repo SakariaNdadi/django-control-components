@@ -23,9 +23,7 @@ class Overview(DashboardPage):
     def widgets(self, request):
         return [
             StatWidget.make("Tasks", lambda request: Task.objects.count()).icon("list-check"),
-            StatWidget.make(
-                "Open", lambda request: Task.objects.filter(done=False).count()
-            )
+            StatWidget.make("Open", lambda request: Task.objects.filter(done=False).count())
             .icon("circle-dot")
             .poll(30),
             ChartWidget.make("By priority")

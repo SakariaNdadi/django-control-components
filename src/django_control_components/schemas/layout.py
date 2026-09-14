@@ -105,7 +105,8 @@ class Tabs(Layout):
     def get_view_data(self, ctx: RenderContext) -> dict[str, Any]:
         tabs = []
         for i, child in enumerate(self._children):
-            assert isinstance(child, Tab)  # enforced in schema()
+            if not isinstance(child, Tab):
+                raise TypeError("Tabs contains a non-Tab child")
             child_ctx = ctx.child(parent=self)
             tabs.append(
                 {"title": child.title or f"Tab {i + 1}", "html": child._render_children(child_ctx)}

@@ -98,6 +98,7 @@ Register your own block and it appears in the palette:
 ```python
 from django_control_components.blocks import Block, block
 
+
 @block("Callout", icon="bullhorn")
 class Callout(Block):
     slots = ("default",)

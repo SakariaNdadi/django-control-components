@@ -109,7 +109,7 @@ TEXT_COLUMN = ComponentPageSpec(
     title="Text Column",
     family="tables",
     icon="font",
-    summary="The value, escaped. `name` may be dotted (`\"author.name\"`).",
+    summary='The value, escaped. `name` may be dotted (`"author.name"`).',
     examples=[
         ComponentExample(
             title="Basic",
@@ -118,7 +118,7 @@ TEXT_COLUMN = ComponentPageSpec(
                 request, [TextColumn.make("title").sortable().searchable().limit(64)]
             ),
             note=(
-                "A dotted name walks a relation - `TextColumn.make(\"author.name\")`. "
+                'A dotted name walks a relation - `TextColumn.make("author.name")`. '
                 "The table adds `author` to `select_related` automatically so it "
                 "stays one query; `.with_related(False)` opts out."
             ),

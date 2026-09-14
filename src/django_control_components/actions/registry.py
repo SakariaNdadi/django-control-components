@@ -12,7 +12,6 @@ tenant's render cannot leave a stale scope behind for another tenant's POST.
 
 from __future__ import annotations
 
-import warnings
 from typing import TYPE_CHECKING, Any, Protocol
 
 if TYPE_CHECKING:
@@ -45,30 +44,6 @@ class _Registry:
         owner scoped to that request. Registering the same key again replaces
         the factory - the caller is expected to pass an equivalent one."""
         self._factories[key] = factory
-
-    def register_rendered(self, owner: ActionOwner) -> None:
-        """Fallback: capture an already-rendered owner instance.
-
-        The instance's queryset is fixed at render time, so it is **not**
-        re-scoped per request (unsafe across tenants) and it 404s under more
-        than one worker process. A real factory registered for the same key
-        always wins over this. Prefer :meth:`register`, or expose the table
-        through a ``Resource`` / ``TableMixin``.
-        """
-        key = owner.key
-        if key in self._factories:
-            # a real factory (or an earlier capture of this key) already stands;
-            # a later render must not clobber it, and must not re-warn.
-            return
-        warnings.warn(
-            f"Action owner {key!r} was registered by rendering a Table "
-            "instance directly. Its action queryset will not be re-scoped "
-            "per request and it will 404 under multiple workers. Register a "
-            "factory via django_control_components.actions.registry.register"
-            "(key, factory), or expose the table through a Resource.",
-            stacklevel=3,
-        )
-        self._factories[key] = lambda _request: owner
 
     def resolve(
         self, owner_key: str, action_name: str, request: HttpRequest

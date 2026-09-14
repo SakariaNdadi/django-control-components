@@ -98,9 +98,11 @@ passes; otherwise `required_permission` is a deny gate, then the `users` and
 
 ```python
 NavItem.objects.create(
-    panel="ops", label="Runbook",
-    target_kind=NavItem.Kind.URL, target="/runbook/",
-    visibility="auth",          # without this, nobody sees it
+    panel="ops",
+    label="Runbook",
+    target_kind=NavItem.Kind.URL,
+    target="/runbook/",
+    visibility="auth",  # without this, nobody sees it
 )
 ```
 

@@ -48,12 +48,9 @@ place. No panel, no resource, no registration.
 ```python
 from django_control_components.blocks import Card, Prose
 
+
 def dashboard(request):
-    card = (
-        Card()
-        .fill("header", [Prose().html("<h2>Today</h2>")])
-        .fill("body", widgets)
-    )
+    card = Card().fill("header", [Prose().html("<h2>Today</h2>")]).fill("body", widgets)
     return render(request, "myapp/dashboard.html", {"card": card})
 ```
 
@@ -79,6 +76,7 @@ put them there:
 
 ```python
 from django_control_components.mixins import SchemaFormMixin
+
 
 class ArticleCreate(SchemaFormMixin, CreateView):
     model = Article
@@ -115,11 +113,7 @@ reloads. Use `TableMixin` unless you have a reason not to.
 toggle, the scrim and `ThemeToggle` all work - inside your own document.
 
 ```python
-shell = (
-    AppShell()
-    .fill("sidebar", [my_sidebar])
-    .fill("content", [page_body])
-)
+shell = AppShell().fill("sidebar", [my_sidebar]).fill("content", [page_body])
 ```
 
 ```django
@@ -144,14 +138,25 @@ If you are not using `Panel`, build the `Sidebar` block directly:
 ```python
 sidebar = (
     Sidebar()
-    .brand("Acme").brand_icon("bolt").brand_url("/")
-    .fill("default", [
-        NavHeading().label("Content"),
-        NavLink().label("Articles").icon("file").to("article-list"),
-        NavGroup().label("Settings").open().fill("default", [
-            NavLink().label("Team").to("team"),
-        ]),
-    ])
+    .brand("Acme")
+    .brand_icon("bolt")
+    .brand_url("/")
+    .fill(
+        "default",
+        [
+            NavHeading().label("Content"),
+            NavLink().label("Articles").icon("file").to("article-list"),
+            NavGroup()
+            .label("Settings")
+            .open()
+            .fill(
+                "default",
+                [
+                    NavLink().label("Team").to("team"),
+                ],
+            ),
+        ],
+    )
     .fill("footer", [ThemeToggle()])
 )
 ```

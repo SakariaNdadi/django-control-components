@@ -6,6 +6,7 @@ from typing import Any, Self
 from ..core.attributes import AttributeBag
 from ..core.component import Component, setter
 from ..core.context import RenderContext
+from ..core.urls import safe_navigation_url
 from ..icons import render_icon
 
 _VARIANTS = {"primary", "secondary", "danger", "ghost", "link"}
@@ -85,7 +86,7 @@ class Button(Component):
         label = self.resolve("label", ctx)
         data["label"] = "" if label is None or label is False else label
         data["icon_html"] = render_icon(self.resolve("icon", ctx))
-        data["href"] = self.resolve("href", ctx) or ""
+        data["href"] = safe_navigation_url(self.resolve("href", ctx))
         data["type"] = self._config.get("type", "button")
         data["disabled"] = bool(self._config.get("disabled"))
         return data

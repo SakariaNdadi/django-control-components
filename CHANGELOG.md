@@ -10,6 +10,14 @@ Renamed and re-versioned release of the rebuild described under `1.0.0b1` below.
 
 ### Added
 
+- **Django-native formsets and inline relation managers.** `FormSet` renders a
+  schema repeatedly with Django management, ordering, deletion, and min/max
+  validation. `RelationManager` builds on `inlineformset_factory` and saves
+  through Django's normal model-formset path.
+- **Provider-neutral AI specification drafts.** Studio providers receive the
+  permission-filtered component palette and may return bounded JSON data for
+  later validation and preview; providers cannot execute components directly.
+
 - **`Sidebar.searchable()` / `Panel.sidebar_searchable()`** - a client-side
   filter box above the nav; typing narrows the links and opens matching groups,
   hidden when the sidebar is railed.
@@ -82,7 +90,8 @@ Renamed and re-versioned release of the rebuild described under `1.0.0b1` below.
   `registry.resolve(key, name, request)`. A `Resource` / `TableMixin` table
   registers its factory automatically; a hand-built `Table` in a plain view
   should call `Table.set_owner_factory(fn)` (it falls back to capturing the
-  rendered instance, single-process only, and warns).
+  rendered instance. An action-bearing table without a per-request factory now
+  raises `ActionOwnerConfigurationError` before rendering.
 - **A row-action POST naming a pk outside the current scope is now a 404**
   rather than falling through to running the action with no target.
 
